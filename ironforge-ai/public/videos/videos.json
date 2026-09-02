@@ -1,0 +1,610 @@
+[
+  {
+    "id": "0901",
+    "name_en": "0901",
+    "name_ar": "0901",
+    "muscle_en": "unknown",
+    "muscle_ar": "unknown",
+    "videoUrl": "/videos/unknown/0901.mp4"
+  },
+  {
+    "id": "0901(1)",
+    "name_en": "0901(1)",
+    "name_ar": "0901(1)",
+    "muscle_en": "unknown",
+    "muscle_ar": "unknown",
+    "videoUrl": "/videos/unknown/0901(1).mp4"
+  },
+  {
+    "id": "abs",
+    "name_en": "Abs",
+    "name_ar": "Abs",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/abs.mp4"
+  },
+  {
+    "id": "abs-exercise-4",
+    "name_en": "Abs Exercise 4",
+    "name_ar": "Abs Exercise 4",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/abs-exercise-4.mp4"
+  },
+  {
+    "id": "abs-exercise-5",
+    "name_en": "Abs Exercise 5",
+    "name_ar": "Abs Exercise 5",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/abs-exercise-5.mp4"
+  },
+  {
+    "id": "arms-dumbbell-hammer-curl",
+    "name_en": "Arms Dumbbell Hammer Curl",
+    "name_ar": "Arms Dumbbell Hammer Curl",
+    "muscle_en": "arms",
+    "muscle_ar": "الذراعين",
+    "videoUrl": "/videos/arms/arms-dumbbell-hammer-curl.mp4"
+  },
+  {
+    "id": "arms-dumbbell-skullcrusher",
+    "name_en": "Arms Dumbbell Skullcrusher",
+    "name_ar": "Arms Dumbbell Skullcrusher",
+    "muscle_en": "arms",
+    "muscle_ar": "الذراعين",
+    "videoUrl": "/videos/arms/arms-dumbbell-skullcrusher.mp4"
+  },
+  {
+    "id": "back-3",
+    "name_en": "Back 3",
+    "name_ar": "Back 3",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-3.mp4"
+  },
+  {
+    "id": "back-5",
+    "name_en": "Back 5",
+    "name_ar": "Back 5",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-5.mp4"
+  },
+  {
+    "id": "back-6",
+    "name_en": "Back 6",
+    "name_ar": "Back 6",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-6.mp4"
+  },
+  {
+    "id": "back-bodyweight-romanian-deadlift",
+    "name_en": "Back Bodyweight Romanian Deadlift",
+    "name_ar": "Back Bodyweight Romanian Deadlift",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-bodyweight-romanian-deadlift.mp4"
+  },
+  {
+    "id": "back-dumbbell-bent-over-reverse-row",
+    "name_en": "Back Dumbbell Bent Over Reverse Row",
+    "name_ar": "Back Dumbbell Bent Over Reverse Row",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-dumbbell-bent-over-reverse-row.mp4"
+  },
+  {
+    "id": "back-exercise",
+    "name_en": "Back Exercise",
+    "name_ar": "Back Exercise",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-exercise.mp4"
+  },
+  {
+    "id": "back-exercise-2",
+    "name_en": "Back Exercise 2",
+    "name_ar": "Back Exercise 2",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-exercise-2.mp4"
+  },
+  {
+    "id": "back-exercise-3",
+    "name_en": "Back Exercise 3",
+    "name_ar": "Back Exercise 3",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-exercise-3.mp4"
+  },
+  {
+    "id": "back-exercise-lats-home-1",
+    "name_en": "Back Exercise Lats Home 1",
+    "name_ar": "Back Exercise Lats Home 1",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-exercise-lats-home-1.mp4"
+  },
+  {
+    "id": "back-ss",
+    "name_en": "Back Ss",
+    "name_ar": "Back Ss",
+    "muscle_en": "back",
+    "muscle_ar": "الظهر",
+    "videoUrl": "/videos/back/back-ss.mp4"
+  },
+  {
+    "id": "biceps-4",
+    "name_en": "Biceps 4",
+    "name_ar": "Biceps 4",
+    "muscle_en": "arms",
+    "muscle_ar": "الذراعين",
+    "videoUrl": "/videos/arms/biceps-4.mp4"
+  },
+  {
+    "id": "biceps-exercise-2",
+    "name_en": "Biceps Exercise 2",
+    "name_ar": "Biceps Exercise 2",
+    "muscle_en": "arms",
+    "muscle_ar": "الذراعين",
+    "videoUrl": "/videos/arms/biceps-exercise-2.mp4"
+  },
+  {
+    "id": "biceps-exercise-3",
+    "name_en": "Biceps Exercise 3",
+    "name_ar": "Biceps Exercise 3",
+    "muscle_en": "arms",
+    "muscle_ar": "الذراعين",
+    "videoUrl": "/videos/arms/biceps-exercise-3.mp4"
+  },
+  {
+    "id": "biceps-exercise-5",
+    "name_en": "Biceps Exercise 5",
+    "name_ar": "Biceps Exercise 5",
+    "muscle_en": "arms",
+    "muscle_ar": "الذراعين",
+    "videoUrl": "/videos/arms/biceps-exercise-5.mp4"
+  },
+  {
+    "id": "calf-exercise-2",
+    "name_en": "Calf Exercise 2",
+    "name_ar": "Calf Exercise 2",
+    "muscle_en": "legs",
+    "muscle_ar": "الأرجل",
+    "videoUrl": "/videos/legs/calf-exercise-2.mp4"
+  },
+  {
+    "id": "cardio-exercise-fat-burn",
+    "name_en": "Cardio Exercise Fat Burn",
+    "name_ar": "Cardio Exercise Fat Burn",
+    "muscle_en": "cardio",
+    "muscle_ar": "كارديو",
+    "videoUrl": "/videos/cardio/cardio-exercise-fat-burn.mp4"
+  },
+  {
+    "id": "cardio-exercise-fat-burn-1",
+    "name_en": "Cardio Exercise Fat Burn 1",
+    "name_ar": "Cardio Exercise Fat Burn 1",
+    "muscle_en": "cardio",
+    "muscle_ar": "كارديو",
+    "videoUrl": "/videos/cardio/cardio-exercise-fat-burn-1.mp4"
+  },
+  {
+    "id": "cardio-exercise-fat-burn-abs-home",
+    "name_en": "Cardio Exercise Fat Burn Abs Home",
+    "name_ar": "Cardio Exercise Fat Burn Abs Home",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/cardio/cardio-exercise-fat-burn-abs-home.mp4"
+  },
+  {
+    "id": "cardio-exercise-fat-burn-abs-home",
+    "name_en": "Cardio Exercise Fat Burn Abs Home",
+    "name_ar": "Cardio Exercise Fat Burn Abs Home",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/cardio-exercise-fat-burn-abs-home.mp4"
+  },
+  {
+    "id": "cardio-running-in-place",
+    "name_en": "Cardio Running In Place",
+    "name_ar": "Cardio Running In Place",
+    "muscle_en": "cardio",
+    "muscle_ar": "كارديو",
+    "videoUrl": "/videos/cardio/cardio-running-in-place.mp4"
+  },
+  {
+    "id": "chest-exercise",
+    "name_en": "Chest Exercise",
+    "name_ar": "Chest Exercise",
+    "muscle_en": "chest",
+    "muscle_ar": "الصدر",
+    "videoUrl": "/videos/chest/chest-exercise.mp4"
+  },
+  {
+    "id": "chest-exercise-2",
+    "name_en": "Chest Exercise 2",
+    "name_ar": "Chest Exercise 2",
+    "muscle_en": "chest",
+    "muscle_ar": "الصدر",
+    "videoUrl": "/videos/chest/chest-exercise-2.mp4"
+  },
+  {
+    "id": "chest-exercise-3",
+    "name_en": "Chest Exercise 3",
+    "name_ar": "Chest Exercise 3",
+    "muscle_en": "chest",
+    "muscle_ar": "الصدر",
+    "videoUrl": "/videos/chest/chest-exercise-3.mp4"
+  },
+  {
+    "id": "chest-exercise-4",
+    "name_en": "Chest Exercise 4",
+    "name_ar": "Chest Exercise 4",
+    "muscle_en": "chest",
+    "muscle_ar": "الصدر",
+    "videoUrl": "/videos/chest/chest-exercise-4.mp4"
+  },
+  {
+    "id": "chest-exercise-5",
+    "name_en": "Chest Exercise 5",
+    "name_ar": "Chest Exercise 5",
+    "muscle_en": "chest",
+    "muscle_ar": "الصدر",
+    "videoUrl": "/videos/chest/chest-exercise-5.mp4"
+  },
+  {
+    "id": "chest-exercise-chest",
+    "name_en": "Chest Exercise Chest",
+    "name_ar": "Chest Exercise Chest",
+    "muscle_en": "chest",
+    "muscle_ar": "الصدر",
+    "videoUrl": "/videos/chest/chest-exercise-chest.mp4"
+  },
+  {
+    "id": "chest-exercise-chest-opener-home",
+    "name_en": "Chest Exercise Chest Opener Home",
+    "name_ar": "Chest Exercise Chest Opener Home",
+    "muscle_en": "chest",
+    "muscle_ar": "الصدر",
+    "videoUrl": "/videos/chest/chest-exercise-chest-opener-home.mp4"
+  },
+  {
+    "id": "chest-exercise-chest-shoulder",
+    "name_en": "Chest Exercise Chest Shoulder",
+    "name_ar": "Chest Exercise Chest Shoulder",
+    "muscle_en": "chest",
+    "muscle_ar": "الصدر",
+    "videoUrl": "/videos/chest/chest-exercise-chest-shoulder.mp4"
+  },
+  {
+    "id": "core-exercise-abs",
+    "name_en": "Core Exercise Abs",
+    "name_ar": "Core Exercise Abs",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/core-exercise-abs.mp4"
+  },
+  {
+    "id": "core-exercise-abs-home",
+    "name_en": "Core Exercise Abs Home",
+    "name_ar": "Core Exercise Abs Home",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/core-exercise-abs-home.mp4"
+  },
+  {
+    "id": "core-exercise-abs-home-3",
+    "name_en": "Core Exercise Abs Home 3",
+    "name_ar": "Core Exercise Abs Home 3",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/core-exercise-abs-home-3.mp4"
+  },
+  {
+    "id": "core-exercise-home-abs-side",
+    "name_en": "Core Exercise Home Abs Side",
+    "name_ar": "Core Exercise Home Abs Side",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/core-exercise-home-abs-side.mp4"
+  },
+  {
+    "id": "core-exercise-muscle-side-abs",
+    "name_en": "Core Exercise Muscle Side Abs",
+    "name_ar": "Core Exercise Muscle Side Abs",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/core-exercise-muscle-side-abs.mp4"
+  },
+  {
+    "id": "core-exercise-side",
+    "name_en": "Core Exercise Side",
+    "name_ar": "Core Exercise Side",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/core-exercise-side.mp4"
+  },
+  {
+    "id": "front-leg-exercise",
+    "name_en": "Front Leg Exercise",
+    "name_ar": "Front Leg Exercise",
+    "muscle_en": "legs",
+    "muscle_ar": "الأرجل",
+    "videoUrl": "/videos/legs/front-leg-exercise.mp4"
+  },
+  {
+    "id": "leg-exercise",
+    "name_en": "Leg Exercise",
+    "name_ar": "Leg Exercise",
+    "muscle_en": "legs",
+    "muscle_ar": "الأرجل",
+    "videoUrl": "/videos/legs/leg-exercise.mp4"
+  },
+  {
+    "id": "leg-exercise-5",
+    "name_en": "Leg Exercise 5",
+    "name_ar": "Leg Exercise 5",
+    "muscle_en": "legs",
+    "muscle_ar": "الأرجل",
+    "videoUrl": "/videos/legs/leg-exercise-5.mp4"
+  },
+  {
+    "id": "legs-exercise-leg",
+    "name_en": "Legs Exercise Leg",
+    "name_ar": "Legs Exercise Leg",
+    "muscle_en": "legs",
+    "muscle_ar": "الأرجل",
+    "videoUrl": "/videos/legs/legs-exercise-leg.mp4"
+  },
+  {
+    "id": "legs-exercise-leg-calf",
+    "name_en": "Legs Exercise Leg Calf",
+    "name_ar": "Legs Exercise Leg Calf",
+    "muscle_en": "legs",
+    "muscle_ar": "الأرجل",
+    "videoUrl": "/videos/legs/legs-exercise-leg-calf.mp4"
+  },
+  {
+    "id": "legs-exercise-leg-front-home",
+    "name_en": "Legs Exercise Leg Front Home",
+    "name_ar": "Legs Exercise Leg Front Home",
+    "muscle_en": "legs",
+    "muscle_ar": "الأرجل",
+    "videoUrl": "/videos/legs/legs-exercise-leg-front-home.mp4"
+  },
+  {
+    "id": "neck-exercise-neck-home",
+    "name_en": "Neck Exercise Neck Home",
+    "name_ar": "Neck Exercise Neck Home",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/neck/neck-exercise-neck-home.mp4"
+  },
+  {
+    "id": "neck-exercise-neck-home",
+    "name_en": "Neck Exercise Neck Home",
+    "name_ar": "Neck Exercise Neck Home",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/neck-exercise-neck-home.mp4"
+  },
+  {
+    "id": "rear-delt-exercise",
+    "name_en": "Rear Delt Exercise",
+    "name_ar": "Rear Delt Exercise",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/rear-delt-exercise.mp4"
+  },
+  {
+    "id": "rear-delt-exercise-2",
+    "name_en": "Rear Delt Exercise 2",
+    "name_ar": "Rear Delt Exercise 2",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/rear-delt-exercise-2.mp4"
+  },
+  {
+    "id": "shoulder-5",
+    "name_en": "Shoulder 5",
+    "name_ar": "Shoulder 5",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/shoulder-5.mp4"
+  },
+  {
+    "id": "shoulder-exercise-3",
+    "name_en": "Shoulder Exercise 3",
+    "name_ar": "Shoulder Exercise 3",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/shoulder-exercise-3.mp4"
+  },
+  {
+    "id": "shoulder-exercise-5",
+    "name_en": "Shoulder Exercise 5",
+    "name_ar": "Shoulder Exercise 5",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/shoulder-exercise-5.mp4"
+  },
+  {
+    "id": "shoulder-exercise-6",
+    "name_en": "Shoulder Exercise 6",
+    "name_ar": "Shoulder Exercise 6",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/shoulder-exercise-6.mp4"
+  },
+  {
+    "id": "shoulders-exercise-front-home",
+    "name_en": "Shoulders Exercise Front Home",
+    "name_ar": "Shoulders Exercise Front Home",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/shoulders-exercise-front-home.mp4"
+  },
+  {
+    "id": "shoulders-exercise-home-band",
+    "name_en": "Shoulders Exercise Home Band",
+    "name_ar": "Shoulders Exercise Home Band",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/shoulders-exercise-home-band.mp4"
+  },
+  {
+    "id": "shoulders-exercise-shoulder-front-band-home",
+    "name_en": "Shoulders Exercise Shoulder Front Band Home",
+    "name_ar": "Shoulders Exercise Shoulder Front Band Home",
+    "muscle_en": "shoulders",
+    "muscle_ar": "الكتف",
+    "videoUrl": "/videos/shoulders/shoulders-exercise-shoulder-front-band-home.mp4"
+  },
+  {
+    "id": "stretching-exercise",
+    "name_en": "Stretching Exercise",
+    "name_ar": "Stretching Exercise",
+    "muscle_en": "core",
+    "muscle_ar": "البطن/الوسط",
+    "videoUrl": "/videos/core/stretching-exercise.mp4"
+  },
+  {
+    "id": "traps-4",
+    "name_en": "Traps 4",
+    "name_ar": "Traps 4",
+    "muscle_en": "traps",
+    "muscle_ar": "الترابيس",
+    "videoUrl": "/videos/back/traps-4.mp4"
+  },
+  {
+    "id": "traps-exercise",
+    "name_en": "Traps Exercise",
+    "name_ar": "Traps Exercise",
+    "muscle_en": "traps",
+    "muscle_ar": "الترابيس",
+    "videoUrl": "/videos/back/traps-exercise.mp4"
+  },
+  {
+    "id": "traps-exercise-2",
+    "name_en": "Traps Exercise 2",
+    "name_ar": "Traps Exercise 2",
+    "muscle_en": "traps",
+    "muscle_ar": "الترابيس",
+    "videoUrl": "/videos/back/traps-exercise-2.mp4"
+  },
+  {
+    "id": "triceps-2",
+    "name_en": "Triceps 2",
+    "name_ar": "Triceps 2",
+    "muscle_en": "arms",
+    "muscle_ar": "الذراعين",
+    "videoUrl": "/videos/arms/triceps-2.mp4"
+  },
+  {
+    "id": "triceps-exercise",
+    "name_en": "Triceps Exercise",
+    "name_ar": "Triceps Exercise",
+    "muscle_en": "arms",
+    "muscle_ar": "الذراعين",
+    "videoUrl": "/videos/arms/triceps-exercise.mp4"
+  },
+  {
+    "id": "unknown-exercise",
+    "name_en": "Unknown Exercise",
+    "name_ar": "Unknown Exercise",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-exercise.mp4"
+  },
+  {
+    "id": "unknown-exercise-home",
+    "name_en": "Unknown Exercise Home",
+    "name_ar": "Unknown Exercise Home",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-exercise-home.mp4"
+  },
+  {
+    "id": "unknown-mile-1",
+    "name_en": "Unknown Mile 1",
+    "name_ar": "Unknown Mile 1",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-mile-1.mp4"
+  },
+  {
+    "id": "unknown-nn-1",
+    "name_en": "Unknown Nn 1",
+    "name_ar": "Unknown Nn 1",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-nn-1.mp4"
+  },
+  {
+    "id": "unknown-p-comy-1",
+    "name_en": "Unknown P Comy 1",
+    "name_ar": "Unknown P Comy 1",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-p-comy-1.mp4"
+  },
+  {
+    "id": "unknown-unknown",
+    "name_en": "Unknown Unknown",
+    "name_ar": "Unknown Unknown",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-unknown.mp4"
+  },
+  {
+    "id": "unknown-unknown-10",
+    "name_en": "Unknown Unknown 10",
+    "name_ar": "Unknown Unknown 10",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-unknown-10.mp4"
+  },
+  {
+    "id": "unknown-unknown-15",
+    "name_en": "Unknown Unknown 15",
+    "name_ar": "Unknown Unknown 15",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-unknown-15.mp4"
+  },
+  {
+    "id": "unknown-unknown-21",
+    "name_en": "Unknown Unknown 21",
+    "name_ar": "Unknown Unknown 21",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-unknown-21.mp4"
+  },
+  {
+    "id": "unknown-unknown-22",
+    "name_en": "Unknown Unknown 22",
+    "name_ar": "Unknown Unknown 22",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-unknown-22.mp4"
+  },
+  {
+    "id": "unknown-unknown-7",
+    "name_en": "Unknown Unknown 7",
+    "name_ar": "Unknown Unknown 7",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-unknown-7.mp4"
+  },
+  {
+    "id": "unknown-unknown-9",
+    "name_en": "Unknown Unknown 9",
+    "name_ar": "Unknown Unknown 9",
+    "muscle_en": "unknown",
+    "muscle_ar": "عام",
+    "videoUrl": "/videos/unknown/unknown-unknown-9.mp4"
+  }
+]
