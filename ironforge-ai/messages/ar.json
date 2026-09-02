@@ -1,0 +1,375 @@
+{
+  "Home": {
+    "title": "ATLAS",
+    "description": "مدربك الذكي لكمال الأجسام — خطط تمرين وتغذية مخصصة بالذكاء الاصطناعي.",
+    "common": {
+      "next": "التالي",
+      "continue": "متابعة"
+    },
+    "badge": "محرك لياقة مدعوم بالذكاء الاصطناعي",
+    "heroTitle1": "تدريب أذكى.",
+    "heroTitle2": "نتائج أقوى.",
+    "joinNow": "انضم الآن",
+    "nav": {
+      "programs": "البرامج",
+      "nutrition": "التغذية",
+      "coaching": "التدريب",
+      "insights": "الرؤى"
+    },
+    "metrics": {
+      "workouts": "تمرين مسجل",
+      "rating": "تقييم المدرب",
+      "consistency": "الالتزام بالهدف"
+    },
+    "todaysPlan": "خطة اليوم",
+    "pushDay": "يوم الدفع",
+    "recoveryScore": "نسبة الاستشفاء",
+    "builtForResults": "مصمم للنتائج",
+    "everythingNeeds": "كل ما يحتاجه جسمك",
+    "features": {
+      "aiCoach": {
+        "title": "المدرب الذكي",
+        "desc": "توجيه مخصص ومتابعة يومية حسب تقدمك."
+      },
+      "smartPlans": {
+        "title": "خطط ذكية",
+        "desc": "استراتيجيات تدريب وتغذية تتكيف مع أهدافك وجدولك."
+      },
+      "tracking": {
+        "title": "تتبع التقدم",
+        "desc": "تقارير مرئية تساعدك على الاستمرار وقياس النتائج."
+      }
+    },
+    "exercises": {
+      "benchPress": "ضغط البنش",
+      "inclineDumbbell": "دمبل مائل",
+      "overheadPress": "ضغط فوق الرأس",
+      "tricepsPushdown": "دفع ترايسبس"
+    }
+  },
+  "Navigation": {
+    "home": "الرئيسية",
+    "about": "حول",
+    "contact": "اتصل بنا",
+    "dashboard": "لوحة التحكم",
+    "workout": "التمارين",
+    "nutrition": "التغذية",
+    "calculator": "الحاسبة",
+    "chat": "الدردشة",
+    "progress": "التقدم",
+    "profile": "الملف الشخصي"
+  },
+  "common": {
+    "next": "التالي",
+    "back": "رجوع",
+    "submit": "إرسال",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "loading": "جاري التحميل...",
+    "saving": "جاري الحفظ...",
+    "continue": "متابعة",
+    "skip": "تخطي",
+    "yes": "نعم",
+    "no": "لا",
+    "error": "خطأ",
+    "success": "نجح",
+    "required": "مطلوب",
+    "optional": "اختياري",
+    "select": "اختر",
+    "search": "بحث",
+    "close": "إغلاق",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "upload": "رفع",
+    "change": "تغيير",
+    "remove": "إزالة",
+    "confirm": "تأكيد",
+    "settings": "الإعدادات"
+  },
+  "goals": {
+    "muscleGain": "زيادة العضلات",
+    "fatLoss": "خسارة الدهون",
+    "strength": "القوة",
+    "generalFitness": "اللياقة العامة",
+    "endurance": "التحمل",
+    "selectPrompt": "اختر أهدافك الأساسية"
+  },
+  "experience": {
+    "beginner": "مبتدئ",
+    "beginnerDesc": "أقل من 6 أشهر من التدريب",
+    "intermediate": "متوسط",
+    "intermediateDesc": "من 6 أشهر إلى سنتين من التدريب",
+    "advanced": "متقدم",
+    "advancedDesc": "أكثر من سنتين من التدريب المستمر",
+    "selectPrompt": "ما هو مستوى خبرتك في التدريب؟"
+  },
+  "gender": {
+    "male": "ذكر",
+    "female": "أنثى",
+    "other": "آخر"
+  },
+  "equipment": {
+    "none": "لا توجد معدات (وزن الجسم فقط)",
+    "dumbbells": "دمبلز",
+    "barbell": "قضبان وأوزان",
+    "resistanceBands": "أحزمة مقاومة",
+    "pullUpBar": "عارضة التمرين",
+    "kettlebells": "كيتلبل",
+    "bench": "بنش الأثقال",
+    "cableMachine": "آلة الكابلات",
+    "fullGym": "صالة كاملة",
+    "selectPrompt": "ما هي المعدات المتاحة لك؟"
+  },
+  "onboarding": {
+    "progress": "الخطوة {current} من {total}",
+    "steps": {
+      "welcome": "مرحباً",
+      "goals": "الأهداف",
+      "experience": "الخبرة",
+      "bodyStats": "إحصائيات الجسم",
+      "injuriesEquipment": "الإصابات والمعدات",
+      "summary": "الملخص"
+    },
+    "common": {
+      "back": "رجوع",
+      "next": "التالي"
+    },
+    "goals": {
+      "muscleGain": "زيادة العضلات",
+      "fatLoss": "خسارة الدهون",
+      "strength": "القوة",
+      "generalFitness": "اللياقة العامة",
+      "endurance": "التحمل",
+      "selectPrompt": "اختر أهدافك الأساسية"
+    },
+    "experience": {
+      "beginner": "مبتدئ",
+      "beginnerDesc": "أقل من 6 أشهر من التدريب",
+      "intermediate": "متوسط",
+      "intermediateDesc": "من 6 أشهر إلى سنتين من التدريب",
+      "advanced": "متقدم",
+      "advancedDesc": "أكثر من سنتين من التدريب المستمر",
+      "selectPrompt": "ما هو مستوى خبرتك في التدريب؟"
+    },
+    "welcome": {
+      "title": "مرحباً بك في ATLAS",
+      "subtitle": "لنقم ببناء خطة لياقتك الشخصية",
+      "description": "أنا مدربك الذكي. في بضع خطوات بسيطة، سأقوم بإنشاء خطة تمرين وتغذية مخصصة بالكامل تناسبك بشكل خاص.",
+      "cta": "ابدأ الآن",
+      "features": {
+        "ai": "تدريب مدعوم بالذكاء الاصطناعي",
+        "custom": "خطط مخصصة بالكامل",
+        "track": "تتبع تقدمك"
+      }
+    },
+    "goalsStep": {
+      "title": "ما هي أهدافك الرياضية؟",
+      "subtitle": "اختر كل ما ينطبق - يمكنك تغييرها لاحقاً",
+      "description": "أهدافك تساعدني في تصميم خطة التدريب والتغذية المثالية لاحتياجاتك.",
+      "minSelection": "يرجى اختيار هدف واحد على الأقل",
+      "aiHint": "مدربك الذكي يحلل أهدافك...",
+      "aiSuggestion": "اختيارات رائعة! بناءً على أهدافك، سأبني خطة متوازنة تركز على {goals} بشكل فعال."
+    },
+    "experienceStep": {
+      "title": "ما هي خبرتك في التدريب؟",
+      "subtitle": "كن صادقاً - هذا يساعدني في اختيار الشدة المناسبة",
+      "description": "مستوى خبرتك يضمن أن التمارين، الحجم، والشدة مثالية لما يمكنك التعامل معه بأمان.",
+      "aiHint": "مدربك الذكي يقوم بضبط مستويات الصعوبة...",
+      "aiSuggestion": "ممتاز. سأبدأك بمستوى {level} مع تقدم مناسب لتحديك دون الإفراط في التدريب."
+    },
+    "bodyStatsStep": {
+      "title": "أخبرني عن نفسك",
+      "subtitle": "هذا يساعد في حساب مقاييسك الأساسية",
+      "age": "العمر",
+      "ageUnit": "سنة",
+      "ageMin": "16",
+      "ageMax": "80",
+      "height": "الطول",
+      "heightUnit": "سم",
+      "heightMin": "140",
+      "heightMax": "220",
+      "weight": "الوزن",
+      "weightUnit": "كجم",
+      "weightMin": "35",
+      "weightMax": "200",
+      "gender": "الجنس",
+      "aiHint": "مدربك الذكي يحسب مؤشر كتلة الجسم واحتياجاتك اليومية...",
+      "aiSuggestion": "فهمت. إحصائياتك الحالية تعطيني أساساً ممتازاً لحساب احتياجاتك السعرية وتخطيط التقدم."
+    },
+    "injuriesStep": {
+      "title": "الإصابات والمعدات",
+      "subtitle": "أعلمني لأحافظ على سلامتك",
+      "injuries": "هل لديك أي إصابات أو قيود؟",
+      "injuriesPlaceholder": "مثال: ألم في أسفل الظهر، مشاكل في الركبة، مشاكل في الكتف، إلخ. اكتب 'لا يوجد' إذا لم يكن لديك قيود.",
+      "equipment": "المعدات المتاحة",
+      "equipmentSelectPrompt": "اختر كل المعدات المتاحة لك",
+      "aiHint": "مدربك الذكي يكيف التمارين لوضعك...",
+      "aiSuggestion": "ملاحظة. سأتعامل مع أي قيود وأبني الخطة حول المعدات المتاحة لديك."
+    },
+    "summaryStep": {
+      "title": "خطتك جاهزة!",
+      "subtitle": "راجع معلوماتك قبل الانتهاء",
+      "coachTitle": "مدربك الذكي يقول:",
+      "coachWelcome": "مرحباً {name}! أنا متحمس لأن أكون جزءاً من رحلتك الرياضية. بناءً على كل ما شاركتني به، قمت بإنشاء خطة مخصصة بالكامل ستساعدك على تحقيق {goals} بوتيرة مناسبة لك. تذكر - الاستمرارية تتفوق على الكمال. لنبدأ ونحقق شيئاً عظيماً معاً!",
+      "infoTitle": "معلوماتك",
+      "goalsLabel": "الأهداف",
+      "experienceLabel": "الخبرة",
+      "ageLabel": "العمر",
+      "heightLabel": "الطول",
+      "weightLabel": "الوزن",
+      "genderLabel": "الجنس",
+      "injuriesLabel": "الإصابات/القيود",
+      "equipmentLabel": "المعدات",
+      "submit": "إنشاء خطتي",
+      "submitting": "جاري إنشاء خطتك المخصصة...",
+      "editInfo": "هناك خطأ؟ ارجوع وقم بتعديله"
+    },
+    "aiThinking": "المدرب الذكي يفكر..."
+  },
+  "profile": {
+    "title": "ملفي الشخصي",
+    "subtitle": "إدارة معلوماتك وتفضيلاتك الشخصية",
+    "avatar": {
+      "title": "صورة الملف الشخصي",
+      "change": "تغيير الصورة",
+      "remove": "إزالة الصورة",
+      "uploadHint": "انقر لرفع صورة جديدة"
+    },
+    "personalInfo": {
+      "title": "المعلومات الشخصية",
+      "name": "الاسم الكامل",
+      "namePlaceholder": "اسمك الكامل",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "age": "العمر",
+      "agePlaceholder": "عمرك",
+      "gender": "الجنس",
+      "selectGender": "اختر الجنس"
+    },
+    "bodyStats": {
+      "title": "إحصائيات الجسم",
+      "height": "الطول",
+      "heightUnit": "سم",
+      "heightPlaceholder": "الطول بالسنتيمتر",
+      "weight": "الوزن",
+      "weightUnit": "كجم",
+      "weightPlaceholder": "الوزن بالكيلوجرام",
+      "targetWeight": "الوزن المستهدف (اختياري)",
+      "targetWeightPlaceholder": "وزنك المستهدف بالكيلوجرام",
+      "activityLevel": "مستوى النشاط",
+      "selectActivity": "اختر مستوى النشاط",
+      "activity": {
+        "sedentary": "خامل (قليل أو لا تمرين)",
+        "light": "خفيف (1-3 تمرينات/أسبوع)",
+        "moderate": "متوسط (3-5 تمرينات/أسبوع)",
+        "active": "نشط (6-7 تمرينات/أسبوع)",
+        "veryActive": "نشيط جداً (رياضي / عمل بدني)"
+      }
+    },
+    "fitnessGoals": {
+      "title": "الأهداف والخبرة الرياضية",
+      "goals": "الأهداف الرياضية",
+      "selectGoals": "اختر أهدافك",
+      "experience": "خبرة التدريب",
+      "selectExperience": "اختر مستوى الخبرة"
+    },
+    "healthEquipment": {
+      "title": "الصحة والمعدات",
+      "injuries": "الإصابات والقيود",
+      "injuriesPlaceholder": "اكتب أي إصابات أو قيود جسدية...",
+      "equipment": "المعدات المتاحة",
+      "selectEquipment": "اختر المعدات المتاحة"
+    },
+    "actions": {
+      "save": "حفظ التغييرات",
+      "saving": "جاري حفظ التغييرات...",
+      "saved": "تم حفظ الملف الشخصي بنجاح!",
+      "cancel": "إلغاء"
+    },
+    "preferences": {
+      "title": "التفضيلات",
+      "language": "اللغة",
+      "selectLanguage": "اختر اللغة"
+    }
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "نظرة عامة على تقدمك",
+    "todayWorkout": "تمرين اليوم",
+    "startWorkout": "ابدأ التمرين",
+    "nutritionGoals": "أهداف التغذية",
+    "calories": "السعرات",
+    "protein": "البروتين",
+    "weeklyProgress": "التقدم الأسبوعي",
+    "workoutsCompleted": "التمارين المكتملة",
+    "aiCoach": "المدرب الذكي",
+    "messageCoach": "مراسلة المدرب",
+    "quickStats": "إحصائيات سريعة",
+    "common": {
+      "settings": "الإعدادات"
+    },
+    "nutrition": {
+      "carbs": "الكربوهيدرات",
+      "water": "الماء"
+    }
+  },
+  "workout": {
+    "title": "التمارين",
+    "subtitle": "جدول التمارين الخاص بك",
+    "currentPlan": "الخطة الحالية",
+    "exercise": "التمرين",
+    "sets": "المجموعات",
+    "reps": "التكرارات",
+    "rest": "الراحة",
+    "weight": "الوزن",
+    "completed": "مكتمل",
+    "start": "ابدأ",
+    "finish": "إنهاء",
+    "skip": "تخطي",
+    "formTips": "نصائح الأداء",
+    "targetMuscle": "العضلة المستهدفة",
+    "equipment": "المعدات",
+    "difficulty": "الصعوبة",
+    "duration": "المدة",
+    "notes": "ملاحظات"
+  },
+  "nutrition": {
+    "title": "التغذية",
+    "subtitle": "خطة التغذية الخاصة بك",
+    "dailyGoals": "الأهداف اليومية",
+    "meals": "الوجبات",
+    "meal": "وجبة",
+    "ingredients": "المكونات",
+    "instructions": "التعليمات",
+    "calories": "السعرات",
+    "protein": "البروتين",
+    "carbs": "الكربوهيدرات",
+    "fats": "الدهون",
+    "addMeal": "إضافة وجبة",
+    "trackMeal": "تتبع الوجبة",
+    "macros": "الماكروز",
+    "water": "الماء",
+    "tips": "نصائح"
+  },
+  "progress": {
+    "title": "التقدم",
+    "subtitle": "تتبع تقدمك",
+    "weight": "الوزن",
+    "measurements": "القياسات",
+    "photos": "الصور",
+    "history": "السجل",
+    "log": "تسجيل",
+    "chart": "الرسم البياني",
+    "weekly": "أسبوعي",
+    "monthly": "شهري",
+    "allTime": "كل الوقت"
+  },
+  "chat": {
+    "title": "المدرب الذكي",
+    "subtitle": "اسأل مدربك الذكي",
+    "placeholder": "اكتب سؤالك هنا...",
+    "send": "إرسال",
+    "typing": "المدرب يكتب...",
+    "clear": "مسح المحادثة"
+  }
+}

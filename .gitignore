@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+ironforge-ai/node_modules/
+ironforge-ai/.next/
+ironforge-ai/out/
+ironforge-ai/android/
+ironforge-ai/dist/
+
+# Env
+.env
+.env.local
+.env.*.local
+ironforge-ai/.env.local
+
+# Large media - videos are large, initially ignored for GitHub push
+# To include videos, use Git LFS: git lfs track "*.mp4"
+*.mp4
+*.mov
+*.avi
+ironforge-ai/public/videos/**/*.mp4
+
+# Archive is ignored
+ironforge-ai/public/videos/_archive_root/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+buildlog.txt
+dev-log.txt
+
+# IDE
+.vscode/
+.trae/
+.idea/
+
+# Temp
+compressed/
+opencode.log
+
+# Arabic source folders (archived, duplicates of public/workout-systems.json)
+# These folders are kept locally but ignored in git
+archive/
+compressed/

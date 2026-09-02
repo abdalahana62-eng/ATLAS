@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 79 71% 55%;
+    --primary-foreground: 0 0% 3.9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 79 71% 55%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ironforge-background text-ironforge-text antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html[dir="rtl"] body {
+    font-family: 'Cairo', 'Inter', sans-serif;
+    letter-spacing: 0 !important;
+    word-spacing: 0.02em;
+  }
+
+  html[dir="ltr"] body {
+    font-family: 'Inter', 'Cairo', sans-serif;
+  }
+
+  /* Fix Arabic headings - prevent letter overlap from tracking-tight */
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3 {
+    letter-spacing: 0 !important;
+    word-spacing: 0.04em;
+    line-height: 1.3;
+    font-feature-settings: "liga" 0, "calt" 0;
+    text-rendering: optimizeLegibility;
+  }
+
+  html[dir="rtl"] .tracking-tight {
+    letter-spacing: 0 !important;
+  }
+}
+
+@layer utilities {
+  .cn-ironforge-card {
+    @apply bg-ironforge-card border border-ironforge-border rounded-lg;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}

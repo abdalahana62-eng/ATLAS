@@ -1,0 +1,375 @@
+{
+  "Home": {
+    "title": "ATLAS",
+    "description": "Your AI coach for bodybuilding — personalized training & nutrition.",
+    "common": {
+      "next": "Next",
+      "continue": "Continue"
+    },
+    "badge": "AI-powered fitness engine",
+    "heroTitle1": "Train smarter.",
+    "heroTitle2": "Perform stronger.",
+    "joinNow": "Join now",
+    "nav": {
+      "programs": "Programs",
+      "nutrition": "Nutrition",
+      "coaching": "Coaching",
+      "insights": "Insights"
+    },
+    "metrics": {
+      "workouts": "workouts tracked",
+      "rating": "coach rating",
+      "consistency": "goal consistency"
+    },
+    "todaysPlan": "Today's plan",
+    "pushDay": "Push Day",
+    "recoveryScore": "Recovery score",
+    "builtForResults": "Built for results",
+    "everythingNeeds": "Everything your body needs",
+    "features": {
+      "aiCoach": {
+        "title": "AI Coach",
+        "desc": "Personalized guidance and daily check-ins tailored to your progress."
+      },
+      "smartPlans": {
+        "title": "Smart Plans",
+        "desc": "Training and nutrition strategies adjusted to your goals and schedule."
+      },
+      "tracking": {
+        "title": "Progress Tracking",
+        "desc": "Visual reports that help you stay consistent and measure real gains."
+      }
+    },
+    "exercises": {
+      "benchPress": "Bench Press",
+      "inclineDumbbell": "Incline Dumbbell",
+      "overheadPress": "Overhead Press",
+      "tricepsPushdown": "Triceps Pushdown"
+    }
+  },
+  "Navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "workout": "Workout",
+    "nutrition": "Nutrition",
+    "calculator": "Calculator",
+    "chat": "Chat",
+    "progress": "Progress",
+    "profile": "Profile"
+  },
+  "common": {
+    "next": "Next",
+    "back": "Back",
+    "submit": "Submit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "continue": "Continue",
+    "skip": "Skip",
+    "yes": "Yes",
+    "no": "No",
+    "error": "Error",
+    "success": "Success",
+    "required": "Required",
+    "optional": "Optional",
+    "select": "Select",
+    "search": "Search",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "upload": "Upload",
+    "change": "Change",
+    "remove": "Remove",
+    "confirm": "Confirm",
+    "settings": "Settings"
+  },
+  "goals": {
+    "muscleGain": "Muscle Gain",
+    "fatLoss": "Fat Loss",
+    "strength": "Strength",
+    "generalFitness": "General Fitness",
+    "endurance": "Endurance",
+    "selectPrompt": "Select your primary goals"
+  },
+  "experience": {
+    "beginner": "Beginner",
+    "beginnerDesc": "Less than 6 months of training",
+    "intermediate": "Intermediate",
+    "intermediateDesc": "6 months to 2 years of training",
+    "advanced": "Advanced",
+    "advancedDesc": "2+ years of consistent training",
+    "selectPrompt": "What is your training experience level?"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "equipment": {
+    "none": "No Equipment (Bodyweight Only)",
+    "dumbbells": "Dumbbells",
+    "barbell": "Barbell & Plates",
+    "resistanceBands": "Resistance Bands",
+    "pullUpBar": "Pull-Up Bar",
+    "kettlebells": "Kettlebells",
+    "bench": "Weight Bench",
+    "cableMachine": "Cable Machine",
+    "fullGym": "Full Gym Access",
+    "selectPrompt": "What equipment do you have access to?"
+  },
+  "onboarding": {
+    "progress": "Step {current} of {total}",
+    "steps": {
+      "welcome": "Welcome",
+      "goals": "Goals",
+      "experience": "Experience",
+      "bodyStats": "Body Stats",
+      "injuriesEquipment": "Injuries & Equipment",
+      "summary": "Summary"
+    },
+    "common": {
+      "back": "Back",
+      "next": "Next"
+    },
+    "goals": {
+      "muscleGain": "Muscle Gain",
+      "fatLoss": "Fat Loss",
+      "strength": "Strength",
+      "generalFitness": "General Fitness",
+      "endurance": "Endurance",
+      "selectPrompt": "Select your primary goals"
+    },
+    "experience": {
+      "beginner": "Beginner",
+      "beginnerDesc": "Less than 6 months of training",
+      "intermediate": "Intermediate",
+      "intermediateDesc": "6 months to 2 years of training",
+      "advanced": "Advanced",
+      "advancedDesc": "2+ years of consistent training",
+      "selectPrompt": "What is your training experience level?"
+    },
+    "welcome": {
+      "title": "Welcome to ATLAS",
+      "subtitle": "Let's build your personalized fitness plan",
+      "description": "I'm your AI coach. In just a few steps, I'll create a fully customized workout and nutrition plan tailored specifically to you.",
+      "cta": "Get Started",
+      "features": {
+        "ai": "AI-Powered Coaching",
+        "custom": "Fully Customized Plans",
+        "track": "Track Your Progress"
+      }
+    },
+    "goalsStep": {
+      "title": "What are your fitness goals?",
+      "subtitle": "Select all that apply — you can change these later",
+      "description": "Your goals help me design the perfect training and nutrition plan for your needs.",
+      "minSelection": "Please select at least one goal",
+      "aiHint": "Your AI coach is analyzing your goals...",
+      "aiSuggestion": "Great choices! Based on your goals, I'll build a balanced plan that prioritizes {goals} effectively."
+    },
+    "experienceStep": {
+      "title": "What's your training experience?",
+      "subtitle": "Be honest — this helps me pick the right intensity",
+      "description": "Your experience level ensures the exercises, volume, and intensity are perfectly matched to what you can handle safely.",
+      "aiHint": "Your AI coach is calibrating difficulty levels...",
+      "aiSuggestion": "Perfect. I'll start you at a {level} pace with proper progression to keep you challenged without overtraining."
+    },
+    "bodyStatsStep": {
+      "title": "Tell me about yourself",
+      "subtitle": "This helps calculate your baseline metrics",
+      "age": "Age",
+      "ageUnit": "years",
+      "ageMin": "16",
+      "ageMax": "80",
+      "height": "Height",
+      "heightUnit": "cm",
+      "heightMin": "140",
+      "heightMax": "220",
+      "weight": "Weight",
+      "weightUnit": "kg",
+      "weightMin": "35",
+      "weightMax": "200",
+      "gender": "Gender",
+      "aiHint": "Your AI coach is calculating your BMI and TDEE...",
+      "aiSuggestion": "Got it. Your current stats give me a great baseline to calculate your daily caloric needs and plan progression."
+    },
+    "injuriesStep": {
+      "title": "Injuries & Equipment",
+      "subtitle": "Keep me informed to keep you safe",
+      "injuries": "Any injuries or limitations?",
+      "injuriesPlaceholder": "E.g., lower back pain, knee issues, shoulder impingement, etc. Write 'None' if you have no limitations.",
+      "equipment": "Available Equipment",
+      "equipmentSelectPrompt": "Select all equipment you have access to",
+      "aiHint": "Your AI coach is adapting exercises for your situation...",
+      "aiSuggestion": "Noted. I'll work around any limitations and build the plan around the equipment you have available."
+    },
+    "summaryStep": {
+      "title": "Your plan is ready!",
+      "subtitle": "Review your information before we finish",
+      "coachTitle": "Your AI Coach Says:",
+      "coachWelcome": "Welcome, {name}! I'm excited to be part of your fitness journey. Based on everything you've shared, I've created a fully personalized plan that will help you achieve your {goals} at a pace that's right for you. Remember — consistency beats perfection. Let's get started and forge something great together!",
+      "infoTitle": "Your Information",
+      "goalsLabel": "Goals",
+      "experienceLabel": "Experience",
+      "ageLabel": "Age",
+      "heightLabel": "Height",
+      "weightLabel": "Weight",
+      "genderLabel": "Gender",
+      "injuriesLabel": "Injuries/Limitations",
+      "equipmentLabel": "Equipment",
+      "submit": "Create My Plan",
+      "submitting": "Creating your personalized plan...",
+      "editInfo": "Something wrong? Go back and edit it"
+    },
+    "aiThinking": "AI coach is thinking..."
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal information and preferences",
+    "avatar": {
+      "title": "Profile Picture",
+      "change": "Change Photo",
+      "remove": "Remove Photo",
+      "uploadHint": "Click to upload a new photo"
+    },
+    "personalInfo": {
+      "title": "Personal Information",
+      "name": "Full Name",
+      "namePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "age": "Age",
+      "agePlaceholder": "Your age",
+      "gender": "Gender",
+      "selectGender": "Select gender"
+    },
+    "bodyStats": {
+      "title": "Body Statistics",
+      "height": "Height",
+      "heightUnit": "cm",
+      "heightPlaceholder": "Height in centimeters",
+      "weight": "Weight",
+      "weightUnit": "kg",
+      "weightPlaceholder": "Weight in kilograms",
+      "targetWeight": "Target Weight (optional)",
+      "targetWeightPlaceholder": "Your goal weight in kg",
+      "activityLevel": "Activity Level",
+      "selectActivity": "Select activity level",
+      "activity": {
+        "sedentary": "Sedentary (Little to no exercise)",
+        "light": "Light (1-3 workouts/week)",
+        "moderate": "Moderate (3-5 workouts/week)",
+        "active": "Active (6-7 workouts/week)",
+        "veryActive": "Very Active (Athletic / Physical job)"
+      }
+    },
+    "fitnessGoals": {
+      "title": "Fitness Goals & Experience",
+      "goals": "Fitness Goals",
+      "selectGoals": "Select your goals",
+      "experience": "Training Experience",
+      "selectExperience": "Select experience level"
+    },
+    "healthEquipment": {
+      "title": "Health & Equipment",
+      "injuries": "Injuries & Limitations",
+      "injuriesPlaceholder": "List any injuries or physical limitations...",
+      "equipment": "Available Equipment",
+      "selectEquipment": "Select available equipment"
+    },
+    "actions": {
+      "save": "Save Changes",
+      "saving": "Saving changes...",
+      "saved": "Profile saved successfully!",
+      "cancel": "Cancel"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "language": "Language",
+      "selectLanguage": "Select language"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of your progress",
+    "todayWorkout": "Today's Workout",
+    "startWorkout": "Start Workout",
+    "nutritionGoals": "Nutrition Goals",
+    "calories": "Calories",
+    "protein": "Protein",
+    "weeklyProgress": "Weekly Progress",
+    "workoutsCompleted": "Workouts Completed",
+    "aiCoach": "AI Coach",
+    "messageCoach": "Message Coach",
+    "quickStats": "Quick Stats",
+    "common": {
+      "settings": "Settings"
+    },
+    "nutrition": {
+      "carbs": "Carbs",
+      "water": "Water"
+    }
+  },
+  "workout": {
+    "title": "Workout",
+    "subtitle": "Your workout schedule",
+    "currentPlan": "Current Plan",
+    "exercise": "Exercise",
+    "sets": "Sets",
+    "reps": "Reps",
+    "rest": "Rest",
+    "weight": "Weight",
+    "completed": "Completed",
+    "start": "Start",
+    "finish": "Finish",
+    "skip": "Skip",
+    "formTips": "Form Tips",
+    "targetMuscle": "Target Muscle",
+    "equipment": "Equipment",
+    "difficulty": "Difficulty",
+    "duration": "Duration",
+    "notes": "Notes"
+  },
+  "nutrition": {
+    "title": "Nutrition",
+    "subtitle": "Your nutrition plan",
+    "dailyGoals": "Daily Goals",
+    "meals": "Meals",
+    "meal": "Meal",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "calories": "Calories",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fats": "Fats",
+    "addMeal": "Add Meal",
+    "trackMeal": "Track Meal",
+    "macros": "Macros",
+    "water": "Water",
+    "tips": "Tips"
+  },
+  "progress": {
+    "title": "Progress",
+    "subtitle": "Track your progress",
+    "weight": "Weight",
+    "measurements": "Measurements",
+    "photos": "Photos",
+    "history": "History",
+    "log": "Log",
+    "chart": "Chart",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "allTime": "All Time"
+  },
+  "chat": {
+    "title": "AI Coach",
+    "subtitle": "Ask your AI coach",
+    "placeholder": "Type your question here...",
+    "send": "Send",
+    "typing": "Coach is typing...",
+    "clear": "Clear Chat"
+  }
+}
