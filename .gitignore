@@ -12,12 +12,11 @@ ironforge-ai/dist/
 .env.*.local
 ironforge-ai/.env.local
 
-# Large media - videos are large, initially ignored for GitHub push
-# To include videos, use Git LFS: git lfs track "*.mp4"
+# Large media - videos tracked via Git LFS
 *.mp4
 *.mov
 *.avi
-ironforge-ai/public/videos/**/*.mp4
+!ironforge-ai/public/videos/**/*.mp4
 
 # Archive is ignored
 ironforge-ai/public/videos/_archive_root/
