@@ -16,21 +16,51 @@ export default function UpdateChecker() {
 
     const check = async () => {
       try {
-        const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
-          headers: { Accept: 'application/vnd.github.v3+json' },
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        const tag = (data.tag_name || '').replace(/^v/, '');
-        const apkAsset = data.assets?.find((a: any) => a.name.endsWith('.apk'));
-        const url = apkAsset?.browser_download_url || data.html_url;
+        // أولاً جرّب Vercel proxy (يشتغل حتى لو الريبو private)
+        let tag: string | null = null;
+        let url: string | null = null;
+
+        // 1) Vercel API
+        try {
+          const vercelBase = typeof window !== 'undefined' && (window as any).Capacitor
+            ? 'https://atlas2-ochre.vercel.app'
+            : '';
+          const apiUrl = vercelBase ? `${vercelBase}/api/latest` : '/api/latest';
+          const r1 = await fetch(apiUrl, { cache: 'no-store' });
+          if (r1.ok) {
+            const d1 = await r1.json();
+            if (d1.tag || d1.version) {
+              tag = (d1.tag || d1.version).replace(/^v/, '');
+              url = d1.url || d1.html_url;
+            }
+          }
+        } catch {}
+
+        // 2) fallback مباشر لـ GitHub (لو الريبو public)
+        if (!tag) {
+          const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
+            headers: { Accept: 'application/vnd.github.v3+json' },
+            cache: 'no-store' as any,
+          });
+          if (res.ok) {
+            const data = await res.json();
+            tag = (data.tag_name || '').replace(/^v/, '');
+            const apkAsset = data.assets?.find((a: any) => a.name.endsWith('.apk'));
+            url = apkAsset?.browser_download_url || data.html_url;
+          } else {
+            console.log('[UpdateChecker] GitHub API', res.status);
+          }
+        }
         
-        if (tag && tag !== CURRENT_VERSION) {
-          // قارن بسيط: لو التاج مختلف اعتبره تحديث
+        if (tag && tag !== CURRENT_VERSION && url) {
           setLatestVersion(tag);
           setUpdateUrl(url);
+        } else {
+          console.log('[UpdateChecker] no update', { tag, current: CURRENT_VERSION, url });
         }
-      } catch {}
+      } catch (e) {
+        console.log('[UpdateChecker] error', e);
+      }
     };
 
     // افحص بعد 3 ثواني من فتح التطبيق
