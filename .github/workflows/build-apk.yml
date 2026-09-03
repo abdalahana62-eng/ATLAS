@@ -49,6 +49,17 @@ jobs:
         run: |
           npx cap add android || true
           npx cap sync android
+      - name: Apply custom icon
+        working-directory: ironforge-ai
+        run: |
+          if [ -f resources/icon.png ]; then
+            echo "Found custom icon, generating mipmap..."
+            pip install Pillow -q
+            python3 scripts/generate-icons.py
+            ls -la android/app/src/main/res/mipmap-xxxhdpi/
+          else
+            echo "No custom icon at resources/icon.png, using default"
+          fi
       - name: Build APK
         working-directory: ironforge-ai/android
         run: ./gradlew assembleDebug
