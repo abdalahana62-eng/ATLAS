@@ -4,6 +4,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import Navigation from '@/components/layout/Navigation';
+import UpdateChecker from '@/components/UpdateChecker';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -72,6 +73,7 @@ export default async function LocaleLayout({
               {children}
             </main>
           </div>
+          <UpdateChecker />
         </NextIntlClientProvider>
       </body>
     </html>

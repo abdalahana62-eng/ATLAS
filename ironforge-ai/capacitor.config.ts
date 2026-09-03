@@ -4,9 +4,8 @@ const config: CapacitorConfig = {
   appId: 'com.atlas.ai',
   appName: 'ATLAS',
   webDir: 'out',
-  // التحديث الفوري: التطبيق يحمّل من Vercel - أي git push يظهر فوراً بدون APK جديد
+  // أوفلاين + فحص تحديث عند وجود نت
   server: {
-    url: 'https://atlas2-nxzzu5ikw-abdalahana62-eng.vercel.app',
     androidScheme: 'https',
     cleartext: true,
   },
