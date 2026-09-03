@@ -26,6 +26,7 @@ export default function Navigation() {
   const router = useRouter();
   const locale = useLocale();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0';
 
   const isRTL = locale === 'ar';
 
@@ -170,7 +171,7 @@ export default function Navigation() {
               {locale === 'ar' ? 'النسخة' : 'Version'}
             </p>
             <p className="text-sm font-semibold text-ironforge-text">
-              1.0.0
+              v{appVersion}
             </p>
             <p className="text-[11px] text-ironforge-text-muted mt-2 pt-2 border-t border-ironforge-border">
               Owner: ABDALLAH SHENOO<br />
