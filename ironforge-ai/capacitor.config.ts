@@ -4,13 +4,11 @@ const config: CapacitorConfig = {
   appId: 'com.atlas.ai',
   appName: 'ATLAS',
   webDir: 'out',
-  // لو هتشغل APK وهو بيكلم سيرفر محلي/مستضاف — استخدم server.url
-  // للـ APK الأوفلاين الكامل لازم تعمل next build + next export (out)
+  // التحديث الفوري: التطبيق يحمّل من Vercel - أي git push يظهر فوراً بدون APK جديد
   server: {
-    // للتطوير: يشغل الويب فيو على السيرفر المحلي
-    // url: 'http://10.0.2.2:3000',
-    // androidScheme: 'https',
-    // cleartext: true,
+    url: 'https://atlas-ironforge-ai.vercel.app',
+    androidScheme: 'https',
+    cleartext: true,
   },
   plugins: {
     SplashScreen: {
