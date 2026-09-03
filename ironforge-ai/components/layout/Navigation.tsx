@@ -172,6 +172,10 @@ export default function Navigation() {
             <p className="text-sm font-semibold text-ironforge-text">
               1.0.0
             </p>
+            <p className="text-[11px] text-ironforge-text-muted mt-2 pt-2 border-t border-ironforge-border">
+              Owner: ABDALLAH SHENOO<br />
+              <a href="mailto:abdalahana555@gmail.com" className="text-ironforge-primary hover:underline">abdalahana555@gmail.com</a>
+            </p>
           </div>
         </div>
       </nav>
