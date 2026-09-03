@@ -15,7 +15,7 @@ export default function PricingPage() {
     {
       name: isAr ? 'مجاني' : 'Free',
       price: '0',
-      currency: isAr ? 'جنيه' : 'EGP',
+      currency: '$',
       period: isAr ? '/ للأبد' : '/ forever',
       icon: Star,
       color: 'border-ironforge-border',
@@ -24,26 +24,26 @@ export default function PricingPage() {
       popular: false,
     },
     {
-      name: isAr ? 'برو' : 'Pro',
-      price: '199',
-      currency: isAr ? 'جنيه' : 'EGP',
-      period: isAr ? '/ شهر' : '/ month',
+      name: isAr ? 'Starter' : 'Starter',
+      price: '19',
+      currency: '$',
+      period: isAr ? '/ مرة واحدة' : '/ one-time',
       icon: Zap,
-      color: 'border-ironforge-primary/50 bg-ironforge-primary/5',
-      btn: isAr ? 'اشترك الآن' : 'Get Pro',
-      features: isAr ? ['كل الأنظمة (2/3/4/5/منزل)', 'وجبات حسب بلدك (14 مطبخ)', 'AI Coach غير محدود', 'تتبع متقدم', 'فيديوهات 720p صامتة'] : ['All systems (2/3/4/5/home)', '14 cuisines', 'Unlimited AI Coach', 'Advanced tracking', '720p silent videos'],
-      popular: true,
+      color: 'border-ironforge-border',
+      btn: isAr ? 'اشتري الآن' : 'Buy Now',
+      features: isAr ? ['كل أنظمة التمرين (2/3/4/5/منزل)', 'فيديوهات 720p كاملة', 'تتبع التقدم', 'تحديثات مجانية'] : ['All workout systems (2/3/4/5/home)', 'Full 720p videos', 'Progress tracking', 'Free updates'],
+      popular: false,
     },
     {
-      name: isAr ? 'برو سنوي' : 'Pro Yearly',
-      price: '999',
-      currency: isAr ? 'جنيه' : 'EGP',
-      period: isAr ? '/ سنة' : '/ year',
+      name: isAr ? 'Pro Lifetime' : 'Pro Lifetime',
+      price: '39',
+      currency: '$',
+      period: isAr ? '/ مدى الحياة' : '/ lifetime',
       icon: Crown,
-      color: 'border-amber-500/30',
-      btn: isAr ? 'وفر 58%' : 'Save 58%',
-      features: isAr ? ['كل مميزات برو', 'خصم 58% (شهرين مجاناً)', 'APK أوفلاين', 'دعم VIP'] : ['All Pro features', '58% off (2 months free)', 'Offline APK', 'VIP support'],
-      popular: false,
+      color: 'border-ironforge-primary/50 bg-ironforge-primary/5',
+      btn: isAr ? 'املكه للأبد ⭐' : 'Own Forever ⭐',
+      features: isAr ? ['كل مميزات Starter', '14 مطبخ عالمي', 'AI Coach غير محدود', 'APK أوفلاين', 'تحديثات مدى الحياة + VIP'] : ['Everything in Starter', '14 global cuisines', 'Unlimited AI Coach', 'Offline APK', 'Lifetime updates + VIP'],
+      popular: true,
     },
   ];
 
@@ -56,7 +56,7 @@ export default function PricingPage() {
             {isAr ? 'اختر خطتك' : 'Choose your plan'}
           </h1>
           <p className="text-ironforge-text-muted max-w-2xl mx-auto">
-            {isAr ? 'ابدأ مجاناً وترقى لما تحتاج كل المميزات — تحديث فوري لكل العملاء عبر Vercel' : 'Start free and upgrade when you need full features — instant updates for all customers via Vercel'}
+            {isAr ? 'ادفع مرة واحدة واملكه للأبد — منتج رقمي عالمي، تحديث فوري لكل العملاء عبر Vercel' : 'Pay once, own forever — global digital product, instant updates for all customers via Vercel'}
           </p>
         </div>
 
@@ -102,8 +102,8 @@ export default function PricingPage() {
           <h3 className="font-bold text-ironforge-text mb-2">{isAr ? 'كيف تتحكم بعد البيع؟' : 'How you control after sale?'}</h3>
           <p className="text-sm text-ironforge-text-muted leading-6">
             {isAr
-              ? '1. العميل يدفع على Gumroad/Stripe → ياخد حساب Supabase → 2. أنت تتحكم من Supabase Dashboard (تفعيل/إيقاف) → 3. أي تحديث تعمله git push → Vercel ينشره تلقائياً لكل العملاء بدون ما يحملوا APK جديد'
-              : '1. Customer pays via Gumroad/Stripe → gets Supabase account → 2. You control via Supabase Dashboard → 3. Any git push auto-deploys to Vercel for all customers'}
+              ? '1. العميل يدفع $19/$39 على Gumroad/Payhip (مرة واحدة) → ياخد رابط APK + حساب → 2. أنت تتحكم من Supabase Dashboard → 3. أي تحديث تعمله git push → Vercel ينشره تلقائياً بدون APK جديد'
+              : '1. Customer pays $19/$39 once via Gumroad/Payhip → gets APK link + account → 2. You control via Supabase Dashboard → 3. Any git push auto-deploys via Vercel, no new APK needed'}
           </p>
         </div>
       </div>
