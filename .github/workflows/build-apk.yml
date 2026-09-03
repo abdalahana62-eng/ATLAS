@@ -28,6 +28,32 @@ jobs:
         run: npm run build
         env:
           BUILD_TARGET: capacitor
+      - name: Fix web assets for Capacitor
+        working-directory: ironforge-ai
+        run: |
+          echo "Checking out/ contents..."
+          ls -la out || echo "out missing!"
+          ls -la out/en || echo "out/en missing!"
+          if [ ! -f out/index.html ]; then
+            echo "Creating out/index.html redirect for Capacitor..."
+            cat > out/index.html << 'HTML'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta http-equiv="refresh" content="0; url=en/">
+            <script>try{var l=(navigator.language||navigator.userLanguage||'en').toLowerCase();if(l.indexOf('ar')===0)location.href='ar/';else location.href='en/';}catch(e){location.href='en/';}</script>
+            <title>ATLAS</title>
+          </head>
+          <body style="background:#05070b;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh">Redirecting to ATLAS...</body>
+          </html>
+          HTML
+          fi
+          echo "--- out/index.html ---"
+          cat out/index.html
+          echo "--- out structure ---"
+          ls -R out | head -n 80
       - name: Sync Capacitor
         working-directory: ironforge-ai
         run: |
