@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'out',
   // التحديث الفوري: التطبيق يحمّل من Vercel - أي git push يظهر فوراً بدون APK جديد
   server: {
-    url: 'https://atlas-ironforge-ai.vercel.app',
+    url: 'https://atlas2-nxzzu5ikw-abdalahana62-eng.vercel.app',
     androidScheme: 'https',
     cleartext: true,
   },
