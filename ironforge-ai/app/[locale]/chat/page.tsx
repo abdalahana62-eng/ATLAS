@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { usePathname } from '@/i18n/routing';
+import { useTranslations, useLocale } from 'next-intl';
 import { 
   MessageSquare, 
   Send, 
@@ -28,8 +27,7 @@ interface ChatMessage {
 
 export default function ChatPage() {
   const t = useTranslations('chat');
-  const pathname = usePathname();
-  const locale = pathname.split('/')[1] || 'en';
+  const locale = useLocale();
   const isRTL = locale === 'ar';
   const activeModel = process.env.NEXT_PUBLIC_OPENAI_MODEL || 'deepseek-coder:1.3b';
 
@@ -87,7 +85,12 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      // في الـ APK الأوفلاين الـ API لازم يجي من Vercel مباشرة
+      const isCapacitor = typeof window !== 'undefined' && window.location.protocol === 'capacitor:';
+      const apiUrl = isCapacitor
+        ? 'https://atlas2-ochre.vercel.app/api/chat'
+        : '/api/chat';
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -5,7 +5,8 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
+  // فقط للـ APK الأوفلاين نحتاج export، أما Vercel فلازم يكون بدون output عشان الـ API يشتغل
+  ...(process.env.BUILD_TARGET === 'capacitor' ? { output: 'export' } : {}),
   images: { unoptimized: true },
   trailingSlash: true,
   experimental: {
