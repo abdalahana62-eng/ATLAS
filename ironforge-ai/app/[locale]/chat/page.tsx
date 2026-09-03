@@ -86,13 +86,23 @@ export default function ChatPage() {
 
     try {
       // في الـ APK الأوفلاين الـ API لازم يجي من Vercel مباشرة (سحابي Groq)
-      const isCapacitor = typeof window !== 'undefined' && window.location.protocol === 'capacitor:';
+      // Capacitor الحديث يستخدم https://localhost وليس capacitor://، لذلك نفحص بعدة طرق
+      const cap = typeof window !== 'undefined' ? (window as any).Capacitor : null;
+      const isCapacitor = typeof window !== 'undefined' && (
+        window.location.protocol === 'capacitor:' ||
+        !!cap?.isNativePlatform?.() ||
+        !!cap?.isNative ||
+        document.URL.includes('capacitor') ||
+        navigator.userAgent.includes('Capacitor')
+      );
       const vercelBase = process.env.NEXT_PUBLIC_VERCEL_URL 
         ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
         : 'https://atlas2-ochre.vercel.app';
       const apiUrl = isCapacitor
         ? `${vercelBase}/api/chat`
         : '/api/chat';
+      // للتشخيص في الـ APK
+      console.log('[ATLAS Chat] isCapacitor:', isCapacitor, 'apiUrl:', apiUrl, 'protocol:', window.location.protocol, 'href:', window.location.href);
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -148,15 +158,16 @@ export default function ChatPage() {
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
 
+      const detail = error?.message ? ` (${error.message})` : '';
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: locale === 'ar'
-          ? 'عذراً، حدث خطأ في اتصال النموذج. يرجى المحاولة مرة أخرى.'
-          : 'Sorry, the model connection failed. Please try again.',
+          ? `عذراً، حدث خطأ في اتصال النموذج${detail}. تأكد من النت وحاول مرة أخرى.`
+          : `Sorry, the model connection failed${detail}. Check internet and try again.`,
         timestamp: new Date()
       };
 

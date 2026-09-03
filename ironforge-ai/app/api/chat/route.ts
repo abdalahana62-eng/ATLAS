@@ -4,6 +4,16 @@ import { createStreamingChatCompletion, type ChatMessage } from '@/lib/ai/openai
 
 export const runtime = 'nodejs';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
+
 export async function POST(req: NextRequest) {
   try {
     // تحقق سريع من وجود مفتاح Groq السحابي قبل المحاولة
@@ -11,7 +21,7 @@ export async function POST(req: NextRequest) {
       console.error('Chat API: Missing OPENAI_API_KEY');
       return Response.json(
         { error: 'Server missing OPENAI_API_KEY (Groq). Configure it in Vercel → Settings → Environment Variables.' },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
     const { messages, locale } = await req.json();
@@ -19,7 +29,7 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(messages) || messages.length === 0) {
       return Response.json(
         { error: 'Messages array is required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -59,13 +69,14 @@ export async function POST(req: NextRequest) {
         'Cache-Control': 'no-cache, no-transform',
         Connection: 'keep-alive',
         'X-Accel-Buffering': 'no',
+        ...corsHeaders,
       },
     });
   } catch (error: any) {
     console.error('Chat API error:', error);
     return Response.json(
       { error: error?.message ?? 'Failed to process chat request' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
