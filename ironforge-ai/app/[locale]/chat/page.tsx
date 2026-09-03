@@ -29,7 +29,7 @@ export default function ChatPage() {
   const t = useTranslations('chat');
   const locale = useLocale();
   const isRTL = locale === 'ar';
-  const activeModel = process.env.NEXT_PUBLIC_OPENAI_MODEL || 'deepseek-coder:1.3b';
+  const activeModel = process.env.NEXT_PUBLIC_OPENAI_MODEL || 'openai/gpt-oss-20b';
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -85,10 +85,13 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      // في الـ APK الأوفلاين الـ API لازم يجي من Vercel مباشرة
+      // في الـ APK الأوفلاين الـ API لازم يجي من Vercel مباشرة (سحابي Groq)
       const isCapacitor = typeof window !== 'undefined' && window.location.protocol === 'capacitor:';
+      const vercelBase = process.env.NEXT_PUBLIC_VERCEL_URL 
+        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
+        : 'https://atlas2-ochre.vercel.app';
       const apiUrl = isCapacitor
-        ? 'https://atlas2-ochre.vercel.app/api/chat'
+        ? `${vercelBase}/api/chat`
         : '/api/chat';
       const response = await fetch(apiUrl, {
         method: 'POST',

@@ -6,6 +6,14 @@ export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
+    // تحقق سريع من وجود مفتاح Groq السحابي قبل المحاولة
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('Chat API: Missing OPENAI_API_KEY');
+      return Response.json(
+        { error: 'Server missing OPENAI_API_KEY (Groq). Configure it in Vercel → Settings → Environment Variables.' },
+        { status: 500 }
+      );
+    }
     const { messages, locale } = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {

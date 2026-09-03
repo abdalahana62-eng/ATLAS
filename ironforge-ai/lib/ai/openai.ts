@@ -4,8 +4,15 @@ let openaiInstance: OpenAI | null = null;
 
 export function getOpenAIClient(): OpenAI {
   if (!openaiInstance) {
-    const apiKey = process.env.OPENAI_API_KEY || 'ollama';
-    const baseURL = process.env.OPENAI_BASE_URL || 'http://localhost:11434/v1';
+    const apiKey = process.env.OPENAI_API_KEY;
+    // السحابي الافتراضي هو Groq، وليس ollama المحلي
+    const baseURL = process.env.OPENAI_BASE_URL || 'https://api.groq.com/openai/v1';
+
+    if (!apiKey) {
+      throw new Error(
+        'Missing OPENAI_API_KEY env. Set it on Vercel Dashboard → Settings → Environment Variables (Groq API Key). Locally set it in ironforge-ai/.env.local'
+      );
+    }
 
     openaiInstance = new OpenAI({
       apiKey,
