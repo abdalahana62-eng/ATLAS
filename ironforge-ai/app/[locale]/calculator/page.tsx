@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { usePathname } from '@/i18n/routing';
+import { useTranslations, useLocale } from 'next-intl';
 import { 
   Calculator, 
   TrendingUp, 
@@ -20,8 +19,7 @@ import { Progress } from '@/components/ui/Progress';
 
 export default function CalorieCalculatorPage() {
   const t = useTranslations('nutrition');
-  const pathname = usePathname();
-  const locale = pathname.split('/')[1] || 'en';
+  const locale = useLocale();
   const isRTL = locale === 'ar';
 
   const [formData, setFormData] = useState({
