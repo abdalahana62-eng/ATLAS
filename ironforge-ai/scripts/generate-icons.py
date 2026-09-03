@@ -29,11 +29,11 @@ DENSITIES = {
 
 def main():
     if not SRC.exists():
-        print(f"❌ Source not found: {SRC}")
+        print(f"Source not found: {SRC}")
         print("   Place your 1024x1024 icon at resources/icon.png")
         return False
     
-    print(f"📱 Generating icons from {SRC}")
+    print(f"Generating icons from {SRC}")
     img = Image.open(SRC).convert("RGBA")
     
     # Ensure square and resize with high quality
@@ -51,10 +51,10 @@ def main():
         # Save ic_launcher_foreground.png for adaptive icon
         resized.save(dest_dir / "ic_launcher_foreground.png", "PNG")
         
-        print(f"  ✓ {folder}: {size}x{size}")
+        print(f"  {folder}: {size}x{size}")
     
     # Also copy to capacitor assets location for web
-    print("✅ All icons generated!")
+    print("All icons generated!")
     return True
 
 if __name__ == "__main__":
