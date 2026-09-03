@@ -61,11 +61,21 @@ export default function UpdateChecker() {
           }
         }
         
-        if (tag && tag !== CURRENT_VERSION && url) {
+        // فقط لو الأحدث أكبر من الحالي (semver)
+        const isNewer = (a: string, b: string) => {
+          const pa = a.split('.').map(n=>parseInt(n,10)||0);
+          const pb = b.split('.').map(n=>parseInt(n,10)||0);
+          for(let i=0;i<Math.max(pa.length,pb.length);i++){
+            if((pa[i]||0) > (pb[i]||0)) return true;
+            if((pa[i]||0) < (pb[i]||0)) return false;
+          }
+          return false;
+        };
+        if (tag && url && isNewer(tag, CURRENT_VERSION)) {
           setLatestVersion(tag);
           setUpdateUrl(url);
         } else {
-          console.log('[UpdateChecker] no update', { tag, current: CURRENT_VERSION, url });
+          console.log('[UpdateChecker] no update', { tag, current: CURRENT_VERSION, url, isNewer: tag? isNewer(tag, CURRENT_VERSION): false });
         }
       } catch (e) {
         console.log('[UpdateChecker] error', e);
