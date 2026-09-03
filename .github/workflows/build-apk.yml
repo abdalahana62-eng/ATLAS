@@ -1,9 +1,13 @@
+
 name: Build APK
 
 on:
   push:
     branches: [main]
   workflow_dispatch: {}
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -68,3 +72,13 @@ jobs:
         with:
           name: atlas-debug-apk
           path: ironforge-ai/android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: ATLAS v1.0.${{ github.run_number }}
+body: "APK جديد - حمّل app-debug.apk وثبته. التحديث يظهر تلقائياً في التطبيق عند وجود نت."
+          files: ironforge-ai/android/app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
