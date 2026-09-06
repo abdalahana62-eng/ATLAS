@@ -23,7 +23,7 @@ export function getOpenAIClient(): OpenAI {
   return openaiInstance;
 }
 
-export const MODEL = process.env.OPENAI_MODEL || 'openai/gpt-oss-20b';
+export const MODEL = process.env.OPENAI_MODEL || 'llama-3.1-8b-instant';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';

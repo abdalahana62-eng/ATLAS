@@ -17,7 +17,11 @@ Tell: how many grams to eat, how to prepare quickly, what to avoid, and remainin
       [{ role: 'system', content: sys }, { role: 'user', content: message }],
       { temperature: 0.6, maxTokens: 600 }
     );
-    const answer = completion.choices[0]?.message?.content ?? '—';
+    const answer = completion.choices[0]?.message?.content?.trim() ?? '';
+    if (!answer) {
+      console.error('Empty answer from model', { model: process.env.OPENAI_MODEL, message });
+      return Response.json({ answer: 'عذراً، حاول مرة أخرى بصياغة مختلفة. مثال: عندي بيض ولبنة، كم جرام آكل؟' });
+    }
     return Response.json({ answer });
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
