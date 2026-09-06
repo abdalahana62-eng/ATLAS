@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-const CURRENT_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '1.0.26';
+const CURRENT_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '1.0.36';
 const REPO = 'abdalahana62-eng/ATLAS';
 
 export default function UpdateChecker() {
