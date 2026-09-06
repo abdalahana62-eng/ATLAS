@@ -13,6 +13,8 @@ import {
   Activity,
   Save,
   ShieldCheck,
+  Download,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -35,7 +37,35 @@ export default function ProfilePage() {
   const [showCamera, setShowCamera] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const checkUpdate = async () => {
+    setCheckingUpdate(true); setUpdateStatus(null);
+    try {
+      localStorage.removeItem(`atlas_update_dismissed_${process.env.NEXT_PUBLIC_APP_VERSION || '1.0.36'}`);
+      // also clear any old dismissed keys
+      Object.keys(localStorage).forEach(k=>{ if(k.startsWith('atlas_update_dismissed_')) localStorage.removeItem(k); });
+      const vercelBase = (typeof window !== 'undefined' && (window as any).Capacitor) ? 'https://atlas2-ochre.vercel.app' : '';
+      const apiUrl = vercelBase ? `${vercelBase}/api/latest` : '/api/latest';
+      const r = await fetch(apiUrl, { cache:'no-store' });
+      const d = await r.json();
+      const tag = (d.tag||d.version||'').replace(/^v/,'');
+      if(tag){
+        const cur = '1.0.37';
+        const isNewer = tag !== cur && tag.localeCompare(cur, undefined, { numeric:true }) > 0 || tag.split('.').map((n:any)=>parseInt(n,10)).join('.') !== cur;
+        // simple semver check
+        const pa = tag.split('.').map((n:any)=>parseInt(n,10)||0); const pb = cur.split('.').map((n:any)=>parseInt(n,10)||0);
+        let newer=false; for(let i=0;i<Math.max(pa.length,pb.length);i++){ if((pa[i]||0)>(pb[i]||0)){ newer=true; break;} if((pa[i]||0)<(pb[i]||0)) break; }
+        if(newer || tag !== cur){
+          setUpdateStatus(locale==='ar' ? `يوجد تحديث ${tag} - افتح البانر تحت أو حمّل من: ${d.url}` : `Update ${tag} available: ${d.url}`);
+          window.location.href = d.url;
+        } else setUpdateStatus(locale==='ar' ? 'أنت على آخر إصدار ✅' : 'You are up to date ✅');
+      } else setUpdateStatus('No release found');
+    } catch(e:any){ setUpdateStatus(e.message); }
+    setCheckingUpdate(false);
+  };
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -145,12 +175,21 @@ export default function ProfilePage() {
             <p className="text-ironforge-text-muted">{t('subtitle')}</p>
           </div>
 
-          <Button onClick={handleSave} disabled={isSaving} className="bg-ironforge-primary hover:bg-ironforge-primary-dark text-ironforge-background disabled:opacity-50">
-            <Save className="h-4 w-4" />
-            {isSaving ? (locale === 'ar' ? 'جاري الحفظ...' : 'Saving...') : (locale === 'ar' ? 'حفظ التغييرات' : 'Save Changes')}
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleSave} disabled={isSaving} className="bg-ironforge-primary hover:bg-ironforge-primary-dark text-ironforge-background disabled:opacity-50">
+              <Save className="h-4 w-4" />
+              {isSaving ? (locale === 'ar' ? 'جاري الحفظ...' : 'Saving...') : (locale === 'ar' ? 'حفظ التغييرات' : 'Save Changes')}
+            </Button>
+            <Button onClick={checkUpdate} disabled={checkingUpdate} variant="outline" className="border-ironforge-primary text-ironforge-primary">
+              <RefreshCw className={`h-4 w-4 ${checkingUpdate ? 'animate-spin' : ''}`} />
+              {checkingUpdate ? (locale==='ar'?'جاري الفحص...':'Checking...') : (locale==='ar'?'فحص التحديثات':'Check for Updates')}
+            </Button>
+          </div>
           {saveMessage && (
             <p className="mt-2 text-sm font-medium text-emerald-400">{saveMessage}</p>
+          )}
+          {updateStatus && (
+            <p className="mt-2 text-sm font-medium text-ironforge-primary break-all">{updateStatus}</p>
           )}
         </div>
 
