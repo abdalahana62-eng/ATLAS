@@ -22,6 +22,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { COUNTRIES, CUISINES, getCuisine, type CountryCode } from '@/lib/data/cuisines';
+import { MEAL_VARIANTS } from '@/lib/data/meal-variants';
 
 interface Meal {
   id: string;
@@ -69,23 +70,20 @@ function calcMacros(s: UserStats, tdee: number): Macros {
   return { calories: Math.round(cal), protein, carbs, fats: fat };
 }
 
-// 5 meals designed to hit exact macros - NOW CUISINE AWARE (country-based)
-function buildMeals(macros: Macros, country: CountryCode): Meal[] {
-  const c = macros.calories;
-  const p = macros.protein;
-  const ca = macros.carbs;
-  const f = macros.fats;
-
+// 5 slots with pcts; if MEAL_VARIANTS has 7 options for this country+type, return variants
+function buildSlots(macros: Macros, country: CountryCode) {
+  const c = macros.calories; const p = macros.protein; const ca = macros.carbs; const f = macros.fats;
   const cuisine = getCuisine(country);
   const pcts = [0.25, 0.30, 0.25, 0.10, 0.10];
-
   return cuisine.slots.map((slot, i) => {
     const pct = pcts[i];
     const m = { cal: Math.round(c * pct), p: Math.round(p * pct), ca: Math.round(ca * pct), f: Math.round(f * pct) };
-    const b = cuisine.builders[i];
     const macrosForMeal: Macros = { calories: m.cal, protein: m.p, carbs: m.ca, fats: m.f };
-    return {
-      id: String(i + 1),
+    const variantsMap = MEAL_VARIANTS[country] as any;
+    const typeKey = cuisine.builders[i].type_en === 'Breakfast' ? 'Breakfast' : cuisine.builders[i].type_en === 'Lunch' ? 'Lunch' : cuisine.builders[i].type_en === 'Dinner' ? 'Dinner' : 'Snack';
+    const variants: any[] = variantsMap?.[typeKey] || [cuisine.builders[i]];
+    const meals: Meal[] = variants.slice(0,7).map((b:any, idx:number)=>({
+      id: `${i + 1}-${idx}`,
       name_en: b.label_en,
       name_ar: b.label_ar,
       meal_type_en: b.type_en,
@@ -100,8 +98,12 @@ function buildMeals(macros: Macros, country: CountryCode): Meal[] {
       instructions_ar: b.ins_ar,
       time: b.time,
       imageUrl: b.img,
-    };
+    }));
+    return { slot, pct, macrosForMeal: m, meals };
   });
+}
+function buildMeals(macros: Macros, country: CountryCode): Meal[] {
+  return buildSlots(macros, country).map(s=>s.meals[0]);
 }
 
 const defaultStats: UserStats = {
@@ -123,6 +125,10 @@ export default function NutritionPage() {
   const [showWizard, setShowWizard] = useState(true);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [loggedMeals, setLoggedMeals] = useState<Record<string, boolean>>({});
+  const [chosen, setChosen] = useState<Record<number, number>>({}); // slotIdx -> variantIdx
+  const [chatInput, setChatInput] = useState('');
+  const [chatAns, setChatAns] = useState<string | null>(null);
+  const [chatLoading, setChatLoading] = useState(false);
 
   // Load saved stats - supports both old key and new country field
   useEffect(() => {
@@ -142,7 +148,19 @@ export default function NutritionPage() {
 
   const tdee = calcTDEE(stats);
   const targetMacros = calcMacros(stats, tdee);
-  const meals = buildMeals(targetMacros, stats.country);
+  const slots = buildSlots(targetMacros, stats.country);
+  const meals = slots.map((s, idx) => s.meals[chosen[idx] ?? 0]);
+
+  const handleChat = async () => {
+    if (!chatInput.trim()) return;
+    setChatLoading(true); setChatAns(null);
+    try {
+      const res = await fetch('/api/nutrition/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: chatInput, stats, targetMacros, country: stats.country }) });
+      const data = await res.json();
+      setChatAns(data.answer || data.error || '—');
+    } catch { setChatAns(locale==='ar' ? 'حدث خطأ' : 'Error'); }
+    setChatLoading(false);
+  };
 
   const handleMealLog = (mealId: string) => {
     setLoggedMeals(prev => ({ ...prev, [mealId]: !prev[mealId] }));
@@ -259,61 +277,93 @@ export default function NutritionPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <h2 className="text-xl font-semibold text-ironforge-text mb-4">
-              {(() => { const c = COUNTRIES.find(x=>x.code===stats.country); return locale==='ar' ? `٥ وجبات ${c?.cuisine_ar || ''} محسوبة — ${c?.flag || ''} ${c?.name_ar || ''}` : `5 ${c?.cuisine_en || ''} Meals — ${c?.flag || ''} ${c?.name_en || ''}` })()}
+              {(() => { const c = COUNTRIES.find(x=>x.code===stats.country); return locale==='ar' ? `٥ وجبات ${c?.cuisine_ar || ''} — ٧ اختيارات لكل وجبة ${c?.flag || ''} ${c?.name_ar || ''}` : `5 Meals — 7 Choices Each ${c?.flag || ''} ${c?.cuisine_en || ''}` })()}
             </h2>
-            <p className="text-xs text-ironforge-text-muted mb-3">{locale==='ar' ? 'كل وجبة مشروحة بالجرام، محسوبة على سعراتك، مع صورة للوجبة' : 'Each meal with grams, calculated to your calories, with dish image'}</p>
-            <div className="space-y-4">
-              {meals.map(meal => (
-                <Card key={meal.id} onClick={() => setSelectedMeal(meal)} className="p-4 border-ironforge-border bg-ironforge-card hover:bg-ironforge-card-hover transition cursor-pointer">
+            <p className="text-xs text-ironforge-text-muted mb-3">{locale==='ar' ? 'اختر وجبة واحدة لكل خانة من ٧ اختيارات محسوبة على سعراتك — اضغط لتبديل' : 'Pick 1 of 7 choices per slot — tap to switch'}</p>
+            <div className="space-y-6">
+              {slots.map((slot, sIdx) => {
+                const chosenMeal = slot.meals[chosen[sIdx] ?? 0];
+                return (
+                <div key={sIdx} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge className={getMealTypeColor(slot.meals[0].meal_type_en)}>{locale==='ar' ? slot.meals[0].meal_type_ar : slot.meals[0].meal_type_en}</Badge>
+                    <span className="text-xs text-ironforge-text-muted">{slot.meals.length} {locale==='ar'?'اختيارات':'choices'}</span>
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
+                    {slot.meals.map((meal, vIdx) => {
+                      const isChosen = (chosen[sIdx] ?? 0) === vIdx;
+                      return (
+                        <Card key={meal.id} onClick={() => { setChosen(prev=>({...prev,[sIdx]:vIdx})); setSelectedMeal(meal); }} className={`min-w-[160px] p-3 cursor-pointer snap-start border-2 ${isChosen ? 'border-ironforge-primary bg-ironforge-primary/10' : 'border-ironforge-border bg-ironforge-card'}`}>
+                          <div className="w-full h-20 rounded overflow-hidden mb-2"><img src={meal.imageUrl} alt={meal.name_en} className="w-full h-full object-cover" /></div>
+                          <p className="text-sm font-semibold text-ironforge-text leading-tight line-clamp-2">{locale==='ar'?meal.name_ar:meal.name_en}</p>
+                          <p className="text-xs text-ironforge-text-muted mt-1">{meal.calories} kcal • {meal.protein}P</p>
+                          {isChosen && <Badge variant="primary" className="mt-2 text-xs">✓ {locale==='ar'?'مختارة':'Chosen'}</Badge>}
+                        </Card>
+                      );
+                    })}
+                  </div>
+                  {/* chosen detail card */}
+                  <Card onClick={() => setSelectedMeal(chosenMeal)} className="p-4 border-ironforge-border bg-ironforge-card hover:bg-ironforge-card-hover transition cursor-pointer">
                   <div className="flex items-start gap-4">
-                    {meal.imageUrl && (
+                    {chosenMeal.imageUrl && (
                       <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0">
-                        <img src={meal.imageUrl} alt={meal.name_en} className="w-full h-full object-cover" />
+                        <img src={chosenMeal.imageUrl} alt={chosenMeal.name_en} className="w-full h-full object-cover" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2 gap-2">
                         <div className="min-w-0">
-                          <h3 className="font-semibold text-ironforge-text mb-1">{locale === 'ar' ? meal.name_ar : meal.name_en}</h3>
-                          <Badge className={getMealTypeColor(meal.meal_type_en)}>{locale === 'ar' ? meal.meal_type_ar : meal.meal_type_en}</Badge>
+                          <h3 className="font-semibold text-ironforge-text mb-1">{locale === 'ar' ? chosenMeal.name_ar : chosenMeal.name_en}</h3>
+                          <Badge className={getMealTypeColor(chosenMeal.meal_type_en)}>{locale === 'ar' ? chosenMeal.meal_type_ar : chosenMeal.meal_type_en}</Badge>
                         </div>
-                        {meal.time && (
+                        {chosenMeal.time && (
                           <div className="flex items-center gap-1 text-sm text-ironforge-text-muted shrink-0">
-                            <Clock className="w-3 h-3" />{meal.time}
+                            <Clock className="w-3 h-3" />{chosenMeal.time}
                           </div>
                         )}
                       </div>
                       <div className="grid grid-cols-4 gap-2 mt-3">
                         <div className="text-center p-2 rounded bg-ironforge-background">
-                          <p className="text-sm font-bold text-ironforge-primary">{meal.calories}</p>
+                          <p className="text-sm font-bold text-ironforge-primary">{chosenMeal.calories}</p>
                           <p className="text-xs text-ironforge-text-muted">{locale === 'ar' ? 'سعرة' : 'kcal'}</p>
                         </div>
                         <div className="text-center p-2 rounded bg-ironforge-background">
-                          <p className="text-sm font-bold text-ironforge-primary">{meal.protein}g</p>
+                          <p className="text-sm font-bold text-ironforge-primary">{chosenMeal.protein}g</p>
                           <p className="text-xs text-ironforge-text-muted">{t('protein')}</p>
                         </div>
                         <div className="text-center p-2 rounded bg-ironforge-background">
-                          <p className="text-sm font-bold text-ironforge-primary">{meal.carbs}g</p>
+                          <p className="text-sm font-bold text-ironforge-primary">{chosenMeal.carbs}g</p>
                           <p className="text-xs text-ironforge-text-muted">{t('carbs')}</p>
                         </div>
                         <div className="text-center p-2 rounded bg-ironforge-background">
-                          <p className="text-sm font-bold text-ironforge-primary">{meal.fats}g</p>
+                          <p className="text-sm font-bold text-ironforge-primary">{chosenMeal.fats}g</p>
                           <p className="text-xs text-ironforge-text-muted">{t('fats')}</p>
                         </div>
                       </div>
                     </div>
                     <Button
-                      onClick={(e) => { e.stopPropagation(); handleMealLog(meal.id); }}
-                      variant={loggedMeals[meal.id] ? 'primary' : 'outline'}
+                      onClick={(e) => { e.stopPropagation(); handleMealLog(chosenMeal.id); }}
+                      variant={loggedMeals[chosenMeal.id] ? 'primary' : 'outline'}
                       size="sm"
                       className="shrink-0"
                     >
-                      {loggedMeals[meal.id] ? <CheckCircle className="w-4 h-4" /> : <Utensils className="w-4 h-4" />}
+                      {loggedMeals[chosenMeal.id] ? <CheckCircle className="w-4 h-4" /> : <Utensils className="w-4 h-4" />}
                     </Button>
                   </div>
                 </Card>
-              ))}
+                </div>
+              );})}
             </div>
+            {/* Chat Option 2 */}
+            <Card className="p-4 border-ironforge-border bg-ironforge-card mt-6">
+              <h3 className="font-bold text-ironforge-text mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-ironforge-primary" />{locale==='ar' ? 'اسأل الشات: هاكل إيه النهاردة؟' : 'Ask Chat: What should I eat today?'}</h3>
+              <p className="text-xs text-ironforge-text-muted mb-3">{locale==='ar' ? 'اكتب اللي عندك في التلاجة أو نفسك في إيه، والبوت يحسبلك الجرامات ويقولك تتجنب إيه حسب سعراتك' : 'Tell what you have at home, bot calculates grams & what to avoid'}</p>
+              <div className="flex gap-2">
+                <input value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={locale==='ar' ? 'مثال: عندي بيض وجبنة قريش' : 'e.g. I have eggs and cottage cheese'} className="flex-1 bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2 text-sm text-ironforge-text" />
+                <Button onClick={handleChat} disabled={chatLoading} className="bg-ironforge-primary text-black">{chatLoading ? '...' : locale==='ar'?'اسأل':'Ask'}</Button>
+              </div>
+              {chatAns && <div className="mt-3 p-3 rounded-lg bg-ironforge-background text-sm text-ironforge-text whitespace-pre-wrap">{chatAns}</div>}
+            </Card>
           </div>
 
           {/* Meal Details */}
