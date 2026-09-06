@@ -39,3 +39,5 @@ ios/
 
 # large videos archive (keep main videos tracked, ignore archive duplicates)
 public/videos/_archive_root/
+
+.vercel
