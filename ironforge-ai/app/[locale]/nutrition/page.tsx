@@ -281,30 +281,29 @@ export default function NutritionPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <h2 className="text-xl font-semibold text-ironforge-text mb-4">
-              {(() => { const c = COUNTRIES.find(x=>x.code===stats.country); return locale==='ar' ? `٥ وجبات ${c?.cuisine_ar || ''} — ٧ اختيارات لكل وجبة ${c?.flag || ''} ${c?.name_ar || ''}` : `5 Meals — 7 Choices Each ${c?.flag || ''} ${c?.cuisine_en || ''}` })()}
+              {(() => { const c = COUNTRIES.find(x=>x.code===stats.country); return locale==='ar' ? `٥ وجبات ${c?.cuisine_ar || ''} محسوبة عليك ${c?.flag || ''} ${c?.name_ar || ''}` : `5 ${c?.cuisine_en || ''} Meals ${c?.flag || ''} ${c?.name_en || ''}` })()}
             </h2>
-            <p className="text-xs text-ironforge-text-muted mb-3">{locale==='ar' ? 'اختر وجبة واحدة لكل خانة من ٧ اختيارات محسوبة على سعراتك — اضغط لتبديل' : 'Pick 1 of 7 choices per slot — tap to switch'}</p>
+            <p className="text-xs text-ironforge-text-muted mb-3">{locale==='ar' ? 'وجبة واحدة لكل خانة — مش عاجباك؟ دوس تغيير الوجبة' : 'One meal per slot — tap change for another'}</p>
             <div className="space-y-6">
               {slots.map((slot, sIdx) => {
                 const chosenMeal = slot.meals[chosen[sIdx] ?? 0];
+                const changeMeal = () => {
+                  setChosen(prev => {
+                    const cur = prev[sIdx] ?? 0;
+                    let nxt = Math.floor(Math.random() * slot.meals.length);
+                    if (slot.meals.length > 1 && nxt === cur) nxt = (cur + 1) % slot.meals.length;
+                    const updated = { ...prev, [sIdx]: nxt };
+                    setSelectedMeal(slot.meals[nxt]);
+                    return updated;
+                  });
+                };
                 return (
                 <div key={sIdx} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Badge className={getMealTypeColor(slot.meals[0].meal_type_en)}>{locale==='ar' ? slot.meals[0].meal_type_ar : slot.meals[0].meal_type_en}</Badge>
-                    <span className="text-xs text-ironforge-text-muted">{slot.meals.length} {locale==='ar'?'اختيارات':'choices'}</span>
-                  </div>
-                  <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
-                    {slot.meals.map((meal, vIdx) => {
-                      const isChosen = (chosen[sIdx] ?? 0) === vIdx;
-                      return (
-                        <Card key={meal.id} onClick={() => { setChosen(prev=>({...prev,[sIdx]:vIdx})); setSelectedMeal(meal); }} className={`min-w-[160px] p-3 cursor-pointer snap-start border-2 ${isChosen ? 'border-ironforge-primary bg-ironforge-primary/10' : 'border-ironforge-border bg-ironforge-card'}`}>
-                          <div className="w-full h-20 rounded overflow-hidden mb-2"><img src={meal.imageUrl} alt={meal.name_en} className="w-full h-full object-cover" /></div>
-                          <p className="text-sm font-semibold text-ironforge-text leading-tight line-clamp-2">{locale==='ar'?meal.name_ar:meal.name_en}</p>
-                          <p className="text-xs text-ironforge-text-muted mt-1">{meal.calories} kcal • {meal.protein}P</p>
-                          {isChosen && <Badge variant="primary" className="mt-2 text-xs">✓ {locale==='ar'?'مختارة':'Chosen'}</Badge>}
-                        </Card>
-                      );
-                    })}
+                    <Button onClick={changeMeal} variant="outline" size="sm" className="border-ironforge-primary/40 text-ironforge-primary hover:bg-ironforge-primary/10">
+                      🔀 {locale==='ar' ? 'تغيير الوجبة' : 'Change meal'}
+                    </Button>
                   </div>
                   {/* chosen detail card */}
                   <Card onClick={() => setSelectedMeal(chosenMeal)} className="p-4 border-ironforge-border bg-ironforge-card hover:bg-ironforge-card-hover transition cursor-pointer">
