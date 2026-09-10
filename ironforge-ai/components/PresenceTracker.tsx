@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 export default function PresenceTracker() {
   useEffect(() => {
     let channel: any = null;
+    let timer: any = null;
     const run = async () => {
       try {
         const supabase = createClient();
@@ -17,12 +18,16 @@ export default function PresenceTracker() {
         channel.subscribe(async (status: string) => {
           if (status === 'SUBSCRIBED') {
             await channel.track({ email, online_at: new Date().toISOString() });
+            // heartbeat every 25s so admin always sees live users
+            timer = setInterval(() => {
+              try { channel.track({ email, online_at: new Date().toISOString() }); } catch {}
+            }, 25000);
           }
         });
       } catch {}
     };
     run();
-    return () => { try { channel?.unsubscribe(); } catch {} };
+    return () => { try { clearInterval(timer); } catch {} try { channel?.untrack(); } catch {} try { channel?.unsubscribe(); } catch {} };
   }, []);
   return null;
 }

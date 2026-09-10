@@ -22,6 +22,8 @@ export default function AdminPage() {
   const [reqs, setReqs] = useState<Req[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [online, setOnline] = useState(0);
+  const [onlineEmails, setOnlineEmails] = useState<string[]>([]);
+  const [showOnline, setShowOnline] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('pending');
   const [shot, setShot] = useState<string | null>(null);
@@ -53,22 +55,41 @@ export default function AdminPage() {
     run();
   }, []);
 
-  // Live online count via Realtime presence
+  // Live online users via Realtime presence (who is actually online)
   useEffect(() => {
     if (!authed) return;
     let channel: any = null;
+    let alive = true;
     const run = async () => {
       try {
         const supabase = createClient();
         channel = supabase.channel('online-users');
         channel.on('presence', { event: 'sync' }, () => {
+          if (!alive) return;
           const state = channel.presenceState();
-          setOnline(Object.keys(state).length);
-        }).subscribe();
+          const emails = Object.keys(state);
+          setOnline(emails.length);
+          setOnlineEmails(emails.slice(0, 20));
+        });
+        channel.on('presence', { event: 'join' }, () => {
+          if (!alive) return;
+          const state = channel.presenceState();
+          const emails = Object.keys(state);
+          setOnline(emails.length);
+          setOnlineEmails(emails.slice(0, 20));
+        });
+        channel.on('presence', { event: 'leave' }, () => {
+          if (!alive) return;
+          const state = channel.presenceState();
+          const emails = Object.keys(state);
+          setOnline(emails.length);
+          setOnlineEmails(emails.slice(0, 20));
+        });
+        channel.subscribe();
       } catch {}
     };
     run();
-    return () => { try { channel?.unsubscribe(); } catch {} };
+    return () => { alive = false; try { channel?.unsubscribe(); } catch {} };
   }, [authed]);
 
   const load = async (em?: string, pw?: string) => {
@@ -172,24 +193,41 @@ export default function AdminPage() {
   }
 
   const cards = [
-    { icon: Wifi, label: isAr ? 'متصل الآن 🟢' : 'Online now', value: online, live: true },
-    { icon: Users, label: isAr ? 'مسجلين' : 'Registered', value: stats?.users ?? '—' },
-    { icon: Crown, label: isAr ? 'مشتركين فعّالين' : 'Active subs', value: stats?.activeSubs ?? '—' },
-    { icon: Clock, label: isAr ? 'طلبات معلقة' : 'Pending', value: stats?.pending ?? '—' },
+    { icon: Wifi, label: isAr ? 'متصل الآن 🟢' : 'Online now', value: online, live: true, key: 'online' },
+    { icon: Users, label: isAr ? 'مسجلين' : 'Registered', value: stats?.users ?? '—', key: '' },
+    { icon: Crown, label: isAr ? 'مشتركين فعّالين' : 'Active subs', value: stats?.activeSubs ?? '—', key: '' },
+    { icon: Clock, label: isAr ? 'طلبات معلقة' : 'Pending', value: stats?.pending ?? '—', key: '' },
   ];
 
   return (
     <div className="min-h-screen bg-ironforge-background p-6">
       <div className="max-w-3xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
           {cards.map(c => (
-            <Card key={c.label} className="p-4 border-ironforge-border text-center">
+            <Card
+              key={c.label}
+              onClick={() => { if (c.key === 'online') setShowOnline(v => !v); }}
+              className={`p-4 border-ironforge-border text-center ${c.key === 'online' ? 'cursor-pointer hover:border-ironforge-primary' : ''}`}
+            >
               <c.icon className="w-5 h-5 text-ironforge-primary mx-auto mb-1" />
               <p className="text-2xl font-black text-ironforge-text">{c.value}</p>
               <p className="text-xs text-ironforge-text-muted">{c.label}</p>
+              {c.key === 'online' && <p className="text-[10px] text-ironforge-primary mt-1">{isAr ? 'دوس لعرض المتصلين' : 'Tap to view'}</p>}
             </Card>
           ))}
         </div>
+
+        {showOnline && (
+          <Card className="p-4 border-ironforge-primary/40 mb-6">
+            <p className="font-bold text-ironforge-text mb-2">🟢 {isAr ? 'المتصلون الآن' : 'Currently online'} ({onlineEmails.length})</p>
+            {onlineEmails.length === 0 && <p className="text-xs text-ironforge-text-muted">{isAr ? 'مفيش حد فاتح التطبيق دلوقتي غيرك — جرّب من موبايل تاني' : 'Nobody online right now — try from another device'}</p>}
+            <div className="space-y-1 max-h-48 overflow-y-auto">
+              {onlineEmails.map(e => (
+                <p key={e} className="text-sm text-ironforge-text bg-ironforge-background rounded-lg px-3 py-1.5" dir="ltr">{e}</p>
+              ))}
+            </div>
+          </Card>
+        )}
 
         <div className="flex gap-2 mb-4">
           <Button onClick={() => setTab('requests')} variant={tab === 'requests' ? 'primary' : 'outline'} className={tab === 'requests' ? 'bg-ironforge-primary text-black' : 'border-ironforge-border'}>{isAr ? 'الطلبات' : 'Requests'}</Button>
