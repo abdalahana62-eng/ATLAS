@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
-import { ShieldCheck, Check, X, Loader2, RefreshCw, Users, Crown, Clock, Eye, Wifi, Mail, Send } from 'lucide-react';
+import { ShieldCheck, Check, X, Loader2, RefreshCw, Users, Crown, Clock, Eye, Wifi, Mail, Send, Lightbulb, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 interface Req { id: string; email: string; phone: string; plan: string; amount: number; method: string; status: string; created_at: string; }
 interface Stats { users: number; activeSubs: number; pending: number; totalRequests: number; }
 interface Sub { email: string; plan: string; expires_at: string; status: string; created_at: string; daysLeft: number; }
+interface Sug { id: string; email: string; message: string; status: string; created_at: string; }
 
 export default function AdminPage() {
   const locale = useLocale();
@@ -25,8 +26,9 @@ export default function AdminPage() {
   const [filter, setFilter] = useState('pending');
   const [shot, setShot] = useState<string | null>(null);
   const [shotLoading, setShotLoading] = useState(false);
-  const [tab, setTab] = useState<'requests' | 'subs'>('requests');
+  const [tab, setTab] = useState<'requests' | 'subs' | 'ideas'>('requests');
   const [subs, setSubs] = useState<Sub[]>([]);
+  const [sugs, setSugs] = useState<Sug[]>([]);
   const [mailTo, setMailTo] = useState<string | null>(null);
   const [mailSubject, setMailSubject] = useState('');
   const [mailBody, setMailBody] = useState('');
@@ -95,6 +97,22 @@ export default function AdminPage() {
       const r = await fetch('/api/admin/subscribers', { headers: headers(), cache: 'no-store' });
       const d = await r.json();
       if (r.ok) setSubs(d.subscribers || []);
+    } catch {}
+  };
+
+  const loadSugs = async () => {
+    try {
+      const r = await fetch('/api/admin/suggestions', { headers: headers(), cache: 'no-store' });
+      const d = await r.json();
+      if (r.ok) setSugs(d.suggestions || []);
+    } catch {}
+  };
+
+  const sugAct = async (id: string, action: 'read' | 'delete') => {
+    try {
+      await fetch('/api/admin/suggestions', { method: 'PATCH', headers: headers(), body: JSON.stringify({ id, action }) });
+      if (action === 'delete') setSugs(prev => prev.filter(x => x.id !== id));
+      else setSugs(prev => prev.map(x => x.id === id ? { ...x, status: 'read' } : x));
     } catch {}
   };
 
@@ -176,7 +194,34 @@ export default function AdminPage() {
         <div className="flex gap-2 mb-4">
           <Button onClick={() => setTab('requests')} variant={tab === 'requests' ? 'primary' : 'outline'} className={tab === 'requests' ? 'bg-ironforge-primary text-black' : 'border-ironforge-border'}>{isAr ? 'الطلبات' : 'Requests'}</Button>
           <Button onClick={() => { setTab('subs'); loadSubs(); }} variant={tab === 'subs' ? 'primary' : 'outline'} className={tab === 'subs' ? 'bg-ironforge-primary text-black' : 'border-ironforge-border'}>{isAr ? 'المشتركين' : 'Subscribers'}</Button>
+          <Button onClick={() => { setTab('ideas'); loadSugs(); }} variant={tab === 'ideas' ? 'primary' : 'outline'} className={tab === 'ideas' ? 'bg-ironforge-primary text-black' : 'border-ironforge-border'}>
+            <Lightbulb className="w-4 h-4" /> {isAr ? 'الاقتراحات' : 'Ideas'}
+            {sugs.filter(s => s.status === 'new').length > 0 && <span className="ml-1 rounded-full bg-red-500 text-white text-[10px] px-1.5">{sugs.filter(s => s.status === 'new').length}</span>}
+          </Button>
         </div>
+
+        {tab === 'ideas' && (
+          <div className="space-y-3">
+            {sugs.map(s => (
+              <Card key={s.id} className={`p-4 border-ironforge-border ${s.status === 'new' ? 'border-ironforge-primary/50' : ''}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="text-sm flex-1">
+                    <p className="font-bold text-ironforge-text" dir="ltr">{s.email}</p>
+                    <p className="text-ironforge-text mt-1 leading-6">{s.message}</p>
+                    <p className="text-xs text-ironforge-text-muted mt-1">{new Date(s.created_at).toLocaleString()}</p>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    {s.status === 'new' && (
+                      <Button onClick={() => sugAct(s.id, 'read')} size="sm" variant="outline" className="border-ironforge-primary text-ironforge-primary"><Check className="w-4 h-4" /></Button>
+                    )}
+                    <Button onClick={() => sugAct(s.id, 'delete')} size="sm" variant="outline" className="border-red-500/50 text-red-400"><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+            {sugs.length === 0 && <p className="text-center text-ironforge-text-muted">{isAr ? 'لا توجد اقتراحات' : 'No suggestions'}</p>}
+          </div>
+        )}
 
         {tab === 'subs' && (
           <div className="space-y-3">

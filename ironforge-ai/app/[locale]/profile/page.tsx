@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import AuthGate from '@/components/AuthGate';
 import DownloadAppButton from '@/components/DownloadAppButton';
+import SuggestionBox from '@/components/SuggestionBox';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
@@ -315,6 +316,8 @@ export default function ProfilePage() {
                 </label>
               </div>
             </Card>
+
+            <SuggestionBox />
           </div>
         </div>
       </div>
