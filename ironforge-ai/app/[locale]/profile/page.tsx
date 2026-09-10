@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
+import AuthGate from '@/components/AuthGate';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
@@ -168,6 +169,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-ironforge-background p-4 md:p-8">
+      <AuthGate />
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>

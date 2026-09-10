@@ -24,6 +24,7 @@ import { Progress } from '@/components/ui/Progress';
 import { COUNTRIES, CUISINES, getCuisine, type CountryCode } from '@/lib/data/cuisines';
 import { MEAL_VARIANTS } from '@/lib/data/meal-variants';
 import SubscriptionGate from '@/components/SubscriptionGate';
+import AuthGate from '@/components/AuthGate';
 
 interface Meal {
   id: string;
@@ -194,6 +195,7 @@ export default function NutritionPage() {
 
   return (
     <div className="min-h-screen bg-ironforge-background p-6 md:p-8">
+      <AuthGate />
       <SubscriptionGate />
       <div className="max-w-7xl mx-auto">
         {/* Header */}

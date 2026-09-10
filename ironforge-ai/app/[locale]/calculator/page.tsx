@@ -16,6 +16,7 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
+import AuthGate from '@/components/AuthGate';
 
 export default function CalorieCalculatorPage() {
   const t = useTranslations('nutrition');
@@ -177,6 +178,7 @@ export default function CalorieCalculatorPage() {
 
   return (
     <div className="min-h-screen bg-ironforge-background p-6 md:p-8">
+      <AuthGate />
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
