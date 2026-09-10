@@ -178,6 +178,18 @@ export default function ProfilePage() {
     setIsSaving(false);
   };
 
+  const handleLogout = async () => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      await createClient().auth.signOut();
+    } catch {}
+    try {
+      localStorage.removeItem('atlas-account');
+      localStorage.removeItem('atlas-sub');
+    } catch {}
+    window.location.href = `/${locale}/auth/login`;
+  };
+
   useEffect(() => {
     return () => {
       if (streamRef.current) {
@@ -202,7 +214,7 @@ export default function ProfilePage() {
             <p className="text-ironforge-text-muted">{t('subtitle')}</p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button onClick={handleSave} disabled={isSaving} className="bg-ironforge-primary hover:bg-ironforge-primary-dark text-ironforge-background disabled:opacity-50">
               <Save className="h-4 w-4" />
               {isSaving ? (locale === 'ar' ? 'جاري الحفظ...' : 'Saving...') : (locale === 'ar' ? 'حفظ التغييرات' : 'Save Changes')}
@@ -210,6 +222,9 @@ export default function ProfilePage() {
             <Button onClick={checkUpdate} disabled={checkingUpdate} variant="outline" className="border-ironforge-primary text-ironforge-primary">
               <RefreshCw className={`h-4 w-4 ${checkingUpdate ? 'animate-spin' : ''}`} />
               {checkingUpdate ? (locale==='ar'?'جاري الفحص...':'Checking...') : (locale==='ar'?'فحص التحديثات':'Check for Updates')}
+            </Button>
+            <Button onClick={handleLogout} variant="outline" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
+              {locale === 'ar' ? 'تسجيل الخروج' : 'Sign out'}
             </Button>
           </div>
           {saveMessage && (
