@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import TrialBadge from '@/components/TrialBadge';
 
 export default function Navigation() {
   const t = useTranslations('Navigation');
@@ -166,6 +167,9 @@ export default function Navigation() {
             </div>
           </Link>
           
+          <div className="mb-2 flex justify-center">
+            <TrialBadge />
+          </div>
           <div className="p-3 rounded-lg bg-ironforge-background">
             <p className="text-xs text-ironforge-text-muted mb-1">
               {locale === 'ar' ? 'النسخة' : 'Version'}

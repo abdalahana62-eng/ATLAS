@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -21,6 +21,21 @@ function LoginInner() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(searchParams.get('error'));
+
+  // Already logged in → go straight to dashboard (never show signup again)
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user?.email) {
+          const { saveAccount } = await import('@/lib/subscription');
+          saveAccount(data.session.user.email.toLowerCase().trim());
+          window.location.href = `/${locale}/dashboard`;
+        }
+      } catch {}
+    };
+    run();
+  }, []);
 
   const signInWithGoogle = async () => {
     setLoading(true);
