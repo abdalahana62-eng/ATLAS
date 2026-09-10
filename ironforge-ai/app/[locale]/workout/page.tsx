@@ -23,6 +23,7 @@ import { ExerciseAnimation } from '@/components/workout/ExerciseAnimation';
 import WeightLogger from '@/components/workout/WeightLogger';
 import SubscriptionGate from '@/components/SubscriptionGate';
 import AuthGate from '@/components/AuthGate';
+import { setActivePlan } from '@/lib/trainingPlan';
 
 type ExerciseState = 'pending' | 'inProgress' | 'completed' | 'skipped';
 
@@ -73,7 +74,24 @@ export default function WorkoutPage() {
   useEffect(() => {
     fetch('/workout-systems.json')
       .then(r => r.json())
-      .then(data => setSystems(data))
+      .then(data => {
+        setSystems(data);
+        // Deep link from "today's plan": ?system=5days&day=2
+        try {
+          const q = new URLSearchParams(window.location.search);
+          const sys = q.get('system'), day = q.get('day');
+          if (sys && (data as any)[sys]) {
+            setActivePlan(sys);
+            setSelectedSystem(sys);
+            const di = parseInt(day || '0', 10);
+            if (!isNaN(di) && (data as any)[sys].days[di]) {
+              setSelectedDay(di);
+              setCurrentExerciseIndex(0);
+              setExerciseStates({});
+            }
+          }
+        } catch {}
+      })
       .catch(err => console.error('Failed to load systems', err));
   }, []);
 
@@ -344,7 +362,7 @@ export default function WorkoutPage() {
               const sys = systems[opt.key];
               const count = sys ? sys.days.length : 0;
               return (
-                <Card key={opt.key} onClick={() => { if (opt.key === '5days') setShowFiveDaysChoice(true); else setSelectedSystem(opt.key); }} className="p-6 border-ironforge-border bg-ironforge-card hover:border-ironforge-primary cursor-pointer transition">
+                <Card key={opt.key} onClick={() => { if (opt.key === '5days') setShowFiveDaysChoice(true); else { setActivePlan(opt.key); setSelectedSystem(opt.key); } }} className="p-6 border-ironforge-border bg-ironforge-card hover:border-ironforge-primary cursor-pointer transition">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-ironforge-primary/20 flex items-center justify-center">
                       <Dumbbell className="w-6 h-6 text-ironforge-primary" />
@@ -374,12 +392,12 @@ export default function WorkoutPage() {
             <h1 className="text-2xl font-bold text-ironforge-text">{locale === 'ar' ? 'هل تريد تمرين العضلة مرة أو مرتين في الأسبوع؟' : 'Train each muscle once or twice per week?'}</h1>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            <Card onClick={() => { setSelectedSystem('5days'); setShowFiveDaysChoice(false); }} className="p-6 border-ironforge-border bg-ironforge-card hover:border-ironforge-primary cursor-pointer transition">
+            <Card onClick={() => { setActivePlan('5days'); setSelectedSystem('5days'); setShowFiveDaysChoice(false); }} className="p-6 border-ironforge-border bg-ironforge-card hover:border-ironforge-primary cursor-pointer transition">
               <h3 className="font-bold text-ironforge-text text-lg">{locale === 'ar' ? 'مرة واحدة في الأسبوع' : 'Once per week'}</h3>
               <p className="text-sm text-ironforge-text-muted">{locale === 'ar' ? 'كل عضلة مرة واحدة — 5 أيام (كما أنشأتها)' : 'Each muscle once — 5 days as you created'}</p>
               <p className="text-xs text-ironforge-text-muted mt-2">{systems['5days'] ? `${systems['5days'].days.length} أيام • ${systems['5days'].days.reduce((a,d)=>a+d.exercises.length,0)} تمارين` : ''}</p>
             </Card>
-            <Card onClick={() => { setSelectedSystem('5days_double'); setShowFiveDaysChoice(false); }} className="p-6 border-ironforge-border bg-ironforge-card hover:border-ironforge-primary cursor-pointer transition">
+            <Card onClick={() => { setActivePlan('5days_double'); setSelectedSystem('5days_double'); setShowFiveDaysChoice(false); }} className="p-6 border-ironforge-border bg-ironforge-card hover:border-ironforge-primary cursor-pointer transition">
               <h3 className="font-bold text-ironforge-text text-lg">{locale === 'ar' ? 'مرتين في الأسبوع (عضلتين في اليوم)' : 'Twice per week (2 muscles / day)'}</h3>
               <p className="text-sm text-ironforge-text-muted">{locale === 'ar' ? 'كل عضلة مرتين — عضلتين في اليوم (الفولدر الداخلي)' : 'Each muscle twice — 2 muscles per day (inner folder)'}</p>
               <p className="text-xs text-ironforge-text-muted mt-2">{systems['5days_double'] ? `${systems['5days_double'].days.length} أيام • ${systems['5days_double'].days.reduce((a,d)=>a+d.exercises.length,0)} تمارين` : ''}</p>

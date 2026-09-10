@@ -22,6 +22,7 @@ import { Progress } from '@/components/ui/Progress';
 import { Badge } from '@/components/ui/Badge';
 import SubscriptionGate from '@/components/SubscriptionGate';
 import AuthGate from '@/components/AuthGate';
+import TodayPlanCard from '@/components/TodayPlanCard';
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
@@ -130,73 +131,9 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Today's Workout */}
+          {/* Today's Workout — follows your pinned system, rotates daily */}
           <div className="lg:col-span-2">
-            <Card className="p-6 border-ironforge-border bg-ironforge-card">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-ironforge-primary/20 flex items-center justify-center">
-                    <Dumbbell className="w-5 h-5 text-ironforge-primary" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-ironforge-text">
-                      {t('todayWorkout')}
-                    </h2>
-                    <p className="text-sm text-ironforge-text-muted">
-                      {todayWorkout.name}
-                    </p>
-                  </div>
-                </div>
-                <Badge variant={todayWorkout.completed ? 'success' : 'secondary'}>
-                  {todayWorkout.completed ? (
-                    <>
-                      <CheckCircle className="w-3 h-3 ml-1" />
-                      {t('workout.completed')}
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="w-3 h-3 ml-1" />
-                      {locale === 'ar' ? 'معلق' : 'Pending'}
-                    </>
-                  )}
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-4 rounded-lg bg-ironforge-background">
-                  <p className="text-2xl font-bold text-ironforge-text">{todayWorkout.duration}</p>
-                  <p className="text-sm text-ironforge-text-muted">{locale === 'ar' ? 'دقيقة' : 'min'}</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-ironforge-background">
-                  <p className="text-2xl font-bold text-ironforge-text">{todayWorkout.exercises}</p>
-                  <p className="text-sm text-ironforge-text-muted">{locale === 'ar' ? 'تمرين' : 'exercises'}</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-ironforge-background">
-                  <p className="text-2xl font-bold text-ironforge-text">
-                    {weeklyProgress.workoutsCompleted}/{weeklyProgress.totalWorkouts}
-                  </p>
-                  <p className="text-sm text-ironforge-text-muted">{locale === 'ar' ? 'أسبوعي' : 'weekly'}</p>
-                </div>
-              </div>
-
-              <Button 
-                className="w-full bg-ironforge-primary hover:bg-ironforge-primary-dark text-ironforge-background"
-                disabled={todayWorkout.completed}
-                onClick={() => router.push('/workout')}
-              >
-                {todayWorkout.completed ? (
-                  <>
-                    <CheckCircle className="w-4 h-4 ml-2" />
-                    {locale === 'ar' ? 'مكتمل' : 'Completed'}
-                  </>
-                ) : (
-                  <>
-                    {t('startWorkout')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
-            </Card>
+            <TodayPlanCard />
           </div>
 
           {/* Nutrition Goals */}

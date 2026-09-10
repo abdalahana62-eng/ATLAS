@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import TodayPlanCard from '@/components/TodayPlanCard';
 
 export default async function HomePage({
   params: { locale }
@@ -121,47 +122,7 @@ export default async function HomePage({
             </div>
           </div>
 
-          <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-[#101820] via-[#0f1721] to-[#0a0d12] p-4 shadow-2xl shadow-ironforge-primary/10">
-            <div className="rounded-[26px] border border-white/10 bg-[#090d12] p-5">
-              <div className="mb-5 flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-400">{t('todaysPlan')}</p>
-                  <h2 className="mt-1 text-2xl font-bold text-white">{t('pushDay')}</h2>
-                </div>
-                <div className="rounded-full bg-ironforge-primary/15 p-2 text-ironforge-primary">
-                  <Zap className="h-5 w-5" />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  [t('exercises.benchPress'), '4 x 8'],
-                  [t('exercises.inclineDumbbell'), '3 x 10'],
-                  [t('exercises.overheadPress'), '4 x 6'],
-                  [t('exercises.tricepsPushdown'), '3 x 12'],
-                ].map(([exercise, sets]) => (
-                  <div key={exercise} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <div>
-                      <p className="font-medium text-white">{exercise}</p>
-                    </div>
-                    <div className="rounded-full bg-ironforge-primary/15 px-2.5 py-1 text-xs font-medium text-ironforge-primary">
-                      {sets}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 rounded-2xl border border-ironforge-primary/20 bg-ironforge-primary/10 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">{t('recoveryScore')}</span>
-                  <span className="text-sm font-semibold text-ironforge-primary">82%</span>
-                </div>
-                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full w-[82%] rounded-full bg-gradient-to-r from-ironforge-primary to-lime-300" />
-                </div>
-              </div>
-            </div>
-          </div>
+          <TodayPlanCard />
         </section>
 
         <section className="pb-8">
