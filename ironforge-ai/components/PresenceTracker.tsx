@@ -3,31 +3,24 @@
 import { useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-// Tracks this device as online (Supabase Realtime presence) so admin sees live count
+// Heartbeat: upserts last_seen every 30s so admin sees exactly who is online.
+// Considered online if last_seen within the last 90 seconds.
 export default function PresenceTracker() {
   useEffect(() => {
-    let channel: any = null;
     let timer: any = null;
-    const run = async () => {
+    let stopped = false;
+    const beat = async () => {
       try {
         const supabase = createClient();
         const { data } = await supabase.auth.getSession();
         const email = data.session?.user?.email?.toLowerCase().trim();
-        if (!email) return;
-        channel = supabase.channel('online-users', { config: { presence: { key: email } } });
-        channel.subscribe(async (status: string) => {
-          if (status === 'SUBSCRIBED') {
-            await channel.track({ email, online_at: new Date().toISOString() });
-            // heartbeat every 25s so admin always sees live users
-            timer = setInterval(() => {
-              try { channel.track({ email, online_at: new Date().toISOString() }); } catch {}
-            }, 25000);
-          }
-        });
+        if (!email || stopped) return;
+        await supabase.from('user_presence').upsert({ email, last_seen: new Date().toISOString() });
       } catch {}
     };
-    run();
-    return () => { try { clearInterval(timer); } catch {} try { channel?.untrack(); } catch {} try { channel?.unsubscribe(); } catch {} };
+    beat();
+    timer = setInterval(beat, 30000);
+    return () => { stopped = true; try { clearInterval(timer); } catch {} };
   }, []);
   return null;
 }

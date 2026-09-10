@@ -55,41 +55,25 @@ export default function AdminPage() {
     run();
   }, []);
 
-  // Live online users via Realtime presence (who is actually online)
+  // Live online users via heartbeat table (online = seen in last 90s), refresh every 15s
   useEffect(() => {
     if (!authed) return;
-    let channel: any = null;
     let alive = true;
+    let timer: any = null;
     const run = async () => {
       try {
         const supabase = createClient();
-        channel = supabase.channel('online-users');
-        channel.on('presence', { event: 'sync' }, () => {
-          if (!alive) return;
-          const state = channel.presenceState();
-          const emails = Object.keys(state);
-          setOnline(emails.length);
-          setOnlineEmails(emails.slice(0, 20));
-        });
-        channel.on('presence', { event: 'join' }, () => {
-          if (!alive) return;
-          const state = channel.presenceState();
-          const emails = Object.keys(state);
-          setOnline(emails.length);
-          setOnlineEmails(emails.slice(0, 20));
-        });
-        channel.on('presence', { event: 'leave' }, () => {
-          if (!alive) return;
-          const state = channel.presenceState();
-          const emails = Object.keys(state);
-          setOnline(emails.length);
-          setOnlineEmails(emails.slice(0, 20));
-        });
-        channel.subscribe();
+        const cutoff = new Date(Date.now() - 90000).toISOString();
+        const { data } = await supabase.from('user_presence').select('email').gt('last_seen', cutoff).limit(50);
+        if (!alive) return;
+        const emails = ((data as any[]) || []).map(r => r.email);
+        setOnline(emails.length);
+        setOnlineEmails(emails.slice(0, 20));
       } catch {}
     };
     run();
-    return () => { alive = false; try { channel?.unsubscribe(); } catch {} };
+    timer = setInterval(run, 15000);
+    return () => { alive = false; try { clearInterval(timer); } catch {} };
   }, [authed]);
 
   const load = async (em?: string, pw?: string) => {
