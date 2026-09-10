@@ -27,8 +27,8 @@ export default function ProfilePage() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
 
-  const [name, setName] = useState('Ahmad Ali');
-  const [email, setEmail] = useState('ahmad@example.com');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [age, setAge] = useState('28');
   const [height, setHeight] = useState('178');
   const [weight, setWeight] = useState('76');
@@ -86,6 +86,31 @@ export default function ProfilePage() {
         if (data.avatar) setAvatar(data.avatar);
       } catch {}
     }
+    // Prefill from Google account (real user info)
+    const fillFromGoogle = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data } = await supabase.auth.getSession();
+        const user = data.session?.user;
+        if (!user) return;
+        const meta: any = user.user_metadata || {};
+        if (!saved) {
+          if (meta.full_name || meta.name) setName(meta.full_name || meta.name);
+          if (user.email) setEmail(user.email);
+          if (meta.avatar_url || meta.picture) setAvatar(meta.avatar_url || meta.picture);
+        } else {
+          // always sync email + avatar from Google even if profile saved
+          try {
+            const cur = JSON.parse(saved);
+            if (user.email && !cur.email?.includes('@example.com')) return;
+            if (user.email) setEmail(user.email);
+            if (!cur.avatar && (meta.avatar_url || meta.picture)) setAvatar(meta.avatar_url || meta.picture);
+          } catch {}
+        }
+      } catch {}
+    };
+    fillFromGoogle();
   }, []);
 
   const openCamera = async () => {
