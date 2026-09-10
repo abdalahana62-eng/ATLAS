@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import Navigation from '@/components/layout/Navigation';
 import UpdateChecker from '@/components/UpdateChecker';
+import PresenceTracker from '@/components/PresenceTracker';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -74,6 +75,7 @@ export default async function LocaleLayout({
             </main>
           </div>
           <UpdateChecker />
+          <PresenceTracker />
         </NextIntlClientProvider>
       </body>
     </html>

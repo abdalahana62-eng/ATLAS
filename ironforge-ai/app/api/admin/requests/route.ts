@@ -1,29 +1,14 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { OWNER_EMAIL, getPlan } from '@/lib/subscription';
+import { getPlan } from '@/lib/subscription';
+import { checkAdmin } from '../auth';
 
 export const runtime = 'nodejs';
 
-async function isAdmin(req: NextRequest): Promise<boolean> {
-  const key = req.headers.get('x-admin-email')?.toLowerCase().trim();
-  const owner = (process.env.ADMIN_EMAIL || OWNER_EMAIL).toLowerCase();
-  if (!key || key !== owner) return false;
-  // Must ALSO be logged in with Google as the owner (session cookie verified server-side)
-  try {
-    const supabase = createClient();
-    const { data } = await supabase.auth.getUser();
-    const email = data.user?.email?.toLowerCase().trim();
-    if (!email || email !== owner) return false;
-    // Google-only accounts are email-verified by definition
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// GET /api/admin/requests → list requests (pending first). Header: x-admin-email + owner Google session
+// GET /api/admin/requests → list requests (or ?id= for single WITH screenshot)
 export async function GET(req: NextRequest) {
-  if (!(await isAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  if (!(await checkAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  if (new URL(req.url).searchParams.get('id')) return getOne(req);
   try {
     const supabase = createClient();
     const status = new URL(req.url).searchParams.get('status') || 'pending';
@@ -40,9 +25,19 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// GET /api/admin/requests?id=X → single request WITH screenshot (heavy, on demand)
+async function getOne(req: NextRequest) {
+  const id = new URL(req.url).searchParams.get('id');
+  if (!id) return Response.json({ error: 'Missing id' }, { status: 400 });
+  const supabase = createClient();
+  const { data, error } = await supabase.from('payment_requests').select('*').eq('id', id).single();
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ request: data });
+}
+
 // PATCH /api/admin/requests → { id, action: 'approve' | 'reject' }
 export async function PATCH(req: NextRequest) {
-  if (!(await isAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  if (!(await checkAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
   try {
     const { id, action } = await req.json();
     if (!id || !['approve', 'reject'].includes(action)) {
