@@ -18,7 +18,6 @@
     "@capacitor/android": "^8.5.0",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
-    "@next/swc-win32-x64-msvc": "^14.2.5",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.1",
     "clsx": "^2.1.1",
