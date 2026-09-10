@@ -20,6 +20,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { ExerciseAnimation } from '@/components/workout/ExerciseAnimation';
+import WeightLogger from '@/components/workout/WeightLogger';
 import SubscriptionGate from '@/components/SubscriptionGate';
 import AuthGate from '@/components/AuthGate';
 
@@ -558,6 +559,13 @@ export default function WorkoutPage() {
                 </div>
               </div>
             </Card>
+
+            {/* Weight Logger */}
+            <WeightLogger
+              key={'log-' + currentExercise.id}
+              exercise={locale === 'ar' ? currentExercise.name_ar : currentExercise.name_en}
+              muscle={locale === 'ar' ? currentExercise.targetMuscle_ar : currentExercise.targetMuscle_en}
+            />
 
             {/* Form Tips */}
             <Card className="p-6 border-ironforge-border bg-ironforge-card">
