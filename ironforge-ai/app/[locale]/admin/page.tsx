@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
-import { ShieldCheck, Check, X, Loader2, RefreshCw, Users, Crown, Clock, Eye, Wifi } from 'lucide-react';
+import { ShieldCheck, Check, X, Loader2, RefreshCw, Users, Crown, Clock, Eye, Wifi, Mail, Send } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 
 interface Req { id: string; email: string; phone: string; plan: string; amount: number; method: string; status: string; created_at: string; }
 interface Stats { users: number; activeSubs: number; pending: number; totalRequests: number; }
+interface Sub { email: string; plan: string; expires_at: string; status: string; created_at: string; daysLeft: number; }
 
 export default function AdminPage() {
   const locale = useLocale();
@@ -24,6 +25,12 @@ export default function AdminPage() {
   const [filter, setFilter] = useState('pending');
   const [shot, setShot] = useState<string | null>(null);
   const [shotLoading, setShotLoading] = useState(false);
+  const [tab, setTab] = useState<'requests' | 'subs'>('requests');
+  const [subs, setSubs] = useState<Sub[]>([]);
+  const [mailTo, setMailTo] = useState<string | null>(null);
+  const [mailSubject, setMailSubject] = useState('');
+  const [mailBody, setMailBody] = useState('');
+  const [mailSending, setMailSending] = useState(false);
 
   const headers = () => ({
     'Content-Type': 'application/json',
@@ -81,6 +88,27 @@ export default function AdminPage() {
       setAuthed(true);
     } catch (e: any) { alert(e.message); }
     setLoading(false);
+  };
+
+  const loadSubs = async () => {
+    try {
+      const r = await fetch('/api/admin/subscribers', { headers: headers(), cache: 'no-store' });
+      const d = await r.json();
+      if (r.ok) setSubs(d.subscribers || []);
+    } catch {}
+  };
+
+  const sendMail = async () => {
+    if (!mailTo || !mailSubject.trim() || !mailBody.trim()) { alert(isAr ? 'اكتب الموضوع والرسالة' : 'Write subject and message'); return; }
+    setMailSending(true);
+    try {
+      const r = await fetch('/api/admin/send-email', { method: 'POST', headers: headers(), body: JSON.stringify({ to: mailTo, subject: mailSubject, message: mailBody }) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      alert(isAr ? 'اتبعتت ✅' : 'Sent ✅');
+      setMailTo(null); setMailSubject(''); setMailBody('');
+    } catch (e: any) { alert(e.message); }
+    setMailSending(false);
   };
 
   const viewShot = async (id: string) => {
@@ -145,6 +173,36 @@ export default function AdminPage() {
           ))}
         </div>
 
+        <div className="flex gap-2 mb-4">
+          <Button onClick={() => setTab('requests')} variant={tab === 'requests' ? 'primary' : 'outline'} className={tab === 'requests' ? 'bg-ironforge-primary text-black' : 'border-ironforge-border'}>{isAr ? 'الطلبات' : 'Requests'}</Button>
+          <Button onClick={() => { setTab('subs'); loadSubs(); }} variant={tab === 'subs' ? 'primary' : 'outline'} className={tab === 'subs' ? 'bg-ironforge-primary text-black' : 'border-ironforge-border'}>{isAr ? 'المشتركين' : 'Subscribers'}</Button>
+        </div>
+
+        {tab === 'subs' && (
+          <div className="space-y-3">
+            {subs.map(s => (
+              <Card key={s.email} className="p-4 border-ironforge-border">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="text-sm">
+                    <p className="font-bold text-ironforge-text" dir="ltr">{s.email}</p>
+                    <p className="text-ironforge-text-muted mt-1">
+                      <Badge className="bg-ironforge-primary/15 text-ironforge-primary border-ironforge-primary/30">{s.plan}</Badge>
+                      {' '}<span className={s.daysLeft <= 3 ? 'text-red-400 font-bold' : ''}>{isAr ? `متبقي ${s.daysLeft} يوم` : `${s.daysLeft}d left`}</span>
+                      {' • '}{isAr ? 'ينتهي' : 'expires'} {s.expires_at?.slice(0, 10)}
+                    </p>
+                  </div>
+                  <Button onClick={() => { setMailTo(s.email); setMailSubject(''); setMailBody(''); }} size="sm" variant="outline" className="border-ironforge-primary text-ironforge-primary">
+                    <Mail className="w-4 h-4" /> {isAr ? 'مراسلة' : 'Email'}
+                  </Button>
+                </div>
+              </Card>
+            ))}
+            {subs.length === 0 && <p className="text-center text-ironforge-text-muted">{isAr ? 'لا يوجد مشتركين' : 'No subscribers'}</p>}
+          </div>
+        )}
+
+        {tab === 'requests' && (
+        <>
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-ironforge-text">{isAr ? 'طلبات الاشتراك' : 'Requests'}</h1>
           <div className="flex gap-2">
@@ -178,7 +236,28 @@ export default function AdminPage() {
           ))}
           {!loading && reqs.length === 0 && <p className="text-center text-ironforge-text-muted">{isAr ? 'لا يوجد طلبات' : 'No requests'}</p>}
         </div>
+        </>
+        )}
       </div>
+
+      {mailTo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" onClick={() => setMailTo(null)}>
+          <div className="max-w-md w-full rounded-2xl bg-ironforge-card border border-ironforge-border p-5" onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-ironforge-text mb-1">{isAr ? 'مراسلة مشترك' : 'Email subscriber'}</h3>
+            <p className="text-xs text-ironforge-text-muted mb-3" dir="ltr">{mailTo}</p>
+            <input value={mailSubject} onChange={e => setMailSubject(e.target.value)} placeholder={isAr ? 'الموضوع' : 'Subject'}
+              className="w-full bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2 text-sm text-ironforge-text mb-2" />
+            <textarea value={mailBody} onChange={e => setMailBody(e.target.value)} rows={5} placeholder={isAr ? 'نص الرسالة...' : 'Message...'}
+              className="w-full bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2 text-sm text-ironforge-text mb-3" />
+            <div className="flex gap-2">
+              <Button onClick={sendMail} disabled={mailSending} className="flex-1 bg-ironforge-primary text-black">
+                {mailSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /> {isAr ? 'إرسال' : 'Send'}</>}
+              </Button>
+              <Button onClick={() => setMailTo(null)} variant="outline" className="border-ironforge-border">{isAr ? 'إلغاء' : 'Cancel'}</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {shot !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" onClick={() => setShot(null)}>
