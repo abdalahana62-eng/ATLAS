@@ -20,6 +20,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { ExerciseAnimation } from '@/components/workout/ExerciseAnimation';
+import SubscriptionGate from '@/components/SubscriptionGate';
 
 type ExerciseState = 'pending' | 'inProgress' | 'completed' | 'skipped';
 
@@ -319,6 +320,7 @@ export default function WorkoutPage() {
   if (!selectedSystem && !showFiveDaysChoice) {
     return (
       <div className="min-h-screen bg-ironforge-background p-4 md:p-8">
+        <SubscriptionGate />
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-ironforge-text mb-2">

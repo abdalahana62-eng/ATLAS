@@ -75,6 +75,11 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
       } else {
+        try {
+          const { saveAccount, refreshSubFromServer } = await import('@/lib/subscription');
+          saveAccount(email.toLowerCase().trim());
+          refreshSubFromServer(email.toLowerCase().trim());
+        } catch {}
         router.refresh();
         router.push('/');
       }

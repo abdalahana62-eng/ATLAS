@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
+import SubscriptionGate from '@/components/SubscriptionGate';
 
 interface ChatMessage {
   id: string;
@@ -224,6 +225,7 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-ironforge-background flex flex-col">
+      <SubscriptionGate />
       {/* Header */}
       <div className="border-b border-ironforge-border bg-ironforge-card p-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">

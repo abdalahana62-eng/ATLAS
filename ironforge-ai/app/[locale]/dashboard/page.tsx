@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/Progress';
 import { Badge } from '@/components/ui/Badge';
+import SubscriptionGate from '@/components/SubscriptionGate';
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
@@ -75,6 +76,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-ironforge-background p-4 md:p-8">
+      <SubscriptionGate />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">

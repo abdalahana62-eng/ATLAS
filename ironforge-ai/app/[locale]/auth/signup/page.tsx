@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
+import { saveAccount } from '@/lib/subscription';
 import { Dumbbell, Mail, Lock, User, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function SignupPage() {
@@ -111,6 +112,7 @@ export default function SignupPage() {
       if (error) {
         setError(error.message);
       } else {
+        saveAccount(email.toLowerCase().trim()); // start 3-day trial
         router.refresh();
         router.push('/');
       }
