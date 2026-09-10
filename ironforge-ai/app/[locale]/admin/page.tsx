@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { ShieldCheck, Check, X, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { createClient } from '@/lib/supabase/client';
 import { OWNER_EMAIL } from '@/lib/subscription';
 
 interface Req { id: string; email: string; phone: string; plan: string; amount: number; method: string; status: string; created_at: string; }
@@ -16,9 +17,31 @@ export default function AdminPage() {
   const [email, setEmail] = useState('');
   const [authed, setAuthed] = useState(false);
   const [reqs, setReqs] = useState<Req[]>([]);
-  const [shots, setShots] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('pending');
+
+  // Auto-login with your Google session — no manual email typing
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.auth.getSession();
+        const em = data.session?.user?.email?.toLowerCase().trim() || '';
+        if (em) {
+          setEmail(em);
+          if (em === OWNER_EMAIL.toLowerCase()) {
+            const r = await fetch('/api/admin/requests?status=pending', { headers: { 'x-admin-email': em }, cache: 'no-store' });
+            if (r.ok) {
+              const d = await r.json();
+              setReqs(d.requests || []);
+              setAuthed(true);
+            }
+          }
+        }
+      } catch {}
+    };
+    run();
+  }, []);
 
   const headers = () => ({ 'Content-Type': 'application/json', 'x-admin-email': email.toLowerCase().trim() });
 
@@ -32,12 +55,6 @@ export default function AdminPage() {
       setAuthed(true);
     } catch (e: any) { alert(e.message); }
     setLoading(false);
-  };
-
-  const viewShot = async (id: string) => {
-    // screenshot is stored but list API omits it for size; fetch via subscriptions table is not exposed —
-    // MVP: screenshots viewable in Supabase dashboard. Show note.
-    setShots(s => ({ ...s, [id]: 'supabase' }));
   };
 
   const act = async (id: string, action: 'approve' | 'reject') => {
@@ -57,12 +74,14 @@ export default function AdminPage() {
         <Card className="p-8 max-w-sm w-full text-center">
           <ShieldCheck className="w-12 h-12 text-ironforge-primary mx-auto mb-4" />
           <h1 className="text-xl font-bold text-ironforge-text mb-4">{isAr ? 'لوحة الإدارة' : 'Admin'}</h1>
+          <p className="text-sm text-ironforge-text-muted mb-3">
+            {isAr ? 'ادخل بحساب جوجل المالك أولاً من صفحة الدخول' : 'Sign in with the owner Google account first'}
+          </p>
           <input value={email} onChange={e => setEmail(e.target.value)} placeholder="admin email" dir="ltr"
             className="w-full bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2.5 text-ironforge-text mb-3" />
           <Button onClick={load} disabled={loading} className="w-full bg-ironforge-primary text-black">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAr ? 'دخول' : 'Enter')}
           </Button>
-          <p className="text-xs text-ironforge-text-muted mt-3">Owner: {OWNER_EMAIL}</p>
         </Card>
       </div>
     );

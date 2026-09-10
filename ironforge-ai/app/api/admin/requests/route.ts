@@ -4,15 +4,26 @@ import { OWNER_EMAIL, getPlan } from '@/lib/subscription';
 
 export const runtime = 'nodejs';
 
-function isAdmin(req: NextRequest): boolean {
+async function isAdmin(req: NextRequest): Promise<boolean> {
   const key = req.headers.get('x-admin-email')?.toLowerCase().trim();
-  const secret = (process.env.ADMIN_EMAIL || OWNER_EMAIL).toLowerCase();
-  return !!key && key === secret;
+  const owner = (process.env.ADMIN_EMAIL || OWNER_EMAIL).toLowerCase();
+  if (!key || key !== owner) return false;
+  // Must ALSO be logged in with Google as the owner (session cookie verified server-side)
+  try {
+    const supabase = createClient();
+    const { data } = await supabase.auth.getUser();
+    const email = data.user?.email?.toLowerCase().trim();
+    if (!email || email !== owner) return false;
+    // Google-only accounts are email-verified by definition
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-// GET /api/admin/requests → list requests (pending first). Header: x-admin-email
+// GET /api/admin/requests → list requests (pending first). Header: x-admin-email + owner Google session
 export async function GET(req: NextRequest) {
-  if (!isAdmin(req)) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  if (!(await isAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
   try {
     const supabase = createClient();
     const status = new URL(req.url).searchParams.get('status') || 'pending';
@@ -31,7 +42,7 @@ export async function GET(req: NextRequest) {
 
 // PATCH /api/admin/requests → { id, action: 'approve' | 'reject' }
 export async function PATCH(req: NextRequest) {
-  if (!isAdmin(req)) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  if (!(await isAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
   try {
     const { id, action } = await req.json();
     if (!id || !['approve', 'reject'].includes(action)) {
