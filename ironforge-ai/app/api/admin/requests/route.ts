@@ -52,7 +52,8 @@ export async function PATCH(req: NextRequest) {
     if (e1 || !pr) return Response.json({ error: 'Not found' }, { status: 404 });
 
     const status = action === 'approve' ? 'approved' : 'rejected';
-    await supabase.from('payment_requests').update({ status, reviewed_at: new Date().toISOString() }).eq('id', id);
+    const { error: e2 } = await supabase.from('payment_requests').update({ status, reviewed_at: new Date().toISOString() }).eq('id', id);
+    if (e2) return Response.json({ error: 'Update failed: ' + e2.message }, { status: 500 });
 
     let expiresAt: string | null = null;
     if (action === 'approve') {
@@ -61,7 +62,8 @@ export async function PATCH(req: NextRequest) {
       const { data: existing } = await supabase.from('subscriptions').select('expires_at').eq('email', pr.email).maybeSingle();
       const base = existing && new Date(existing.expires_at).getTime() > Date.now() ? new Date(existing.expires_at).getTime() : Date.now();
       expiresAt = new Date(base + plan.days * 86400000).toISOString();
-      await supabase.from('subscriptions').upsert({ email: pr.email, plan: pr.plan, expires_at: expiresAt, status: 'active', updated_at: new Date().toISOString() });
+      const { error: e3 } = await supabase.from('subscriptions').upsert({ email: pr.email, plan: pr.plan, expires_at: expiresAt, status: 'active', updated_at: new Date().toISOString() });
+      if (e3) return Response.json({ error: 'Activate failed: ' + e3.message }, { status: 500 });
     }
     return Response.json({ status, expiresAt });
   } catch (e: any) {
