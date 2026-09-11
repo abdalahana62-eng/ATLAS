@@ -23,7 +23,7 @@ STRICT RULES (no exceptions):
 
     const completion = await createChatCompletion(
       [{ role: 'system', content: sys }, { role: 'user', content: message }],
-      { temperature: 0.2, maxTokens: 700, model: 'llama-3.3-70b-versatile' }
+      { temperature: 0.2, maxTokens: 700, model: 'openai/gpt-oss-120b' }
     );
     const answer = completion.choices[0]?.message?.content?.trim() ?? '';
     if (!answer) {
