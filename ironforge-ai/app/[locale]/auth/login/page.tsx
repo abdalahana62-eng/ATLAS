@@ -30,6 +30,15 @@ function LoginInner() {
   // على رابط وهمي (example.supabase.co) ويدي "لا يمكن الوصول للموقع".
   const missingBackend = !process.env.NEXT_PUBLIC_SUPABASE_URL;
 
+  const isCapacitorApp = () => {
+    try {
+      const w = window as any;
+      return !!(w.Capacitor?.isNativePlatform?.() || w.Capacitor?.isNative);
+    } catch {
+      return false;
+    }
+  };
+
   // Already logged in → go straight to dashboard (never show signup again)
   useEffect(() => {
     const run = async () => {
@@ -49,6 +58,13 @@ function LoginInner() {
     setLoading(true);
     setError(null);
     try {
+      // Inside the APK the OAuth flow must run in the system browser and
+      // return via deep link — otherwise the session ends up in the external
+      // browser and the app itself stays logged out.
+      if (isCapacitorApp()) {
+        await signInWithGoogleInApp();
+        return;
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -58,6 +74,92 @@ function LoginInner() {
       if (error) setError(error.message);
     } catch {
       setError(isAr ? 'حدث خطأ' : 'Something went wrong');
+      setLoading(false);
+    }
+  };
+
+  const signInWithGoogleInApp = async () => {
+    try {
+      const [{ Browser }, { App }] = await Promise.all([
+        import('@capacitor/browser'),
+        import('@capacitor/app'),
+      ]);
+      let finished = false;
+      const cleanup = async (sub: { remove: () => void }) => {
+        try { sub.remove(); } catch {}
+        try { await Browser.close(); } catch {}
+      };
+      const fail = async (sub: { remove: () => void }, msg: string) => {
+        if (finished) return;
+        finished = true;
+        await cleanup(sub);
+        setError(msg);
+        setLoading(false);
+      };
+      const sub = await App.addListener('appUrlOpen', async ({ url }: { url: string }) => {
+        if (finished) return;
+        try {
+          const u = new URL(url);
+          const code = u.searchParams.get('code');
+          const oauthError = u.searchParams.get('error');
+          if (oauthError) {
+            await fail(sub, u.searchParams.get('error_description') || oauthError);
+            return;
+          }
+          if (!code) {
+            await fail(sub, isAr ? 'رجعنا للتطبيق من غير كود دخول، حاول تاني' : 'No auth code returned, try again');
+            return;
+          }
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            const raw = error.message || '';
+            const msg = /pkce|code verifier|already used|expired/i.test(raw)
+              ? 'انتهت صلاحية محاولة الدخول، دوس الدخول بحساب جوجل مرة واحدة جديدة'
+              : raw;
+            await fail(sub, msg);
+            return;
+          }
+          finished = true;
+          await cleanup(sub);
+          try {
+            const { data } = await supabase.auth.getSession();
+            const em = data.session?.user?.email?.toLowerCase().trim();
+            if (em) {
+              const { saveAccount, syncTrialFromServer, refreshSubFromServer } = await import('@/lib/subscription');
+              saveAccount(em);
+              syncTrialFromServer(em).catch(() => {});
+              refreshSubFromServer(em);
+            }
+          } catch {}
+          window.location.href = `/${locale}/onboarding`;
+        } catch (e: any) {
+          await fail(sub, e?.message || (isAr ? 'حدث خطأ' : 'Something went wrong'));
+        }
+      });
+      // User closed the browser without finishing → reset the button
+      await Browser.addListener('browserFinished', () => {
+        setTimeout(() => {
+          if (!finished) {
+            finished = true;
+            try { sub.remove(); } catch {}
+            setLoading(false);
+          }
+        }, 1500);
+      });
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'com.atlas.ai://auth/callback',
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error || !data?.url) {
+        await fail(sub, error?.message || (isAr ? 'حدث خطأ' : 'Something went wrong'));
+        return;
+      }
+      await Browser.open({ url: data.url });
+    } catch (e: any) {
+      setError(e?.message || (isAr ? 'حدث خطأ' : 'Something went wrong'));
       setLoading(false);
     }
   };
