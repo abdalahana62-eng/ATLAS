@@ -153,13 +153,26 @@ export default function NutritionPage() {
   const slots = buildSlots(targetMacros, stats.country);
   const meals = slots.map((s, idx) => s.meals[chosen[idx] ?? 0]);
 
-  const handleChat = async () => {
-    if (!chatInput.trim()) return;
-    setChatLoading(true); setChatAns(null);
+  const [chatOptions, setChatOptions] = useState<string[]>([]);
+
+  const parseOptions = (text: string): { clean: string; opts: string[] } => {
+    const lines = text.split('\n');
+    const opts = lines.filter(l => l.trim().startsWith('>> ')).map(l => l.trim().slice(3).trim()).slice(0, 3);
+    const clean = lines.filter(l => !l.trim().startsWith('>> ')).join('\n').trim();
+    return { clean, opts };
+  };
+
+  const handleChat = async (preset?: string) => {
+    const msg = (preset ?? chatInput).trim();
+    if (!msg) return;
+    setChatLoading(true); setChatAns(null); setChatOptions([]);
     try {
-      const res = await fetch('/api/nutrition/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: chatInput, stats, targetMacros, country: stats.country, logged: { calories: totalLoggedCalories, protein: totalLoggedP, carbs: totalLoggedC, fats: totalLoggedF } }) });
+      const res = await fetch('/api/nutrition/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: msg, stats, targetMacros, country: stats.country, logged: { calories: totalLoggedCalories, protein: totalLoggedP, carbs: totalLoggedC, fats: totalLoggedF } }) });
       const data = await res.json();
-      setChatAns(data.answer || data.error || '—');
+      const raw = data.answer || data.error || '—';
+      const { clean, opts } = parseOptions(raw);
+      setChatAns(clean);
+      setChatOptions(opts);
     } catch { setChatAns(locale==='ar' ? 'حدث خطأ' : 'Error'); }
     setChatLoading(false);
   };
@@ -362,10 +375,20 @@ export default function NutritionPage() {
               <h3 className="font-bold text-ironforge-text mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-ironforge-primary" />{locale==='ar' ? 'اسأل الشات: هاكل إيه النهاردة؟' : 'Ask Chat: What should I eat today?'}</h3>
               <p className="text-xs text-ironforge-text-muted mb-3">{locale==='ar' ? 'اكتب اللي عندك في التلاجة أو نفسك في إيه، والبوت يحسبلك الجرامات ويقولك تتجنب إيه حسب سعراتك' : 'Tell what you have at home, bot calculates grams & what to avoid'}</p>
               <div className="flex gap-2">
-                <input value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={locale==='ar' ? 'مثال: عندي بيض وجبنة قريش' : 'e.g. I have eggs and cottage cheese'} className="flex-1 bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2 text-sm text-ironforge-text" />
-                <Button onClick={handleChat} disabled={chatLoading} className="bg-ironforge-primary text-black">{chatLoading ? '...' : locale==='ar'?'اسأل':'Ask'}</Button>
+                <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') handleChat(); }} placeholder={locale==='ar' ? 'مثال: هاكل كشري' : 'e.g. I will eat koshari'} className="flex-1 bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2 text-sm text-ironforge-text" />
+                <Button onClick={() => handleChat()} disabled={chatLoading} className="bg-ironforge-primary text-black">{chatLoading ? '...' : locale==='ar'?'اسأل':'Ask'}</Button>
               </div>
               {chatAns && <div className="mt-3 p-3 rounded-lg bg-ironforge-background text-sm text-ironforge-text whitespace-pre-wrap">{chatAns}</div>}
+              {chatOptions.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {chatOptions.map((o, i) => (
+                    <button key={i} onClick={() => { setChatInput(o); handleChat(o); }} disabled={chatLoading}
+                      className="rounded-full border border-ironforge-primary/50 bg-ironforge-primary/10 px-4 py-1.5 text-sm font-bold text-ironforge-primary hover:bg-ironforge-primary/20 transition">
+                      {o}
+                    </button>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
 
