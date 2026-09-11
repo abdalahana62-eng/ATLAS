@@ -52,7 +52,7 @@ ${wantsPlan
       console.error('Empty answer from model', { model: process.env.OPENAI_MODEL, message });
       return Response.json({ answer: 'عذراً، حاول مرة أخرى بصياغة مختلفة. مثال: عندي بيض ولبنة، كم جرام آكل؟' });
     }
-    return Response.json({ answer });
+    return Response.json({ answer, v: 'plan-mode-1' });
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
   }
