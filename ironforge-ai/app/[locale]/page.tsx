@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import TodayPlanCard from '@/components/TodayPlanCard';
+import AuthCodeCatcher from '@/components/AuthCodeCatcher';
 
 export default async function HomePage({
   params: { locale }
@@ -129,6 +130,7 @@ export default async function HomePage({
 
   return (
     <main className="relative overflow-hidden min-h-screen bg-[#05070b] text-white">
+      <AuthCodeCatcher />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(151,210,59,0.22),_transparent_30%),radial-gradient(circle_at_right,_rgba(94,234,212,0.14),_transparent_25%)]" />
 
