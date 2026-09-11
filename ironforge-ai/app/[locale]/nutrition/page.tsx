@@ -155,6 +155,7 @@ export default function NutritionPage() {
   const meals = slots.map((s, idx) => s.meals[chosen[idx] ?? 0]);
 
   const [chatOptions, setChatOptions] = useState<string[]>([]);
+  const [chatUpgrade, setChatUpgrade] = useState(false);
 
   const parseOptions = (text: string): { clean: string; opts: string[] } => {
     const lines = text.split('\n');
@@ -166,7 +167,7 @@ export default function NutritionPage() {
   const handleChat = async (preset?: string) => {
     const msg = (preset ?? chatInput).trim();
     if (!msg) return;
-    setChatLoading(true); setChatAns(null); setChatOptions([]);
+    setChatLoading(true); setChatAns(null); setChatOptions([]); setChatUpgrade(false);
     try {
       const res = await fetch('/api/nutrition/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: msg, stats, targetMacros, country: stats.country, logged: { calories: totalLoggedCalories, protein: totalLoggedP, carbs: totalLoggedC, fats: totalLoggedF } }) });
       const data = await res.json();
@@ -174,6 +175,7 @@ export default function NutritionPage() {
       const { clean, opts } = parseOptions(raw);
       setChatAns(clean);
       setChatOptions(opts);
+      if (data.upgrade) setChatUpgrade(true);
     } catch { setChatAns(locale==='ar' ? 'حدث خطأ' : 'Error'); }
     setChatLoading(false);
   };
@@ -393,6 +395,12 @@ export default function NutritionPage() {
                 <Button onClick={() => handleChat()} disabled={chatLoading} className="bg-ironforge-primary text-black">{chatLoading ? '...' : locale==='ar'?'اسأل':'Ask'}</Button>
               </div>
               {chatAns && <div className="mt-3 p-4 rounded-lg bg-ironforge-background border border-ironforge-border leading-8"><ChatMessageBody content={chatAns} /></div>}
+              {chatUpgrade && (
+                <a href={locale === 'ar' ? '/pricing' : '/en/pricing'}
+                  className="mt-2 block text-center rounded-xl bg-ironforge-primary text-black font-bold py-2.5 hover:bg-ironforge-primary-dark transition">
+                  {locale === 'ar' ? 'شوف خطط الاشتراك' : 'See subscription plans'}
+                </a>
+              )}
               {chatOptions.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {chatOptions.map((o, i) => (

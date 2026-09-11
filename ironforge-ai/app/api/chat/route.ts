@@ -3,6 +3,47 @@ import { systemCoachPrompt } from '@/lib/ai/prompts';
 import { buildKnowledgeContext } from '@/lib/knowledgeSearch';
 import { buildDishContext } from '@/lib/data/dishNutrition';
 import { createStreamingChatCompletion, type ChatMessage } from '@/lib/ai/openai';
+import { trackAIUsage, isQuotaError } from '@/lib/ai/usage';
+
+// Friendly upsell shown when the free Groq quota runs out for the day.
+// Keep it human + beginner-simple, and link to the real plans page.
+function quotaUpsell(locale: string): string {
+  const plansPath = locale === 'en' ? '/en/pricing' : '/pricing';
+  if (locale === 'en') {
+    return `## Oops — today's free replies are done 😅
+
+- Your coach needs a quick rest, but your training doesn't stop
+- **Upgrade your subscription** for longer, unlimited daily chats
+
+[See subscription plans](${plansPath})`;
+  }
+  return `## خلصت رسائل النهاردة المجانية يا بطل 😅
+
+- المدرب محتاج يريّح شوية، لكن تمرينك ميقفش
+- **رقي اشتراكك** عشان محادثة أطول بدون حدود يومية
+
+[شوف خطط الاشتراك](${plansPath})`;
+}
+
+function sseResponse(fullText: string) {
+  const encoder = new TextEncoder();
+  const readable = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: fullText })}\n\n`));
+      controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+      controller.close();
+    },
+  });
+  return new Response(readable, {
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+      ...corsHeaders,
+    },
+  });
+}
 
 const EXPERT_PROTOCOL = `
 === EXPERT DIAGNOSTIC PROTOCOL — human-first version (follow strictly) ===
@@ -62,10 +103,21 @@ export async function POST(req: NextRequest) {
       })),
     ];
 
-    const stream = await createStreamingChatCompletion(chatMessages, {
-      temperature: 0.5,
-      maxTokens: 2000,
-    });
+    let stream;
+    try {
+      stream = await createStreamingChatCompletion(chatMessages, {
+        temperature: 0.5,
+        maxTokens: 2000,
+      });
+    } catch (e: any) {
+      // Free Groq quota exhausted on ALL fallback models → upsell, don't crash.
+      if (isQuotaError(e)) {
+        console.warn('[ATLAS Chat] quota exhausted, sending upsell');
+        return sseResponse(quotaUpsell(locale || 'ar'));
+      }
+      throw e;
+    }
+    trackAIUsage('chat');
 
     const encoder = new TextEncoder();
 

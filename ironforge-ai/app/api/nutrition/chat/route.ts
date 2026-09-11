@@ -1,9 +1,20 @@
 import { NextRequest } from 'next/server';
 import { createChatCompletion } from '@/lib/ai/openai';
+import { trackAIUsage, isQuotaError } from '@/lib/ai/usage';
 import { buildKnowledgeContext } from '@/lib/knowledgeSearch';
 import { buildDishContext } from '@/lib/data/dishNutrition';
 
 export const runtime = 'nodejs';
+
+function quotaUpsell(isAr: boolean): { answer: string; upgrade: boolean } {
+  const plansPath = isAr ? '/pricing' : '/en/pricing';
+  return {
+    upgrade: true,
+    answer: isAr
+      ? `## خلصت رسائل النهاردة المجانية يا بطل 😅\n\n- رقي اشتراكك عشان تسأل براحتك بدون حدود يومية\n\n[شوف خطط الاشتراك](${plansPath})`
+      : `## Today's free replies are done 😅\n\n- Upgrade your subscription to ask freely with no daily limits\n\n[See subscription plans](${plansPath})`,
+  };
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,10 +57,20 @@ ${wantsPlan
   ? `3. FULL-DAY PLAN MODE: the user wants a complete eating plan${planKcal ? ` of ${planKcal} kcal` : ''}. Give 4-5 meals (فطار/غدا/عشا/2 سناك) with EXACT grams each computed from verified values, Egyptian/Saudi dishes, totals summing to target ±5%. Structure per meal: ## وجبة + grams in **bold** + (kcal|P/C/F) on one line. Keep each meal 2 lines max. End with daily totals + 📚 المصادر + 2 quick replies.`
   : '3. Max 120 words unless user asks for details.'}${kb}${dishes}`;
 
-    const completion = await createChatCompletion(
-      [{ role: 'system', content: sys }, { role: 'user', content: message }],
-      { temperature: 0.2, maxTokens: wantsPlan ? 1500 : 700, model: 'openai/gpt-oss-120b' }
-    );
+    let completion;
+    try {
+      completion = await createChatCompletion(
+        [{ role: 'system', content: sys }, { role: 'user', content: message }],
+        { temperature: 0.2, maxTokens: wantsPlan ? 1500 : 700, model: 'openai/gpt-oss-120b' }
+      );
+    } catch (err: any) {
+      if (isQuotaError(err)) {
+        console.warn('[ATLAS Nutrition] quota exhausted, sending upsell');
+        return Response.json(quotaUpsell(isAr));
+      }
+      throw err;
+    }
+    trackAIUsage('nutrition');
     const answer = completion.choices[0]?.message?.content?.trim() ?? '';
     if (!answer) {
       console.error('Empty answer from model', { model: process.env.OPENAI_MODEL, message });

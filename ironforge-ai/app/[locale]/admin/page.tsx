@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
-import { ShieldCheck, Check, X, Loader2, RefreshCw, Users, Crown, Clock, Eye, Wifi, Mail, Send, Lightbulb, Trash2 } from 'lucide-react';
+import { ShieldCheck, Check, X, Loader2, RefreshCw, Users, Crown, Clock, Eye, Wifi, Mail, Send, Lightbulb, Trash2, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { createClient } from '@/lib/supabase/client';
 
 interface Req { id: string; email: string; phone: string; plan: string; amount: number; method: string; status: string; created_at: string; }
-interface Stats { users: number; activeSubs: number; pending: number; totalRequests: number; }
+interface Stats { users: number; activeSubs: number; pending: number; totalRequests: number; aiToday?: number; aiYesterday?: number; aiWeek?: number; }
 interface Sub { email: string; plan: string; expires_at: string; status: string; created_at: string; daysLeft: number; }
 interface Sug { id: string; email: string; message: string; status: string; created_at: string; }
 
@@ -177,16 +177,27 @@ export default function AdminPage() {
   }
 
   const cards = [
-    { icon: Wifi, label: isAr ? 'متصل الآن 🟢' : 'Online now', value: online, live: true, key: 'online' },
-    { icon: Users, label: isAr ? 'مسجلين' : 'Registered', value: stats?.users ?? '—', key: '' },
-    { icon: Crown, label: isAr ? 'مشتركين فعّالين' : 'Active subs', value: stats?.activeSubs ?? '—', key: '' },
-    { icon: Clock, label: isAr ? 'طلبات معلقة' : 'Pending', value: stats?.pending ?? '—', key: '' },
+    { icon: Wifi, label: isAr ? 'متصل الآن 🟢' : 'Online now', value: online, live: true, key: 'online', sub: '' },
+    { icon: Users, label: isAr ? 'مسجلين' : 'Registered', value: stats?.users ?? '—', key: '', sub: '' },
+    { icon: Crown, label: isAr ? 'مشتركين فعّالين' : 'Active subs', value: stats?.activeSubs ?? '—', key: '', sub: '' },
+    { icon: Clock, label: isAr ? 'طلبات معلقة' : 'Pending', value: stats?.pending ?? '—', key: '', sub: '' },
+    {
+      icon: Bot,
+      label: isAr ? 'رسائل AI النهاردة' : 'AI msgs today',
+      value: stats ? (stats.aiToday ?? 0) : '—',
+      key: '',
+      sub: stats
+        ? isAr
+          ? `امبارح ${stats.aiYesterday ?? 0} • الأسبوع ${stats.aiWeek ?? 0}`
+          : `yday ${stats.aiYesterday ?? 0} • wk ${stats.aiWeek ?? 0}`
+        : '',
+    },
   ];
 
   return (
     <div className="min-h-screen bg-ironforge-background p-6">
       <div className="max-w-3xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 mb-3">
           {cards.map(c => (
             <Card
               key={c.label}
@@ -194,8 +205,9 @@ export default function AdminPage() {
               className={`p-4 border-ironforge-border text-center ${c.key === 'online' ? 'cursor-pointer hover:border-ironforge-primary' : ''}`}
             >
               <c.icon className="w-5 h-5 text-ironforge-primary mx-auto mb-1" />
-              <p className="text-2xl font-black text-ironforge-text">{c.value}</p>
+              <p className="text-2xl font-black tabular-nums text-ironforge-text">{c.value}</p>
               <p className="text-xs text-ironforge-text-muted">{c.label}</p>
+              {c.sub ? <p className="text-[10px] tabular-nums text-ironforge-text-muted mt-1">{c.sub}</p> : null}
               {c.key === 'online' && <p className="text-[10px] text-ironforge-primary mt-1">{isAr ? 'دوس لعرض المتصلين' : 'Tap to view'}</p>}
             </Card>
           ))}

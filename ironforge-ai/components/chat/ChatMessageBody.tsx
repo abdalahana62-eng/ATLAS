@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
+function renderBold(text: string, keyPrefix: string): React.ReactNode[] {
   // **bold** → <strong>, keep it simple and safe (no dangerouslySetInnerHTML)
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((p, i) => {
@@ -14,6 +14,26 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
       );
     }
     return <React.Fragment key={`${keyPrefix}-${i}`}>{p}</React.Fragment>;
+  });
+}
+
+function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
+  // [label](href) → clickable link (used for the subscription upsell)
+  const linkParts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
+  return linkParts.map((lp, li) => {
+    const m = lp.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (m) {
+      return (
+        <a
+          key={`${keyPrefix}-a-${li}`}
+          href={m[2]}
+          className="font-bold text-ironforge-primary underline underline-offset-4 decoration-ironforge-primary/60 hover:decoration-ironforge-primary"
+        >
+          {renderBold(m[1], `${keyPrefix}-a-${li}`)}
+        </a>
+      );
+    }
+    return <React.Fragment key={`${keyPrefix}-${li}`}>{renderBold(lp, `${keyPrefix}-${li}`)}</React.Fragment>;
   });
 }
 
