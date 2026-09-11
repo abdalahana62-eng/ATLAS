@@ -113,6 +113,15 @@ export default function ChatPage() {
         body: JSON.stringify({
           messages: [...messages, userMessage],
           locale,
+          profile: (() => {
+            try {
+              return {
+                stats: JSON.parse(localStorage.getItem('atlas-stats') || localStorage.getItem('ironforge-stats') || 'null'),
+                account: JSON.parse(localStorage.getItem('atlas-account') || 'null'),
+                activePlan: JSON.parse(localStorage.getItem('atlas-active-plan') || 'null'),
+              };
+            } catch { return null; }
+          })(),
         }),
       });
 
