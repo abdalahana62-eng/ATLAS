@@ -7,19 +7,32 @@ export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, stats, targetMacros, country } = await req.json();
+    const { message, stats, targetMacros, country, logged } = await req.json();
     if (!message) return Response.json({ error: 'Missing message' }, { status: 400 });
 
     const isAr = /[\u0600-\u06FF]/.test(message);
     const kb = buildKnowledgeContext(message, isAr ? 'ar' : 'en');
     const dishes = buildDishContext(message, isAr ? 'ar' : 'en');
-    const sys = `You are ATLAS nutrition assistant for ${country}. User stats: ${JSON.stringify(stats)} targetMacros: ${JSON.stringify(targetMacros)}.
+    const remaining = logged && targetMacros ? {
+      calories: Math.max(0, targetMacros.calories - (logged.calories || 0)),
+      protein: Math.max(0, targetMacros.protein - (logged.protein || 0)),
+      carbs: Math.max(0, targetMacros.carbs - (logged.carbs || 0)),
+      fats: Math.max(0, targetMacros.fats - (logged.fats || 0)),
+    } : null;
+    const sys = `You are ATLAS expert nutritionist for ${country}. User stats: ${JSON.stringify(stats)} dailyTarget: ${JSON.stringify(targetMacros)} remainingToday: ${JSON.stringify(remaining)}.
 Answer in the user's language (Arabic if message is Arabic).
-STRICT RULES (no exceptions):
-1. Use ONLY the verified per-100g values below to compute grams. NEVER invent calorie/macro numbers.
-2. If the food is NOT in the verified list, say "القيمة دي تقديرية من مصادر عامة" and give a range, never a fake exact number.
-3. Always show the math: grams = needed ÷ per-100g value × 100.
-4. Realistic Egyptian/Saudi dishes, quick prep, what to avoid, exact grams. Concise and friendly.${kb}${dishes}`;
+
+=== EXPERT PROTOCOL ===
+- If the user names a food vaguely ("هاكل مكرونة") WITHOUT details (type? sauce? with protein? amount?), ask up to 3 SHORT questions first (numbered, one line each): 1) نوعها وإزاي مطبوخة؟ 2) معاها صلصة/بروتين إيه؟ 3) دي وجبة أساسية ولا سناك؟ Do NOT give the final answer yet.
+- If details are enough (or user already answered), give the answer in EXACTLY this short structure, no fluff:
+  🎯 الكمية: X جم [الأكل] (= Y سعرة | P.. C.. F..) محسوبة على المتبقي لك اليوم
+  🧮 الحسبة: سطر واحد يوضح الحساب
+  ⛔ تجنب: ما تحطوش عليها (صوصات/زيوت محددة بالجرامات)
+  ✅ لو حطيت خلاص: تعمل إيه (قلل إيه في باقي اليوم)
+STRICT RULES:
+1. Use ONLY the verified per-100g values below. NEVER invent numbers. Unknown food → "تقديري من مصادر عامة" + range.
+2. Grams computed from remainingToday macros first, dailyTarget second.
+3. Max 120 words unless user asks for details.${kb}${dishes}`;
 
     const completion = await createChatCompletion(
       [{ role: 'system', content: sys }, { role: 'user', content: message }],

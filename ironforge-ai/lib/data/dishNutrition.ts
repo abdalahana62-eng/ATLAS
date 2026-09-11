@@ -58,6 +58,15 @@ export const DISH_DB: Array<{ keys: string[]; label_ar: string; per100: DishInfo
   { keys: ['saleeg', 'سليق'], label_ar: 'سليق', per100: d(140, 9, 18, 3) },
   { keys: ['jarish', 'jareesh', 'جريش'], label_ar: 'جريش', per100: d(110, 6, 20, 1.5) },
   { keys: ['lamb', 'لحم غنم', 'لحم ضأن'], label_ar: 'لحم غنم', per100: d(250, 22, 0, 17) },
+  // ---- Pasta & sauces & extras ----
+  { keys: ['مكرونة', 'معكرونة', 'باستا', 'pasta', 'spaghetti', 'مكرونه'], label_ar: 'مكرونة مسلوقة', per100: d(131, 5, 25, 1) },
+  { keys: ['بشاميل', 'bechamel', 'باشميل'], label_ar: 'بشاميل', per100: d(140, 4, 10, 9) },
+  { keys: ['صلصة طماطم', 'tomato sauce', 'صوص أحمر', 'صلصه'], label_ar: 'صلصة طماطم', per100: d(35, 1.5, 7, 0.5) },
+  { keys: ['بطاطس مقلية', 'fries', 'بطاطس محمرة', 'شيبس'], label_ar: 'بطاطس مقلية', per100: d(320, 3.5, 36, 17) },
+  { keys: ['بطاطس مسلوقة', 'boiled potato', 'بطاطس'], label_ar: 'بطاطس مسلوقة', per100: d(87, 1.9, 20, 0.1) },
+  { keys: ['زيت', 'oil'], label_ar: 'زيت (المعلقة 10جم ≈ 88 سعرة)', per100: d(884, 0, 0, 100) },
+  { keys: ['زبدة', 'butter', 'سمن'], label_ar: 'زبدة', per100: d(717, 0.9, 0.1, 81) },
+  { keys: ['جبنة موزاريلا', 'mozzarella', 'موزاريلا'], label_ar: 'موزاريلا', per100: d(280, 20, 3, 18) },
 ];
 
 function norm(s: string): string {

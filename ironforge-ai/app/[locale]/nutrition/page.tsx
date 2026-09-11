@@ -157,7 +157,7 @@ export default function NutritionPage() {
     if (!chatInput.trim()) return;
     setChatLoading(true); setChatAns(null);
     try {
-      const res = await fetch('/api/nutrition/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: chatInput, stats, targetMacros, country: stats.country }) });
+      const res = await fetch('/api/nutrition/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: chatInput, stats, targetMacros, country: stats.country, logged: { calories: totalLoggedCalories, protein: totalLoggedP, carbs: totalLoggedC, fats: totalLoggedF } }) });
       const data = await res.json();
       setChatAns(data.answer || data.error || '—');
     } catch { setChatAns(locale==='ar' ? 'حدث خطأ' : 'Error'); }
