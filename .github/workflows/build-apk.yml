@@ -56,6 +56,9 @@ jobs:
         run: |
           npx cap add android || true
           npx cap sync android
+      - name: Patch Android deep link
+        working-directory: ironforge-ai
+        run: node scripts/patch-android-manifest.js
       - name: Apply custom icon
         working-directory: ironforge-ai
         run: |
