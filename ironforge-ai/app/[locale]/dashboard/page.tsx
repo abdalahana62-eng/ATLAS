@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { usePathname, useRouter } from '@/i18n/routing';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/routing';
 import {
   Dumbbell,
   Flame,
@@ -265,9 +265,8 @@ function Skeleton() {
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
-  const pathname = usePathname();
   const router = useRouter();
-  const locale = pathname.split('/')[1] || 'ar';
+  const locale = useLocale();
   const isRTL = locale !== 'en';
   const ar = isRTL;
 
