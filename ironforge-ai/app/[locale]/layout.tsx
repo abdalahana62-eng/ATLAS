@@ -22,10 +22,29 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'Home' });
+  const isAr = locale === 'ar';
+  const title = t('title');
+  const description = t('description');
+  const canonicalPath = locale === 'ar' ? '/' : '/en';
 
   return {
-    title: t('title'),
-    description: t('description'),
+    title: { default: title, template: `%s | ATLAS` },
+    description,
+    metadataBase: new URL('https://atlasfit.pro'),
+    alternates: {
+      canonical: canonicalPath,
+      languages: { ar: '/', en: '/en' },
+    },
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: 'website',
+      siteName: 'ATLAS AI Coach',
+      locale: isAr ? 'ar_EG' : 'en_US',
+      url: canonicalPath,
+      title,
+      description,
+    },
+    twitter: { card: 'summary', title, description },
     manifest: '/manifest.json',
     appleWebApp: {
       capable: true,

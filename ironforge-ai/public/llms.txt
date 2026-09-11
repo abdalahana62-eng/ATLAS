@@ -1,0 +1,33 @@
+# ATLAS AI Coach — atlasfit.pro
+
+ATLAS is an Arabic-first AI bodybuilding coach (web app + Android app) for beginners
+in Egypt and Saudi Arabia. It explains fitness and nutrition in simple Egyptian Arabic,
+like a human personal trainer.
+
+## What it does
+- AI chat coach (Arabic/English) for training and nutrition questions
+- Gym programs: 2, 3, 4 and 5-day systems, each with exercise videos
+- Home workout program (no equipment)
+- Calorie (TDEE) and macro calculator (Mifflin-St Jeor)
+- Egyptian and Saudi meal plans in exact grams (koshari, ful, taameya, shakshuka, kabsa)
+  with 7 choices per meal
+- Progress tracking: weight curve, training streaks, levels, weekly activity
+
+## Pricing (EGP)
+- 3-day free trial, no card required
+- Monthly 299 / Quarterly 599 / Yearly 2000
+- Payment: Instapay or Vodafone Cash
+
+## Key pages
+- Home: https://atlasfit.pro/
+- Plans: https://atlasfit.pro/pricing
+- Sign up: https://atlasfit.pro/auth/signup
+- AI chat: https://atlasfit.pro/chat (login required)
+- Nutrition: https://atlasfit.pro/nutrition (login required)
+
+## Who it is for
+Beginners (0–24 months of training) who want a simple Arabic coach, exact numbers
+(grams, sets, reps), and Egyptian food — not generic foreign meal plans.
+
+## Contact
+Owner: ABDALLAH SHENOO — abdalahana555@gmail.com
