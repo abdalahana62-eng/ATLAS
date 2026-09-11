@@ -337,6 +337,19 @@ export default function DashboardPage() {
     };
   }, [logs, meas, stats]);
 
+  // Gamification level from REAL all-time training days.
+  // NOTE: this useMemo MUST stay before any early return (Rules of Hooks) —
+  // otherwise React throws "rendered more hooks" and the page crashes.
+  const level = useMemo(() => {
+    const d = data.totalDays;
+    if (d >= 80) return { name: ar ? 'أسطورة' : 'Legend', Icon: Trophy, next: null as number | null, progress: 100 };
+    if (d >= 40) return { name: ar ? 'وحش' : 'Beast', Icon: Trophy, next: 80, progress: Math.round((d / 80) * 100) };
+    if (d >= 20) return { name: ar ? 'ملتزم' : 'Committed', Icon: Medal, next: 40, progress: Math.round((d / 40) * 100) };
+    if (d >= 8) return { name: ar ? 'منتظم' : 'Regular', Icon: Medal, next: 20, progress: Math.round((d / 20) * 100) };
+    if (d >= 1) return { name: ar ? 'ناشئ' : 'Rookie', Icon: Medal, next: 8, progress: Math.round((d / 8) * 100) };
+    return { name: ar ? 'البداية' : 'Start', Icon: Flag, next: 1, progress: 0 };
+  }, [data.totalDays, ar]);
+
   if (loading) return <Skeleton />;
 
   const hour = new Date().getHours();
@@ -351,17 +364,6 @@ export default function DashboardPage() {
       : hour < 18
         ? 'Strong day, champ'
         : 'Good evening, champ';
-
-  // Gamification level from REAL all-time training days (skill: avoid static design)
-  const level = useMemo(() => {
-    const d = data.totalDays;
-    if (d >= 80) return { name: ar ? 'أسطورة' : 'Legend', Icon: Trophy, next: null as number | null, progress: 100 };
-    if (d >= 40) return { name: ar ? 'وحش' : 'Beast', Icon: Trophy, next: 80, progress: Math.round((d / 80) * 100) };
-    if (d >= 20) return { name: ar ? 'ملتزم' : 'Committed', Icon: Medal, next: 40, progress: Math.round((d / 40) * 100) };
-    if (d >= 8) return { name: ar ? 'منتظم' : 'Regular', Icon: Medal, next: 20, progress: Math.round((d / 20) * 100) };
-    if (d >= 1) return { name: ar ? 'ناشئ' : 'Rookie', Icon: Medal, next: 8, progress: Math.round((d / 8) * 100) };
-    return { name: ar ? 'البداية' : 'Start', Icon: Flag, next: 1, progress: 0 };
-  }, [data.totalDays, ar]);
 
   const dateStr = new Date().toLocaleDateString(ar ? 'ar-EG' : 'en-US', {
     weekday: 'long',
