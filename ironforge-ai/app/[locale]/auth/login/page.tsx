@@ -20,7 +20,12 @@ function LoginInner() {
   const supabase = createClient();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(searchParams.get('error'));
+  const rawError = searchParams.get('error');
+  const [error, setError] = useState<string | null>(
+    rawError && /pkce|code verifier|already used|expired/i.test(rawError)
+      ? 'انتهت صلاحية رابط الدخول ده (رابط قديم)، دوس الدخول بحساب جوجل مرة واحدة جديدة'
+      : rawError
+  );
 
   // Already logged in → go straight to dashboard (never show signup again)
   useEffect(() => {

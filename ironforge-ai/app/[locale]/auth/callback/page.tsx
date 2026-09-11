@@ -31,7 +31,19 @@ function CallbackInner() {
             window.location.href = next;
             return;
           }
-          window.location.href = `${loginUrl}?error=${encodeURIComponent(error.message)}`;
+          const msg = error.message || '';
+          // Stale link (PKCE verifier gone) but session may exist → proceed.
+          try {
+            const { data } = await supabase.auth.getSession();
+            if (data.session) {
+              window.location.href = next;
+              return;
+            }
+          } catch {}
+          const friendly = /pkce|code verifier|already used|expired/i.test(msg)
+            ? 'انتهت صلاحية رابط الدخول ده (رابط قديم)، دوس الدخول بحساب جوجل مرة واحدة جديدة'
+            : msg;
+          window.location.href = `${loginUrl}?error=${encodeURIComponent(friendly)}`;
         } catch (e: any) {
           window.location.href = `${loginUrl}?error=${encodeURIComponent(e?.message || 'auth failed')}`;
         }
