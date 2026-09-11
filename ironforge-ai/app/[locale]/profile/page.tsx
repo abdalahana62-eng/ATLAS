@@ -144,7 +144,8 @@ export default function ProfilePage() {
     } catch {}
     // also try to save to Supabase if available
     try {
-      const res = await fetch('/api/profile', {
+      const { apiFetch } = await import('@/lib/apiBase');
+      const res = await apiFetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

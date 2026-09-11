@@ -88,25 +88,12 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      // في الـ APK الأوفلاين الـ API لازم يجي من Vercel مباشرة (سحابي Groq)
-      // Capacitor الحديث يستخدم https://localhost وليس capacitor://، لذلك نفحص بعدة طرق
-      const cap = typeof window !== 'undefined' ? (window as any).Capacitor : null;
-      const isCapacitor = typeof window !== 'undefined' && (
-        window.location.protocol === 'capacitor:' ||
-        !!cap?.isNativePlatform?.() ||
-        !!cap?.isNative ||
-        document.URL.includes('capacitor') ||
-        navigator.userAgent.includes('Capacitor')
-      );
-      const vercelBase = process.env.NEXT_PUBLIC_VERCEL_URL 
-        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
-        : 'https://atlasfit.pro';
-      const apiUrl = isCapacitor
-        ? `${vercelBase}/api/chat`
-        : '/api/chat';
+      // في الـ APK الأوفلاين الـ API لازم يجي من السحابة (apiFetch بيحوّل
+      // تلقائياً + fallback على atlasfit.pro لو سيرفر Vercel واقع)
+      const { apiFetch, api, isCapacitorApp } = await import('@/lib/apiBase');
       // للتشخيص في الـ APK
-      console.log('[ATLAS Chat] isCapacitor:', isCapacitor, 'apiUrl:', apiUrl, 'protocol:', window.location.protocol, 'href:', window.location.href);
-      const response = await fetch(apiUrl, {
+      console.log('[ATLAS Chat] isCapacitor:', isCapacitorApp(), 'apiUrl:', api('/api/chat'), 'protocol:', window.location.protocol, 'href:', window.location.href);
+      const response = await apiFetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

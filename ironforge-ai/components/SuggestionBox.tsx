@@ -24,7 +24,8 @@ export default function SuggestionBox() {
     if (!email) { setError(isAr ? 'سجّل دخولك الأول' : 'Sign in first'); return; }
     setSending(true);
     try {
-      const r = await fetch('/api/admin/suggestions', {
+      const { apiFetch } = await import('@/lib/apiBase');
+      const r = await apiFetch('/api/admin/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, message: msg }),

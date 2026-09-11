@@ -169,7 +169,8 @@ export default function NutritionPage() {
     if (!msg) return;
     setChatLoading(true); setChatAns(null); setChatOptions([]); setChatUpgrade(false);
     try {
-      const res = await fetch('/api/nutrition/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: msg, stats, targetMacros, country: stats.country, logged: { calories: totalLoggedCalories, protein: totalLoggedP, carbs: totalLoggedC, fats: totalLoggedF } }) });
+      const { apiFetch } = await import('@/lib/apiBase');
+      const res = await apiFetch('/api/nutrition/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: msg, stats, targetMacros, country: stats.country, logged: { calories: totalLoggedCalories, protein: totalLoggedP, carbs: totalLoggedC, fats: totalLoggedF } }) });
       const data = await res.json();
       const raw = data.answer || data.error || '—';
       const { clean, opts } = parseOptions(raw);

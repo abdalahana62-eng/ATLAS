@@ -1,4 +1,6 @@
 // Subscription system: 3-day trial + monthly plans (Instapay / Vodafone Cash)
+import { apiFetch } from './apiBase';
+
 export const PAY_NUMBER = '01040771597';
 export const TRIAL_DAYS = 3;
 export const OWNER_EMAIL = 'abdalahana555@gmail.com';
@@ -72,7 +74,7 @@ export function hasAccess(): boolean {
 }
 export async function refreshSubFromServer(email: string): Promise<boolean> {
   try {
-    const r = await fetch(`/api/subscriptions?email=${encodeURIComponent(email)}`, { cache: 'no-store' });
+    const r = await apiFetch(`/api/subscriptions?email=${encodeURIComponent(email)}`, { cache: 'no-store' });
     if (!r.ok) return false;
     const d = await r.json();
     if (d?.expiresAt && new Date(d.expiresAt).getTime() > Date.now()) {
@@ -91,7 +93,7 @@ export async function syncTrialFromServer(email: string): Promise<void> {
   try {
     const em = email.toLowerCase().trim();
     const local = read<Account>('atlas-account');
-    const r = await fetch(`/api/account/trial?email=${encodeURIComponent(em)}`, { cache: 'no-store' });
+    const r = await apiFetch(`/api/account/trial?email=${encodeURIComponent(em)}`, { cache: 'no-store' });
     if (r.ok) {
       const d = await r.json();
       if (d?.startedAt) {
@@ -99,7 +101,7 @@ export async function syncTrialFromServer(email: string): Promise<void> {
         return;
       }
     }
-    await fetch('/api/account/trial', {
+    await apiFetch('/api/account/trial', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: em, startedAt: local?.createdAt || new Date().toISOString() }),

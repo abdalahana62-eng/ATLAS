@@ -81,7 +81,8 @@ function SubscribeInner() {
     if (!shot) { setError(isAr ? 'ارفع سكرين شوت التحويل' : 'Upload transfer screenshot'); return; }
     setLoading(true);
     try {
-      const r = await fetch('/api/subscriptions', {
+      const { apiFetch } = await import('@/lib/apiBase');
+      const r = await apiFetch('/api/subscriptions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, phone, plan: plan.id, amount: plan.price, method, screenshot: shot }),
