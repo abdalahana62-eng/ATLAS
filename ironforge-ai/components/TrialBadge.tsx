@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Crown, Clock } from 'lucide-react';
-import { trialDaysLeft, subDaysLeft, getAccount, refreshSubFromServer } from '@/lib/subscription';
+import { trialDaysLeft, subDaysLeft, getAccount, refreshSubFromServer, syncTrialFromServer } from '@/lib/subscription';
 
 // Shows current plan: trial countdown or active subscription
 export default function TrialBadge() {
@@ -17,6 +17,7 @@ export default function TrialBadge() {
     const run = async () => {
       const acc = getAccount();
       if (!acc) return;
+      await syncTrialFromServer(acc.email);
       await refreshSubFromServer(acc.email);
       const sub = subDaysLeft();
       if (sub > 0) {

@@ -5,6 +5,25 @@ import { checkAdmin } from '../auth';
 export const runtime = 'nodejs';
 
 // GET /api/admin/stats → { users, activeSubs, pending, totalRequests, aiToday, aiYesterday, aiWeek }
+async function readAppStats(supabase: ReturnType<typeof createClient>) {
+  // Requires migration 010_presence_platform.sql — zeros gracefully if missing.
+  const out = { appInstalls: 0, appOnline: 0 };
+  try {
+    const { data, error } = await supabase.from('user_presence').select('email,platform,last_seen').limit(5000);
+    if (error || !data) return out;
+    const cutoff = Date.now() - 90000;
+    const seen = new Set<string>();
+    for (const r of data as any[]) {
+      if (r.platform === 'app') {
+        seen.add(String(r.email));
+        if (new Date(r.last_seen).getTime() > cutoff) out.appOnline += 1;
+      }
+    }
+    out.appInstalls = seen.size;
+  } catch {}
+  return out;
+}
+
 async function readAIUsage(supabase: ReturnType<typeof createClient>) {
   // Requires migration 008_ai_usage.sql — returns zeros gracefully if missing.
   const out = { aiToday: 0, aiYesterday: 0, aiWeek: 0 };
@@ -31,7 +50,8 @@ export async function GET(req: NextRequest) {
     if (!error && data) {
       try {
         const ai = await readAIUsage(supabase);
-        return Response.json({ ...data, ...ai });
+        const app = await readAppStats(supabase);
+        return Response.json({ ...data, ...ai, ...app });
       } catch {}
       return Response.json(data);
     }
@@ -53,6 +73,9 @@ export async function GET(req: NextRequest) {
     } catch {}
     try {
       Object.assign(out, await readAIUsage(supabase));
+    } catch {}
+    try {
+      Object.assign(out, await readAppStats(supabase));
     } catch {}
     return Response.json(out);
   } catch (e: any) {

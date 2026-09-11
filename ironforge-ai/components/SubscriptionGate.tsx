@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { hasAccess, trialDaysLeft, subDaysLeft, getAccount, refreshSubFromServer } from '@/lib/subscription';
+import { hasAccess, trialDaysLeft, subDaysLeft, getAccount, refreshSubFromServer, syncTrialFromServer } from '@/lib/subscription';
 
 // Shows paywall overlay when trial expired and no active subscription
 export default function SubscriptionGate() {
@@ -18,7 +18,10 @@ export default function SubscriptionGate() {
   useEffect(() => {
     const run = async () => {
       const acc = getAccount();
-      if (acc?.email) await refreshSubFromServer(acc.email);
+      if (acc?.email) {
+        await syncTrialFromServer(acc.email);
+        await refreshSubFromServer(acc.email);
+      }
       setTrial(trialDaysLeft());
       setLocked(!hasAccess());
       setChecked(true);

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
-import { saveAccount, refreshSubFromServer } from '@/lib/subscription';
+import { saveAccount, refreshSubFromServer, syncTrialFromServer } from '@/lib/subscription';
 import { Loader2 } from 'lucide-react';
 
 // Blocks the page until a real (Google) session exists.
@@ -24,7 +24,8 @@ export default function AuthGate() {
           router.replace('/auth/login');
           return;
         }
-        saveAccount(email); // starts 3-day trial on first login
+        saveAccount(email); // starts 3-day trial on first login (local clock)
+        await syncTrialFromServer(email); // converge to server clock (website ↔ app)
         refreshSubFromServer(email);
         setOk(true);
       } catch {

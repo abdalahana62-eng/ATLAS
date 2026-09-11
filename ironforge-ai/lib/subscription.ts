@@ -70,7 +70,6 @@ export function hasAccess(): boolean {
   if (typeof window === 'undefined') return true;
   return trialDaysLeft() > 0 || subDaysLeft() > 0;
 }
-
 export async function refreshSubFromServer(email: string): Promise<boolean> {
   try {
     const r = await fetch(`/api/subscriptions?email=${encodeURIComponent(email)}`, { cache: 'no-store' });
@@ -82,4 +81,28 @@ export async function refreshSubFromServer(email: string): Promise<boolean> {
     }
     return false;
   } catch { return false; }
+}
+
+// Sync the trial clock with the SERVER so website ↔ app share the same 3 days.
+// - Server has a start → overwrite local clock with it (all devices converge).
+// - Server has none → register local start (first device wins server-side).
+// Never throws; falls back to the local clock silently.
+export async function syncTrialFromServer(email: string): Promise<void> {
+  try {
+    const em = email.toLowerCase().trim();
+    const local = read<Account>('atlas-account');
+    const r = await fetch(`/api/account/trial?email=${encodeURIComponent(em)}`, { cache: 'no-store' });
+    if (r.ok) {
+      const d = await r.json();
+      if (d?.startedAt) {
+        localStorage.setItem('atlas-account', JSON.stringify({ email: em, createdAt: d.startedAt }));
+        return;
+      }
+    }
+    await fetch('/api/account/trial', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: em, startedAt: local?.createdAt || new Date().toISOString() }),
+    });
+  } catch {}
 }
