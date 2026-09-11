@@ -13,6 +13,11 @@ export async function POST(req: NextRequest) {
     const isAr = /[\u0600-\u06FF]/.test(message);
     const kb = buildKnowledgeContext(message, isAr ? 'ar' : 'en');
     const dishes = buildDishContext(message, isAr ? 'ar' : 'en');
+    // Full-plan request? (e.g. "عاوز اكل 2000 سعرة") → long structured answer, no word cap
+    const q = message.toLowerCase();
+    const targetKcalMatch = message.match(/(\d{3,4})\s*(سعر|سعره|كالوري|kcal|cal)/);
+    const wantsPlan = /اكل ايه|اكل إيه|نظام|وجبات|plan|meal plan|يوم كامل|فطار وغدا|جدول/.test(message) || !!targetKcalMatch;
+    const planKcal = targetKcalMatch ? parseInt(targetKcalMatch[1], 10) : null;
     const remaining = logged && targetMacros ? {
       calories: Math.max(0, targetMacros.calories - (logged.calories || 0)),
       protein: Math.max(0, targetMacros.protein - (logged.protein || 0)),
@@ -34,11 +39,13 @@ Answer in the user's language (Arabic if message is Arabic).
 STRICT RULES:
 1. Use ONLY the verified per-100g values below. NEVER invent numbers. Unknown food → "تقديري من مصادر عامة" + range.
 2. Grams from remainingToday first, dailyTarget second.
-3. Max 120 words unless user asks for details.${kb}${dishes}`;
+${wantsPlan
+  ? `3. FULL-DAY PLAN MODE: the user wants a complete eating plan${planKcal ? ` of ${planKcal} kcal` : ''}. Give 4-5 meals (فطار/غدا/عشا/2 سناك) with EXACT grams each computed from verified values, Egyptian/Saudi dishes, totals summing to target ±5%. Structure per meal: name + grams + (kcal|P/C/F). End with daily totals + 2 quick replies.`
+  : '3. Max 120 words unless user asks for details.'}${kb}${dishes}`;
 
     const completion = await createChatCompletion(
       [{ role: 'system', content: sys }, { role: 'user', content: message }],
-      { temperature: 0.2, maxTokens: 700, model: 'openai/gpt-oss-120b' }
+      { temperature: 0.2, maxTokens: wantsPlan ? 1500 : 700, model: 'openai/gpt-oss-120b' }
     );
     const answer = completion.choices[0]?.message?.content?.trim() ?? '';
     if (!answer) {

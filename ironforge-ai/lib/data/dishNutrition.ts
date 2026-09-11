@@ -67,6 +67,13 @@ export const DISH_DB: Array<{ keys: string[]; label_ar: string; per100: DishInfo
   { keys: ['زيت', 'oil'], label_ar: 'زيت (المعلقة 10جم ≈ 88 سعرة)', per100: d(884, 0, 0, 100) },
   { keys: ['زبدة', 'butter', 'سمن'], label_ar: 'زبدة', per100: d(717, 0.9, 0.1, 81) },
   { keys: ['جبنة موزاريلا', 'mozzarella', 'موزاريلا'], label_ar: 'موزاريلا', per100: d(280, 20, 3, 18) },
+  { keys: ['عدس مطبوخ', 'cooked lentils', 'عدس'], label_ar: 'عدس مطبوخ', per100: d(116, 9, 20, 0.4) },
+  { keys: ['حمص مسلوق', 'cooked chickpeas', 'حمص مسلوق'], label_ar: 'حمص مسلوق', per100: d(164, 9, 27, 2.6) },
+  { keys: ['لحم بقري', 'beef', 'لحمة'], label_ar: 'لحم بقري خالي', per100: d(200, 26, 0, 10) },
+  { keys: ['سلمون', 'salmon'], label_ar: 'سلمون', per100: d(208, 20, 0, 13) },
+  { keys: ['بطاطا حلوة', 'sweet potato', 'بطاطا'], label_ar: 'بطاطا حلوة', per100: d(86, 1.6, 20, 0.1) },
+  { keys: ['شوفان جاف', 'dry oats', 'rolled oats'], label_ar: 'شوفان جاف', per100: d(389, 17, 66, 7) },
+  { keys: ['فول سوداني محمص', 'roasted peanuts'], label_ar: 'فول سوداني', per100: d(567, 26, 16, 49) },
 ];
 
 function norm(s: string): string {
