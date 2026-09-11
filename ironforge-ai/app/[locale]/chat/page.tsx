@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import SubscriptionGate from '@/components/SubscriptionGate';
 import AuthGate from '@/components/AuthGate';
+import ChatMessageBody from '@/components/chat/ChatMessageBody';
 
 interface ChatMessage {
   id: string;
@@ -31,7 +32,7 @@ export default function ChatPage() {
   const t = useTranslations('chat');
   const locale = useLocale();
   const isRTL = locale === 'ar';
-  const activeModel = process.env.NEXT_PUBLIC_OPENAI_MODEL || 'openai/gpt-oss-20b';
+  const activeModel = process.env.NEXT_PUBLIC_OPENAI_MODEL || 'openai/gpt-oss-120b';
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -99,7 +100,7 @@ export default function ChatPage() {
       );
       const vercelBase = process.env.NEXT_PUBLIC_VERCEL_URL 
         ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
-        : 'https://atlas2-ochre.vercel.app';
+        : 'https://atlasfit.pro';
       const apiUrl = isCapacitor
         ? `${vercelBase}/api/chat`
         : '/api/chat';
@@ -286,17 +287,15 @@ export default function ChatPage() {
                 </div>
               )}
               
-              <div className={`max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
+              <div className={`max-w-[85%] md:max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
                 <Card 
-                  className={`p-4 ${
+                  className={`px-5 py-4 shadow-sm ${
                     message.role === 'user'
                       ? 'bg-ironforge-primary text-ironforge-background border-ironforge-primary'
-                      : 'bg-ironforge-card text-ironforge-text border-ironforge-border'
+                      : 'bg-ironforge-card text-ironforge-text border-ironforge-border leading-8'
                   }`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <ChatMessageBody content={message.content} isUser={message.role === 'user'} />
                 </Card>
                 
                 <div className="flex items-center gap-2 mt-1 px-1">

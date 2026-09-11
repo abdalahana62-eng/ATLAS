@@ -32,7 +32,7 @@ export default function UpdateChecker() {
         // 1) Vercel API
         try {
           const vercelBase = typeof window !== 'undefined' && (window as any).Capacitor
-            ? 'https://atlas2-ochre.vercel.app'
+            ? 'https://atlasfit.pro'
             : '';
           const apiUrl = vercelBase ? `${vercelBase}/api/latest` : '/api/latest';
           const r1 = await fetch(apiUrl, { cache: 'no-store' });

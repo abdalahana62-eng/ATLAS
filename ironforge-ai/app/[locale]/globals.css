@@ -75,4 +75,15 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Chat readability — clear Arabic-friendly rendering */
+  .chat-body p {
+    margin-bottom: 0.35rem;
+    overflow-wrap: break-word;
+  }
+
+  html[dir="rtl"] .chat-body {
+    text-align: right;
+    line-height: 2;
+  }
 }

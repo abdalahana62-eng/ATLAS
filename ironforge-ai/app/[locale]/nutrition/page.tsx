@@ -25,6 +25,7 @@ import { COUNTRIES, CUISINES, getCuisine, type CountryCode } from '@/lib/data/cu
 import { MEAL_VARIANTS } from '@/lib/data/meal-variants';
 import SubscriptionGate from '@/components/SubscriptionGate';
 import AuthGate from '@/components/AuthGate';
+import ChatMessageBody from '@/components/chat/ChatMessageBody';
 
 interface Meal {
   id: string;
@@ -378,7 +379,7 @@ export default function NutritionPage() {
                 <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') handleChat(); }} placeholder={locale==='ar' ? 'مثال: هاكل كشري' : 'e.g. I will eat koshari'} className="flex-1 bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2 text-sm text-ironforge-text" />
                 <Button onClick={() => handleChat()} disabled={chatLoading} className="bg-ironforge-primary text-black">{chatLoading ? '...' : locale==='ar'?'اسأل':'Ask'}</Button>
               </div>
-              {chatAns && <div className="mt-3 p-3 rounded-lg bg-ironforge-background text-sm text-ironforge-text whitespace-pre-wrap">{chatAns}</div>}
+              {chatAns && <div className="mt-3 p-4 rounded-lg bg-ironforge-background border border-ironforge-border leading-8"><ChatMessageBody content={chatAns} /></div>}
               {chatOptions.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {chatOptions.map((o, i) => (
