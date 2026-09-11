@@ -189,6 +189,19 @@ export default function NutritionPage() {
   const totalLoggedC = Object.keys(loggedMeals).filter(id => loggedMeals[id]).reduce((s, id) => s + (meals.find(m => m.id === id)?.carbs || 0), 0);
   const totalLoggedF = Object.keys(loggedMeals).filter(id => loggedMeals[id]).reduce((s, id) => s + (meals.find(m => m.id === id)?.fats || 0), 0);
 
+  // Persist today's totals so the dashboard shows REAL intake (reset automatically each day)
+  useEffect(() => {
+    try {
+      localStorage.setItem('atlas-nutrition-log', JSON.stringify({
+        date: new Date().toISOString().slice(0, 10),
+        calories: totalLoggedCalories,
+        protein: totalLoggedP,
+        carbs: totalLoggedC,
+        fats: totalLoggedF,
+      }));
+    } catch {}
+  }, [totalLoggedCalories, totalLoggedP, totalLoggedC, totalLoggedF]);
+
   const savePlan = () => {
     localStorage.setItem('atlas-stats', JSON.stringify(stats));
     localStorage.setItem('ironforge-stats', JSON.stringify(stats)); // keep legacy for migration

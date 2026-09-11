@@ -136,6 +136,12 @@ export default function ProfilePage() {
     setIsSaving(true);
     const data = { name, email, age, height, weight, goal, activityLevel, avatar };
     localStorage.setItem('ironforge-profile', JSON.stringify(data));
+    // Log weight into measurements history so the dashboard trend is REAL
+    try {
+      const { saveMeasurement } = await import('@/lib/userData');
+      const w = Number(weight);
+      if (w > 0) await saveMeasurement({ log_date: new Date().toISOString().slice(0, 10), weight_kg: w });
+    } catch {}
     // also try to save to Supabase if available
     try {
       const res = await fetch('/api/profile', {
