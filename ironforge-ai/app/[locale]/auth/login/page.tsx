@@ -44,7 +44,7 @@ function LoginInner() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/${locale}/onboarding`,
+          redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/onboarding`,
         },
       });
       if (error) setError(error.message);
