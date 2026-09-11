@@ -11,17 +11,15 @@ export default function UpdateChecker() {
   const [updateUrl, setUpdateUrl] = useState<string | null>(null);
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
-  // تذكر اللي المستخدم قفله عشان مايظهرش تاني لنفس النسخة
-  const dismissedKey = `atlas_update_dismissed_${CURRENT_VERSION}`;
+  // نتذكر أحدث نسخة اتقفل البانر بتاعها — أي إصدار أجدد من كده يظهر تاني
+  // حتى لو المستخدم كان قافل البانر قبل كده.
+  const dismissedKey = 'atlas_update_dismissed_tag';
+  const dismiss = () => {
+    try { localStorage.setItem(dismissedKey, latestVersion || ''); } catch {}
+    setDismissed(true);
+  };
 
   useEffect(() => {
-    // لو المستخدم قفل البانر لنفس النسخة الحالية لا تظهر تاني
-    try {
-      if (localStorage.getItem(dismissedKey)) {
-        setDismissed(true);
-        return;
-      }
-    } catch {}
     // لا تفحص لو مفيش نت
     if (!navigator.onLine) return;
 
@@ -74,8 +72,16 @@ export default function UpdateChecker() {
           return false;
         };
         if (tag && url && isNewer(tag, CURRENT_VERSION)) {
-          setLatestVersion(tag);
-          setUpdateUrl(url);
+          // لو المستخدم قفل بانر نفس النسخة الأحدث دي قبل كده، متظهرش تاني —
+          // لكن أي إصدار أجدد يظهر عادي.
+          let wasDismissed = false;
+          try { wasDismissed = localStorage.getItem(dismissedKey) === tag; } catch {}
+          if (wasDismissed) {
+            setDismissed(true);
+          } else {
+            setLatestVersion(tag);
+            setUpdateUrl(url);
+          }
         } else {
           console.log('[UpdateChecker] no update', { tag, current: CURRENT_VERSION, url, isNewer: tag? isNewer(tag, CURRENT_VERSION): false });
         }
@@ -103,10 +109,7 @@ export default function UpdateChecker() {
             </p>
           </div>
           <button
-            onClick={() => {
-              try { localStorage.setItem(dismissedKey, '1'); } catch {}
-              setDismissed(true);
-            }}
+            onClick={dismiss}
             className="text-ironforge-text-muted hover:text-ironforge-text text-xl leading-none"
           >
             ×
@@ -122,10 +125,7 @@ export default function UpdateChecker() {
             حمّل التحديث
           </a>
           <button
-            onClick={() => {
-              try { localStorage.setItem(dismissedKey, '1'); } catch {}
-              setDismissed(true);
-            }}
+            onClick={dismiss}
             className="px-4 py-2.5 rounded-xl border border-ironforge-border text-ironforge-text hover:bg-ironforge-background transition"
           >
             لاحقاً
