@@ -222,7 +222,7 @@ export default function Navigation() {
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 bg-black/50 z-50" onClick={() => setIsMobileMenuOpen(false)}>
           <div 
-            className={`fixed top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-80 bg-ironforge-card border-l border-ironforge-border`}
+            className={`fixed top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-80 max-w-[85vw] bg-ironforge-card border-l border-ironforge-border overflow-y-auto`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-ironforge-border flex items-center justify-between">
@@ -292,6 +292,25 @@ export default function Navigation() {
                     {locale === 'ar' ? 'EN' : 'AR'}
                   </span>
                 </Link>
+              </div>
+
+              {/* Subscription + version — same as desktop sidebar */}
+              <div className="border-t border-ironforge-border pt-4 space-y-3">
+                <div className="flex justify-center">
+                  <TrialBadge />
+                </div>
+                <div className="p-3 rounded-lg bg-ironforge-background">
+                  <p className="text-xs text-ironforge-text-muted mb-1">
+                    {locale === 'ar' ? 'النسخة' : 'Version'}
+                  </p>
+                  <p className="text-sm font-semibold text-ironforge-text">
+                    v{appVersion}
+                  </p>
+                  <p className="text-[11px] text-ironforge-text-muted mt-2 pt-2 border-t border-ironforge-border">
+                    Owner: ABDALLAH SHENOO<br />
+                    <a href="mailto:abdalahana555@gmail.com" className="text-ironforge-primary hover:underline">abdalahana555@gmail.com</a>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
