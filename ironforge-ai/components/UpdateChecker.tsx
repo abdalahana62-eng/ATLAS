@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
-const CURRENT_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '1.1.0';
+// NOTE: default '0.0.0' (not '1.1.0') so stale builds without a baked version
+// ALWAYS prompt for update instead of thinking they are the newest.
+const CURRENT_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '0.0.0';
 const REPO = 'abdalahana62-eng/ATLAS';
 
 export default function UpdateChecker() {
