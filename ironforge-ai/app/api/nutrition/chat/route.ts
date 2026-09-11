@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createChatCompletion } from '@/lib/ai/openai';
+import { buildKnowledgeContext } from '@/lib/knowledgeSearch';
 
 export const runtime = 'nodejs';
 
@@ -8,10 +9,13 @@ export async function POST(req: NextRequest) {
     const { message, stats, targetMacros, country } = await req.json();
     if (!message) return Response.json({ error: 'Missing message' }, { status: 400 });
 
+    const isAr = /[\u0600-\u06FF]/.test(message);
+    const kb = buildKnowledgeContext(message, isAr ? 'ar' : 'en');
     const sys = `You are ATLAS nutrition assistant for ${country}. User stats: ${JSON.stringify(stats)} targetMacros: ${JSON.stringify(targetMacros)}. 
 Answer in the user's language (Arabic if message is Arabic). 
 You MUST ground your answer in realistic Egyptian/Saudi dishes. 
-Tell: how many grams to eat, how to prepare quickly, what to avoid, and remaining calories. Be concise, friendly, and give exact grams.`;
+Never invent calorie numbers — use the verified knowledge below when relevant.
+Tell: how many grams to eat, how to prepare quickly, what to avoid, and remaining calories. Be concise, friendly, and give exact grams.${kb}`;
 
     const completion = await createChatCompletion(
       [{ role: 'system', content: sys }, { role: 'user', content: message }],

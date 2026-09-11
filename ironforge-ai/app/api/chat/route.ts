@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { systemCoachPrompt } from '@/lib/ai/prompts';
+import { buildKnowledgeContext } from '@/lib/knowledgeSearch';
 import { createStreamingChatCompletion, type ChatMessage } from '@/lib/ai/openai';
 
 export const runtime = 'nodejs';
@@ -33,7 +34,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const systemPrompt = systemCoachPrompt;
+    const lastUser = [...messages].reverse().find((m: any) => m.role === 'user')?.content || '';
+    const kb = buildKnowledgeContext(String(lastUser), locale || 'ar');
+    const systemPrompt = systemCoachPrompt + kb;
 
     const chatMessages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
