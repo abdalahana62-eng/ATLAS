@@ -26,6 +26,9 @@ function LoginInner() {
       ? 'انتهت صلاحية رابط الدخول ده (رابط قديم)، دوس الدخول بحساب جوجل مرة واحدة جديدة'
       : rawError
   );
+  // نسخ الـ APK القديمة اتبنت من غير مفاتيح Supabase → زرار جوجل بيودي
+  // على رابط وهمي (example.supabase.co) ويدي "لا يمكن الوصول للموقع".
+  const missingBackend = !process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   // Already logged in → go straight to dashboard (never show signup again)
   useEffect(() => {
@@ -82,6 +85,14 @@ function LoginInner() {
               {isAr ? 'ادخل بحساب جوجل عشان تبدأ تجربتك المجانية (3 أيام)' : 'Sign in with Google to start your free trial (3 days)'}
             </p>
           </div>
+
+          {missingBackend && (
+            <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm leading-6">
+              {isAr
+                ? 'نسخة التطبيق دي قديمة ومش متوصلة بالسيرفر. حمّل أحدث إصدار من الموقع (atlasfit.pro) وسجّل من هناك.'
+                : 'This app version is outdated and not connected. Download the latest version from atlasfit.pro.'}
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
