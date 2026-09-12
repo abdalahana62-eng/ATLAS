@@ -76,14 +76,14 @@ export default function Navigation() {
     }
   ];
 
+  // Active check works with both URL styles: prefix-less (/dashboard, default
+  // locale on web) and prefixed (/ar/dashboard, /en/dashboard in the APK).
+  const normPath = (pathname || '/').replace(/^\/(ar|en)(?=\/|$)/, '') || '/';
   const isActive = (href: string) => {
     if (href === '/') {
-      return pathname === `/${locale}` || pathname === `/${locale}/`;
+      return normPath === '/';
     }
-    if (href === '/dashboard') {
-      return pathname === `/${locale}/dashboard`;
-    }
-    return pathname.startsWith(`/${locale}${href}`);
+    return normPath === href || normPath.startsWith(`${href}/`);
   };
 
   const handleNavigation = (href: string) => {
