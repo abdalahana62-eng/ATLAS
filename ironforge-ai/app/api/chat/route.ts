@@ -5,6 +5,8 @@ import { buildDishContext } from '@/lib/data/dishNutrition';
 import { createStreamingChatCompletion, type ChatMessage } from '@/lib/ai/openai';
 import { trackAIUsage, isQuotaError } from '@/lib/ai/usage';
 import { requireAI } from '@/lib/api/guard';
+import { corsHeadersFor, corsPreflight } from '@/lib/security/cors';
+import { validateChatMessages } from '@/lib/security/validate';
 
 // Friendly upsell shown when the free Groq quota runs out for the day.
 // Keep it human + beginner-simple, and link to the real plans page.
@@ -26,7 +28,7 @@ function quotaUpsell(locale: string): string {
 [شوف خطط الاشتراك](${plansPath})`;
 }
 
-function sseResponse(fullText: string) {
+function sseResponse(fullText: string, corsHeaders: Record<string, string>) {
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     start(controller) {
@@ -59,17 +61,14 @@ You are a senior coach doing a friendly 1-on-1 consultation with a BEGINNER. Tal
 
 export const runtime = 'nodejs';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: corsHeaders });
+export async function OPTIONS(req: NextRequest) {
+  const pre = corsPreflight(req);
+  if (pre) return pre;
+  return new Response(null, { status: 204, headers: corsHeadersFor(req) });
 }
 
 export async function POST(req: NextRequest) {
+  const corsHeaders = corsHeadersFor(req);
   try {
     // Security: logged-in session + active trial/subscription + daily cap.
     // Blocks anonymous quota-burn from any website/app on the internet.
@@ -88,24 +87,37 @@ export async function POST(req: NextRequest) {
     }
     const { messages, locale, profile } = await req.json();
 
-    if (!Array.isArray(messages) || messages.length === 0) {
+    const checked = validateChatMessages(messages);
+    if (!checked.ok) {
       return Response.json(
-        { error: 'Messages array is required' },
+        { error: checked.error },
         { status: 400, headers: corsHeaders }
       );
     }
+    const safeLocale = locale === 'en' ? 'en' : 'ar';
+    // Never trust raw client profile: cap size and strip to known scalar fields.
+    let profileCtx = '';
+    if (profile && typeof profile === 'object') {
+      try {
+        const flat: Record<string, string> = {};
+        for (const [k, v] of Object.entries(profile)) {
+          if (/^[a-zA-Z_]{1,32}$/.test(k) && (typeof v === 'string' || typeof v === 'number')) {
+            flat[k] = String(v).slice(0, 200);
+          }
+        }
+        const s = JSON.stringify(flat).slice(0, 1500);
+        if (s !== '{}') profileCtx = `\n\n=== USER PROFILE (known facts — never re-ask these) ===\n${s}\n`;
+      } catch {}
+    }
 
-    const lastUser = [...messages].reverse().find((m: any) => m.role === 'user')?.content || '';
-    const kb = buildKnowledgeContext(String(lastUser), locale || 'ar');
-    const dishes = buildDishContext(String(lastUser), locale || 'ar');
-    const profileCtx = profile
-      ? `\n\n=== USER PROFILE (known facts — never re-ask these) ===\n${JSON.stringify(profile).slice(0, 1500)}\n`
-      : '';
+    const lastUser = [...checked.value].reverse().find((m: any) => m.role === 'user')?.content || '';
+    const kb = buildKnowledgeContext(String(lastUser).slice(0, 4000), safeLocale);
+    const dishes = buildDishContext(String(lastUser).slice(0, 4000), safeLocale);
     const systemPrompt = systemCoachPrompt + EXPERT_PROTOCOL + profileCtx + kb + dishes;
 
     const chatMessages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
-      ...messages.map((m: any) => ({
+      ...checked.value.map((m) => ({
         role: m.role as 'user' | 'assistant',
         content: m.content as string,
       })),
@@ -121,7 +133,7 @@ export async function POST(req: NextRequest) {
       // Free Groq quota exhausted on ALL fallback models → upsell, don't crash.
       if (isQuotaError(e)) {
         console.warn('[ATLAS Chat] quota exhausted, sending upsell');
-        return sseResponse(quotaUpsell(locale || 'ar'));
+        return sseResponse(quotaUpsell(safeLocale), corsHeaders);
       }
       throw e;
     }
@@ -152,9 +164,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Chat API error:', error);
+    console.error('Chat API error:', error?.message || error);
     return Response.json(
-      { error: error?.message ?? 'Failed to process chat request' },
+      { error: 'Failed to process chat request' },
       { status: 500, headers: corsHeaders }
     );
   }

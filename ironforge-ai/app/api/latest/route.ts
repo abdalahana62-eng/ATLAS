@@ -1,18 +1,16 @@
 import { NextRequest } from 'next/server';
+import { corsHeadersFor, corsPreflight } from '@/lib/security/cors';
 
 export const runtime = 'nodejs';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: corsHeaders });
+export async function OPTIONS(req: NextRequest) {
+  const pre = corsPreflight(req);
+  if (pre) return pre;
+  return new Response(null, { status: 204, headers: corsHeadersFor(req) });
 }
 
 export async function GET(req: NextRequest) {
+  const corsHeaders = corsHeadersFor(req);
   try {
     const repo = 'abdalahana62-eng/ATLAS';
     const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
@@ -28,10 +26,10 @@ export async function GET(req: NextRequest) {
     });
 
     if (!res.ok) {
-      const text = await res.text();
+      console.error('[latest] GitHub API failed:', res.status);
       return Response.json(
-        { error: `GitHub API ${res.status}`, details: text.slice(0, 300), repo, hasToken: !!token },
-        { status: res.status, headers: corsHeaders }
+        { error: 'Update check failed' },
+        { status: 502, headers: corsHeaders }
       );
     }
 
@@ -45,6 +43,7 @@ export async function GET(req: NextRequest) {
       { headers: corsHeaders }
     );
   } catch (e: any) {
-    return Response.json({ error: e?.message || 'Failed' }, { status: 500, headers: corsHeaders });
+    console.error('[latest] failed:', e?.message || e);
+    return Response.json({ error: 'Update check failed' }, { status: 500, headers: corsHeaders });
   }
 }

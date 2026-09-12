@@ -42,6 +42,32 @@ export default function AdminPage() {
     'x-admin-email': (sessionStorage.getItem('atlas-admin-email') || email).toLowerCase().trim(),
     'x-admin-password': sessionStorage.getItem('atlas-admin-pass') || password,
   });
+  const fetchOpts = (extra: RequestInit = {}): RequestInit => ({ credentials: 'include', cache: 'no-store', ...extra });
+
+  const isSafeShot = (s: string) =>
+    /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=\s]+$/.test(s);
+
+  const loginWithGoogle = async () => {
+    try {
+      const supabase = createClient();
+      const origin = window.location.origin;
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${origin}/${locale}/auth/callback?next=/${locale}/admin` },
+      });
+    } catch {}
+  };
+
+  const logout = async () => {
+    try {
+      sessionStorage.removeItem('atlas-admin-email');
+      sessionStorage.removeItem('atlas-admin-pass');
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {}
+    setAuthed(false);
+    setPassword('');
+  };
 
   const planName = (id: string) =>
     isAr
@@ -79,7 +105,7 @@ export default function AdminPage() {
   const loadOnline = async () => {
     setOnlineLoading(true);
     try {
-      const r = await fetch('/api/admin/presence', { headers: headers(), cache: 'no-store' });
+      const r = await fetch('/api/admin/presence', fetchOpts({ headers: headers() }));
       if (r.ok) {
         const d = await r.json();
         const rows = ((d.online as any[]) || []).map(x => ({
@@ -107,12 +133,15 @@ export default function AdminPage() {
     try {
       const e = (em ?? email).toLowerCase().trim();
       const p = pw ?? password;
+      if (!e || !p) throw new Error(isAr ? 'اكتب الإيميل وكلمة السر' : 'Enter email and password');
       const h = { 'x-admin-email': e, 'x-admin-password': p };
       const [r1, r2] = await Promise.all([
-        fetch(`/api/admin/requests?status=${filter}`, { headers: h, cache: 'no-store' }),
-        fetch('/api/admin/stats', { headers: h, cache: 'no-store' }),
+        fetch(`/api/admin/requests?status=${filter}`, fetchOpts({ headers: h })),
+        fetch('/api/admin/stats', fetchOpts({ headers: h })),
       ]);
-      if (!r1.ok) throw new Error(isAr ? 'بيانات الدخول غلط' : 'Invalid credentials');
+      if (r1.status === 429) throw new Error(isAr ? 'محاولات كتير — استنى دقيقة' : 'Too many attempts — wait a minute');
+      if (r1.status === 500) throw new Error(isAr ? 'عطل في السيرفر (غالباً SUPABASE_SERVICE_ROLE_KEY ناقص في Vercel)' : 'Server error (likely missing SUPABASE_SERVICE_ROLE_KEY)');
+      if (!r1.ok) throw new Error(isAr ? 'بيانات الدخول غلط أو جلسة جوجل المالك ناقصة — سجّل بجوجل الأول بنفس إيميل المالك' : 'Invalid credentials or missing owner Google session — sign in with Google first');
       const d1 = await r1.json();
       setReqs(d1.requests || []);
       if (r2.ok) setStats(await r2.json());
@@ -125,7 +154,7 @@ export default function AdminPage() {
 
   const loadSubs = async () => {
     try {
-      const r = await fetch('/api/admin/subscribers', { headers: headers(), cache: 'no-store' });
+      const r = await fetch('/api/admin/subscribers', fetchOpts({ headers: headers() }));
       const d = await r.json();
       if (r.ok) setSubs(d.subscribers || []);
     } catch {}
@@ -133,7 +162,7 @@ export default function AdminPage() {
 
   const loadSugs = async () => {
     try {
-      const r = await fetch('/api/admin/suggestions', { headers: headers(), cache: 'no-store' });
+      const r = await fetch('/api/admin/suggestions', fetchOpts({ headers: headers() }));
       const d = await r.json();
       if (r.ok) setSugs(d.suggestions || []);
     } catch {}
@@ -141,7 +170,7 @@ export default function AdminPage() {
 
   const sugAct = async (id: string, action: 'read' | 'delete') => {
     try {
-      await fetch('/api/admin/suggestions', { method: 'PATCH', headers: headers(), body: JSON.stringify({ id, action }) });
+      await fetch('/api/admin/suggestions', fetchOpts({ method: 'PATCH', headers: headers(), body: JSON.stringify({ id, action }) }));
       if (action === 'delete') setSugs(prev => prev.filter(x => x.id !== id));
       else setSugs(prev => prev.map(x => x.id === id ? { ...x, status: 'read' } : x));
     } catch {}
@@ -151,7 +180,7 @@ export default function AdminPage() {
     if (!mailTo || !mailSubject.trim() || !mailBody.trim()) { alert(isAr ? 'اكتب الموضوع والرسالة' : 'Write subject and message'); return; }
     setMailSending(true);
     try {
-      const r = await fetch('/api/admin/send-email', { method: 'POST', headers: headers(), body: JSON.stringify({ to: mailTo, subject: mailSubject, message: mailBody }) });
+      const r = await fetch('/api/admin/send-email', fetchOpts({ method: 'POST', headers: headers(), body: JSON.stringify({ to: mailTo, subject: mailSubject, message: mailBody }) }));
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       alert(isAr ? 'اتبعتت ✅' : 'Sent ✅');
@@ -164,7 +193,7 @@ export default function AdminPage() {
     setShotLoading(true);
     setShot(null);
     try {
-      const r = await fetch(`/api/admin/requests?id=${id}`, { headers: headers(), cache: 'no-store' });
+      const r = await fetch(`/api/admin/requests?id=${id}`, fetchOpts({ headers: headers() }));
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       setShot(d.request?.screenshot || '');
@@ -175,7 +204,7 @@ export default function AdminPage() {
   const act = async (id: string, action: 'approve' | 'reject') => {
     if (!confirm(isAr ? `تأكيد ${action === 'approve' ? 'قبول' : 'رفض'}؟` : `Confirm ${action}?`)) return;
     try {
-      const r = await fetch('/api/admin/requests', { method: 'PATCH', headers: headers(), body: JSON.stringify({ id, action }) });
+      const r = await fetch('/api/admin/requests', fetchOpts({ method: 'PATCH', headers: headers(), body: JSON.stringify({ id, action }) }));
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       setReqs(prev => prev.filter(x => x.id !== id));
@@ -189,10 +218,16 @@ export default function AdminPage() {
       <div className="min-h-screen bg-ironforge-background flex items-center justify-center p-6">
         <Card className="p-8 max-w-sm w-full text-center">
           <ShieldCheck className="w-12 h-12 text-ironforge-primary mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-ironforge-text mb-4">{isAr ? 'لوحة الإدارة 🔒' : 'Admin 🔒'}</h1>
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="admin email" dir="ltr"
+          <h1 className="text-xl font-bold text-ironforge-text mb-2">{isAr ? 'لوحة الإدارة 🔒' : 'Admin 🔒'}</h1>
+          <p className="text-xs text-ironforge-text-muted mb-4">
+            {isAr ? 'خطوتين: ١) الدخول بجوجل المالك ٢) كلمة سر الإدارة' : 'Two steps: 1) Owner Google sign-in 2) Admin password'}
+          </p>
+          <Button onClick={loginWithGoogle} variant="outline" className="w-full border-ironforge-border mb-3">
+            {isAr ? 'الدخول بحساب جوجل المالك أولاً' : 'Sign in with owner Google first'}
+          </Button>
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="admin email" dir="ltr" autoComplete="username"
             className="w-full bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2.5 text-ironforge-text mb-3" />
-          <input value={password} onChange={e => setPassword(e.target.value)} type="password" inputMode="numeric" placeholder={isAr ? 'كلمة السر' : 'Password'} dir="ltr"
+          <input value={password} onChange={e => setPassword(e.target.value)} type="password" autoComplete="current-password" placeholder={isAr ? 'كلمة السر' : 'Password'} dir="ltr"
             className="w-full bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-2.5 text-ironforge-text mb-3" />
           <Button onClick={() => load()} disabled={loading} className="w-full bg-ironforge-primary text-black">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAr ? 'دخول' : 'Enter')}
@@ -234,6 +269,11 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-ironforge-background p-6">
       <div className="max-w-3xl mx-auto">
+        <div className="flex justify-end mb-3">
+          <Button onClick={logout} variant="outline" size="sm" className="border-ironforge-border text-ironforge-text-muted">
+            {isAr ? 'خروج آمن' : 'Sign out'}
+          </Button>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-3">
           {cards.map(c => (
             <Card
@@ -396,7 +436,7 @@ export default function AdminPage() {
       {shot !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" onClick={() => setShot(null)}>
           <div className="max-w-md w-full rounded-2xl bg-ironforge-card p-4" onClick={e => e.stopPropagation()}>
-            {shot ? <img src={shot} alt="transfer" className="w-full rounded-xl" /> : <p className="text-center text-ironforge-text-muted text-sm">{isAr ? 'لا توجد صورة' : 'No screenshot'}</p>}
+            {shot && isSafeShot(shot) ? <img src={shot} alt="transfer" className="w-full rounded-xl" /> : <p className="text-center text-ironforge-text-muted text-sm">{isAr ? 'لا توجد صورة' : 'No screenshot'}</p>}
             <Button onClick={() => setShot(null)} variant="outline" className="w-full mt-3 border-ironforge-border">{isAr ? 'إغلاق' : 'Close'}</Button>
           </div>
         </div>

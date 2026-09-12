@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { PLANS } from '@/lib/subscription';
 import { getSessionEmail } from '@/lib/api/guard';
+import { apiRateLimited } from '@/lib/security/rate-limit';
+import { isEmail, isSafeImageDataUrl, isText } from '@/lib/security/validate';
 
 export const runtime = 'nodejs';
 
@@ -31,7 +33,8 @@ export async function GET(req: NextRequest) {
     }
     return Response.json({ plan: data.plan, expiresAt: data.expires_at });
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    console.error('[subscriptions] GET failed:', e?.message || e);
+    return Response.json({ error: 'Internal error' }, { status: 500 });
   }
 }
 
@@ -39,6 +42,8 @@ export async function GET(req: NextRequest) {
 // Security: session email must match + amount must EXACTLY equal the plan price
 // (stops "yearly for 1 EGP" forgery; admin still eyeballs the screenshot).
 export async function POST(req: NextRequest) {
+  const limited = apiRateLimited(req, 'subscriptions', 10);
+  if (limited) return limited;
   try {
     const body = await req.json();
     const email = String(body.email || '').toLowerCase().trim();
@@ -47,8 +52,12 @@ export async function POST(req: NextRequest) {
     const amount = Number(body.amount || 0);
     const method = String(body.method || '');
     const screenshot = String(body.screenshot || '');
-    if (!email || !phone || !['monthly', 'quarterly', 'yearly'].includes(plan) || !amount || !['instapay', 'vodafone'].includes(method)) {
+    if (!isEmail(email) || !isText(phone, 5, 32) || !['monthly', 'quarterly', 'yearly'].includes(plan) || !amount || !['instapay', 'vodafone'].includes(method)) {
       return Response.json({ error: 'Missing fields' }, { status: 400 });
+    }
+    // Egyptian phone: 8-15 digits, optional leading +.
+    if (!/^\+?\d{8,15}$/.test(phone.replace(/[\s-]/g, ''))) {
+      return Response.json({ error: 'Invalid phone' }, { status: 400 });
     }
     const sessionEmail = await getSessionEmail();
     if (!sessionEmail || sessionEmail !== email) {
@@ -57,7 +66,7 @@ export async function POST(req: NextRequest) {
     if (PLAN_PRICE[plan] !== amount) {
       return Response.json({ error: 'Amount does not match plan price' }, { status: 400 });
     }
-    if (screenshot.length > 2_500_000) {
+    if (screenshot.length > 2_500_000 || !isSafeImageDataUrl(screenshot)) {
       return Response.json({ error: 'Screenshot too large' }, { status: 400 });
     }
     const supabase = createServiceClient();
@@ -66,9 +75,13 @@ export async function POST(req: NextRequest) {
       .insert({ email, phone, plan, amount, method, screenshot, status: 'pending' })
       .select('id')
       .single();
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('[subscriptions] insert failed:', error.message);
+      return Response.json({ error: 'Could not save request' }, { status: 500 });
+    }
     return Response.json({ id: data.id, status: 'pending' });
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    console.error('[subscriptions] POST failed:', e?.message || e);
+    return Response.json({ error: 'Internal error' }, { status: 500 });
   }
 }

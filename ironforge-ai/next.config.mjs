@@ -8,17 +8,35 @@ const nextConfig = {
   // فقط للـ APK الأوفلاين نحتاج export + trailingSlash، أما Vercel فلازم يكون بدونهم عشان الـ API يشتغل بدون 308 redirect
   ...(process.env.BUILD_TARGET === 'capacitor' ? { output: 'export', trailingSlash: true } : { trailingSlash: false }),
   images: { unoptimized: true },
-  // CORS for the Capacitor APK (https://localhost → this API).
-  // Ignored in the static capacitor export; active on Vercel where the API runs.
+  // Security headers for all pages. API CORS is handled dynamically in
+  // middleware.ts (allow-list only) — no wildcard here on purpose.
   async headers() {
     if (process.env.BUILD_TARGET === 'capacitor') return [];
     return [
       {
-        source: '/api/:path*',
+        source: '/:path*',
         headers: [
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, PATCH, DELETE, OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
+              "img-src 'self' data: blob: https:",
+              "connect-src 'self' https://*.supabase.co https://api.groq.com https://api.github.com https://api.resend.com",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
+          ...(process.env.VERCEL === '1'
+            ? [{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' }]
+            : []),
         ],
       },
     ];

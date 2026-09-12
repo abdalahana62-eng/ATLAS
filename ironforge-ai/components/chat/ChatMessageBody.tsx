@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { isSafeHref } from '@/lib/security/validate';
 
 function renderBold(text: string, keyPrefix: string): React.ReactNode[] {
   // **bold** → <strong>, keep it simple and safe (no dangerouslySetInnerHTML)
@@ -22,17 +23,20 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
   const linkParts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
   return linkParts.map((lp, li) => {
     const m = lp.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-    if (m) {
+    if (m && isSafeHref(m[2])) {
       return (
         <a
           key={`${keyPrefix}-a-${li}`}
           href={m[2]}
+          target={m[2].startsWith('http') ? '_blank' : undefined}
+          rel={m[2].startsWith('http') ? 'noopener noreferrer nofollow' : undefined}
           className="font-bold text-ironforge-primary underline underline-offset-4 decoration-ironforge-primary/60 hover:decoration-ironforge-primary"
         >
           {renderBold(m[1], `${keyPrefix}-a-${li}`)}
         </a>
       );
     }
+    // Unsafe href (javascript:, data:, etc.) → render as plain text, never a link.
     return <React.Fragment key={`${keyPrefix}-${li}`}>{renderBold(lp, `${keyPrefix}-${li}`)}</React.Fragment>;
   });
 }

@@ -28,7 +28,8 @@ export async function GET(req: NextRequest) {
     );
     return Response.json({ startedAt: (data as any).started_at, trialLeft: left });
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    console.error('[trial] GET failed:', e?.message || e);
+    return Response.json({ error: 'Internal error' }, { status: 500 });
   }
 }
 
@@ -50,7 +51,10 @@ export async function POST(req: NextRequest) {
       { email: em, started_at: new Date().toISOString() },
       { onConflict: 'email', ignoreDuplicates: true }
     );
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('[trial] POST failed:', error.message);
+      return Response.json({ error: 'Could not save' }, { status: 500 });
+    }
     const { data } = await supabase
       .from('trial_starts')
       .select('started_at')
@@ -58,6 +62,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
     return Response.json({ startedAt: (data as any)?.started_at ?? null });
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    console.error('[trial] POST failed:', e?.message || e);
+    return Response.json({ error: 'Internal error' }, { status: 500 });
   }
 }

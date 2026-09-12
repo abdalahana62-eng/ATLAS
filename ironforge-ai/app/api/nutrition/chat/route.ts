@@ -22,15 +22,19 @@ export async function POST(req: NextRequest) {
     const gate = await requireAI(req);
     if (gate instanceof Response) return gate;
     const { message, stats, targetMacros, country, logged } = await req.json();
-    if (!message) return Response.json({ error: 'Missing message' }, { status: 400 });
+    if (typeof message !== 'string' || !message.trim() || message.length > 2000) {
+      return Response.json({ error: 'Missing message' }, { status: 400 });
+    }
+    const safeMessage = message.trim().slice(0, 2000);
+    const safeCountry = typeof country === 'string' ? country.slice(0, 64) : 'EG';
 
-    const isAr = /[\u0600-\u06FF]/.test(message);
-    const kb = buildKnowledgeContext(message, isAr ? 'ar' : 'en');
-    const dishes = buildDishContext(message, isAr ? 'ar' : 'en');
+    const isAr = /[\u0600-\u06FF]/.test(safeMessage);
+    const kb = buildKnowledgeContext(safeMessage, isAr ? 'ar' : 'en');
+    const dishes = buildDishContext(safeMessage, isAr ? 'ar' : 'en');
     // Full-plan request? (e.g. "عاوز اكل 2000 سعرة") → long structured answer, no word cap
-    const q = message.toLowerCase();
-    const targetKcalMatch = message.match(/(\d{3,4})\s*(سعر|سعره|كالوري|kcal|cal)/);
-    const wantsPlan = /اكل ايه|اكل إيه|نظام|وجبات|plan|meal plan|يوم كامل|فطار وغدا|جدول/.test(message) || !!targetKcalMatch;
+    const q = safeMessage.toLowerCase();
+    const targetKcalMatch = safeMessage.match(/(\d{3,4})\s*(سعر|سعره|كالوري|kcal|cal)/);
+    const wantsPlan = /اكل ايه|اكل إيه|نظام|وجبات|plan|meal plan|يوم كامل|فطار وغدا|جدول/.test(safeMessage) || !!targetKcalMatch;
     const planKcal = targetKcalMatch ? parseInt(targetKcalMatch[1], 10) : null;
     const remaining = logged && targetMacros ? {
       calories: Math.max(0, targetMacros.calories - (logged.calories || 0)),
@@ -38,7 +42,7 @@ export async function POST(req: NextRequest) {
       carbs: Math.max(0, targetMacros.carbs - (logged.carbs || 0)),
       fats: Math.max(0, targetMacros.fats - (logged.fats || 0)),
     } : null;
-    const sys = `You are ATLAS expert nutritionist for ${country} — you talk like a friendly human coach to a BEGINNER, not like a food table. User stats: ${JSON.stringify(stats)} dailyTarget: ${JSON.stringify(targetMacros)} remainingToday: ${JSON.stringify(remaining)}.
+    const sys = `You are ATLAS expert nutritionist for ${safeCountry} — you talk like a friendly human coach to a BEGINNER, not like a food table. User stats: ${JSON.stringify(stats ?? {}).slice(0, 800)} dailyTarget: ${JSON.stringify(targetMacros ?? {}).slice(0, 500)} remainingToday: ${JSON.stringify(remaining ?? {}).slice(0, 500)}.
 Answer in the user's language (Arabic if message is Arabic). Arabic = simple Egyptian-friendly words (عشان، كده، بص)، short sentences, one idea per line.
 
 === HUMAN ANSWER PROTOCOL (mandatory) ===
@@ -63,7 +67,7 @@ ${wantsPlan
     let completion;
     try {
       completion = await createChatCompletion(
-        [{ role: 'system', content: sys }, { role: 'user', content: message }],
+        [{ role: 'system', content: sys }, { role: 'user', content: safeMessage }],
         { temperature: 0.2, maxTokens: wantsPlan ? 1500 : 700, model: 'openai/gpt-oss-120b' }
       );
     } catch (err: any) {
@@ -76,11 +80,12 @@ ${wantsPlan
     trackAIUsage('nutrition');
     const answer = completion.choices[0]?.message?.content?.trim() ?? '';
     if (!answer) {
-      console.error('Empty answer from model', { model: process.env.OPENAI_MODEL, message });
+      console.error('Empty answer from model', { model: process.env.OPENAI_MODEL });
       return Response.json({ answer: 'عذراً، حاول مرة أخرى بصياغة مختلفة. مثال: عندي بيض ولبنة، كم جرام آكل؟' });
     }
     return Response.json({ answer, v: 'plan-mode-1' });
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    console.error('[nutrition/chat] failed:', e?.message || e);
+    return Response.json({ error: 'Internal error' }, { status: 500 });
   }
 }

@@ -21,9 +21,13 @@ export async function POST(req: NextRequest) {
     const { error } = await supabase
       .from('user_presence')
       .upsert({ email, last_seen: new Date().toISOString(), platform });
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('[presence] failed:', error.message);
+      return Response.json({ error: 'Could not save' }, { status: 500 });
+    }
     return Response.json({ ok: true });
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    console.error('[presence] failed:', e?.message || e);
+    return Response.json({ error: 'Internal error' }, { status: 500 });
   }
 }

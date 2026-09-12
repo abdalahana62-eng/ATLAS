@@ -4,6 +4,7 @@ import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
+import { safeNextPath } from '@/lib/security/validate';
 import { Loader2 } from 'lucide-react';
 
 // Google OAuth callback: /<locale>/auth/callback?code=...&next=/<locale>/onboarding
@@ -17,7 +18,8 @@ function CallbackInner() {
     const run = async () => {
       const loginUrl = `/${locale}/auth/login`;
       const code = params.get('code');
-      const next = params.get('next') ?? `/${locale}/onboarding`;
+      // Prevent open-redirect: only allow internal /ar... or /en... paths.
+      const next = safeNextPath(params.get('next'), `/${locale}/onboarding`);
       const oauthError = params.get('error');
       if (oauthError) {
         window.location.href = `${loginUrl}?error=${encodeURIComponent(params.get('error_description') || oauthError)}`;

@@ -80,7 +80,8 @@ export async function requireAI(
   try {
     svc = createServiceClient();
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    console.error('[guard] service client missing:', e?.message || e);
+    return Response.json({ error: 'Service unavailable' }, { status: 500 });
   }
 
   const isSub = await hasActiveSubscription(svc, email);

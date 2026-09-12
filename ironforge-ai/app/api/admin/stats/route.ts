@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
-import { checkAdmin } from '../auth';
+import { guardAdmin } from '../auth';
+import { corsHeadersFor } from '@/lib/security/cors';
 
 export const runtime = 'nodejs';
 
@@ -43,7 +44,9 @@ async function readAIUsage(supabase: ReturnType<typeof createServiceClient>) {
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await checkAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  const cors = corsHeadersFor(req);
+  const denied = await guardAdmin(req);
+  if (denied) return Response.json({ error: 'Forbidden' }, { status: denied.status, headers: { ...cors, ...Object.fromEntries(denied.headers.entries()) } });
   try {
     const supabase = createServiceClient();
     const { data, error } = await supabase.rpc('get_admin_stats');
@@ -51,9 +54,9 @@ export async function GET(req: NextRequest) {
       try {
         const ai = await readAIUsage(supabase);
         const app = await readAppStats(supabase);
-        return Response.json({ ...data, ...ai, ...app });
+        return Response.json({ ...data, ...ai, ...app }, { headers: cors });
       } catch {}
-      return Response.json(data);
+      return Response.json(data, { headers: cors });
     }
     // Fallback: count tables directly (works even if rpc missing)
     const out: any = { users: 0, activeSubs: 0, pending: 0, totalRequests: 0, fallback: true };
@@ -77,8 +80,9 @@ export async function GET(req: NextRequest) {
     try {
       Object.assign(out, await readAppStats(supabase));
     } catch {}
-    return Response.json(out);
+    return Response.json(out, { headers: cors });
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    console.error('[admin/stats] failed:', e?.message || e);
+    return Response.json({ error: 'Internal error' }, { status: 500, headers: cors });
   }
 }
