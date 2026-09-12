@@ -40,12 +40,21 @@ jobs:
         run: |
           echo "Checking out/ contents..."
           ls -la out || echo "out missing!"
-          ls -la out/en || echo "out/en missing!"
+          ls -la out/ar || echo "out/ar missing!"
           if [ ! -f out/index.html ] || ! grep -q "ATLAS" out/index.html; then
-            echo "Fixing out/index.html for Capacitor WebView..."
-            cp out/en/index.html out/index.html
-            cp -r out/en/* out/ 2>/dev/null || true
-            echo "Fixed - copied en to root"
+            echo "Fixing out/ root with Arabic (default locale) pages..."
+            cp out/ar/index.html out/index.html
+            cp out/ar/index.txt out/ 2>/dev/null || true
+            for d in out/ar/*/; do
+              name=$(basename "$d")
+              if [ "$name" = "auth" ]; then
+                mkdir -p out/auth
+                cp -r out/ar/auth/login out/ar/auth/signup out/auth/ 2>/dev/null || true
+              else
+                cp -r "out/ar/$name" "out/$name"
+              fi
+            done
+            echo "Fixed - copied ar to root (kept top-level /auth/callback)"
           fi
           echo "--- out/index.html head ---"
           head -n 20 out/index.html
