@@ -79,21 +79,17 @@ export default function AdminPage() {
   const loadOnline = async () => {
     setOnlineLoading(true);
     try {
-      const supabase = createClient();
-      const cutoff = new Date(Date.now() - 90000).toISOString();
-      const { data } = await supabase
-        .from('user_presence')
-        .select('email,platform,last_seen')
-        .gt('last_seen', cutoff)
-        .order('last_seen', { ascending: false })
-        .limit(50);
-      const rows = ((data as any[]) || []).map(r => ({
-        email: String(r.email),
-        platform: String(r.platform || 'web'),
-        last_seen: String(r.last_seen),
-      }));
-      setOnline(rows.length);
-      setOnlineUsers(rows);
+      const r = await fetch('/api/admin/presence', { headers: headers(), cache: 'no-store' });
+      if (r.ok) {
+        const d = await r.json();
+        const rows = ((d.online as any[]) || []).map(x => ({
+          email: String(x.email),
+          platform: String(x.platform || 'web'),
+          last_seen: String(x.last_seen),
+        }));
+        setOnline(rows.length);
+        setOnlineUsers(rows);
+      }
     } catch {}
     setOnlineLoading(false);
   };

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { onboardingCoachPrompt } from '@/lib/ai/prompts';
 import { createChatCompletion } from '@/lib/ai/openai';
+import { requireAI } from '@/lib/api/guard';
 
 export const runtime = 'nodejs';
 
@@ -21,6 +22,8 @@ interface OnboardingNextStepResponse {
 
 export async function POST(req: NextRequest) {
   try {
+    const gate = await requireAI(req);
+    if (gate instanceof Response) return gate;
     const body: OnboardingNextStepRequest = await req.json();
 
     const { step, responses, last_user_message, collected_data } = body;

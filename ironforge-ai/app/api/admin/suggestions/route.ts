@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { checkAdmin } from '../auth';
 
 export const runtime = 'nodejs';
@@ -8,7 +9,7 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   if (!(await checkAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
   try {
-    const supabase = createClient();
+    const supabase = createServiceClient();
     const { data, error } = await supabase
       .from('suggestions')
       .select('id,email,message,status,created_at')
@@ -26,7 +27,7 @@ export async function PATCH(req: NextRequest) {
   if (!(await checkAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
   try {
     const { id, action } = await req.json();
-    const supabase = createClient();
+    const supabase = createServiceClient();
     if (action === 'read') {
       await supabase.from('suggestions').update({ status: 'read' }).eq('id', id);
     } else if (action === 'delete') {

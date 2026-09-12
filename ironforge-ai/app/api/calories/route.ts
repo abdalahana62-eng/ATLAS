@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { calorieCalculatorPrompt } from '@/lib/ai/prompts';
 import { createChatCompletion, extractJSONFromResponse } from '@/lib/ai/openai';
+import { requireAI } from '@/lib/api/guard';
 
 export const runtime = 'nodejs';
 
@@ -15,6 +16,8 @@ interface CaloriesRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    const gate = await requireAI(req);
+    if (gate instanceof Response) return gate;
     const body: CaloriesRequest = await req.json();
 
     const { age, gender, height_cm, weight_kg, activity_level, goal } = body;

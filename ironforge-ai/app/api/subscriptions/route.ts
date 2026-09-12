@@ -1,14 +1,25 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
+import { PLANS } from '@/lib/subscription';
+import { getSessionEmail } from '@/lib/api/guard';
 
 export const runtime = 'nodejs';
 
-// GET /api/subscriptions?email=x → { plan, expiresAt } or 404
+const PLAN_PRICE: Record<string, number> = Object.fromEntries(
+  PLANS.map((p) => [p.id, p.price])
+);
+
+// GET /api/subscriptions?email=x → { plan, expiresAt } or 404.
+// Strict: the queried email must match the logged-in session (anti-harvest).
 export async function GET(req: NextRequest) {
   const email = new URL(req.url).searchParams.get('email')?.toLowerCase().trim();
   if (!email) return Response.json({ error: 'Missing email' }, { status: 400 });
+  const sessionEmail = await getSessionEmail();
+  if (!sessionEmail || sessionEmail !== email) {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
   try {
-    const supabase = createClient();
+    const supabase = createServiceClient();
     const { data, error } = await supabase
       .from('subscriptions')
       .select('plan,expires_at,status')
@@ -24,7 +35,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/subscriptions → create payment request { email, phone, plan, amount, method, screenshot }
+// POST /api/subscriptions → create payment request { email, phone, plan, amount, method, screenshot }.
+// Security: session email must match + amount must EXACTLY equal the plan price
+// (stops "yearly for 1 EGP" forgery; admin still eyeballs the screenshot).
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -37,10 +50,17 @@ export async function POST(req: NextRequest) {
     if (!email || !phone || !['monthly', 'quarterly', 'yearly'].includes(plan) || !amount || !['instapay', 'vodafone'].includes(method)) {
       return Response.json({ error: 'Missing fields' }, { status: 400 });
     }
+    const sessionEmail = await getSessionEmail();
+    if (!sessionEmail || sessionEmail !== email) {
+      return Response.json({ error: 'Sign in with this email first' }, { status: 403 });
+    }
+    if (PLAN_PRICE[plan] !== amount) {
+      return Response.json({ error: 'Amount does not match plan price' }, { status: 400 });
+    }
     if (screenshot.length > 2_500_000) {
       return Response.json({ error: 'Screenshot too large' }, { status: 400 });
     }
-    const supabase = createClient();
+    const supabase = createServiceClient();
     const { data, error } = await supabase
       .from('payment_requests')
       .insert({ email, phone, plan, amount, method, screenshot, status: 'pending' })

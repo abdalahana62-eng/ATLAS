@@ -1,10 +1,11 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 
 // Fire-and-forget daily AI usage counter (feeds the admin dashboard card).
+// Uses the service client: anon access to ai_usage is revoked (lockdown).
 // Never throws — tracking must never break a chat reply.
 export function trackAIUsage(endpoint: 'chat' | 'nutrition') {
   try {
-    const supabase = createClient();
+    const supabase = createServiceClient();
     // Don't await: don't delay the user's reply for analytics.
     (supabase.rpc('bump_ai_usage', { p_endpoint: endpoint }) as unknown as Promise<unknown>).catch(
       () => {}

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { getPlan } from '@/lib/subscription';
 import { checkAdmin } from '../auth';
 
@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   if (!(await checkAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
   if (new URL(req.url).searchParams.get('id')) return getOne(req);
   try {
-    const supabase = createClient();
+    const supabase = createServiceClient();
     const status = new URL(req.url).searchParams.get('status') || 'pending';
     const { data, error } = await supabase
       .from('payment_requests')
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 async function getOne(req: NextRequest) {
   const id = new URL(req.url).searchParams.get('id');
   if (!id) return Response.json({ error: 'Missing id' }, { status: 400 });
-  const supabase = createClient();
+  const supabase = createServiceClient();
   const { data, error } = await supabase.from('payment_requests').select('*').eq('id', id).single();
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ request: data });
@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest) {
     if (!id || !['approve', 'reject'].includes(action)) {
       return Response.json({ error: 'Bad request' }, { status: 400 });
     }
-    const supabase = createClient();
+    const supabase = createServiceClient();
     const { data: pr, error: e1 } = await supabase
       .from('payment_requests')
       .select('*')

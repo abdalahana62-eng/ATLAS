@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { checkAdmin } from '../auth';
 
 export const runtime = 'nodejs';
 
 // GET /api/admin/stats → { users, activeSubs, pending, totalRequests, aiToday, aiYesterday, aiWeek }
-async function readAppStats(supabase: ReturnType<typeof createClient>) {
+async function readAppStats(supabase: ReturnType<typeof createServiceClient>) {
   // Requires migration 010_presence_platform.sql — zeros gracefully if missing.
   const out = { appInstalls: 0, appOnline: 0 };
   try {
@@ -24,7 +24,7 @@ async function readAppStats(supabase: ReturnType<typeof createClient>) {
   return out;
 }
 
-async function readAIUsage(supabase: ReturnType<typeof createClient>) {
+async function readAIUsage(supabase: ReturnType<typeof createServiceClient>) {
   // Requires migration 008_ai_usage.sql — returns zeros gracefully if missing.
   const out = { aiToday: 0, aiYesterday: 0, aiWeek: 0 };
   try {
@@ -45,7 +45,7 @@ async function readAIUsage(supabase: ReturnType<typeof createClient>) {
 export async function GET(req: NextRequest) {
   if (!(await checkAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
   try {
-    const supabase = createClient();
+    const supabase = createServiceClient();
     const { data, error } = await supabase.rpc('get_admin_stats');
     if (!error && data) {
       try {

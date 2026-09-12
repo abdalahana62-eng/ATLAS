@@ -34,13 +34,14 @@ export default function PresenceTracker() {
         const { data } = await supabase.auth.getSession();
         const email = data.session?.user?.email?.toLowerCase().trim();
         if (!email || stopped) return;
-        const { error } = await supabase
-          .from('user_presence')
-          .upsert({ email, last_seen: new Date().toISOString(), platform });
-        if (error) {
-          // Migration 010 not run yet (no platform column) → basic heartbeat
-          await supabase.from('user_presence').upsert({ email, last_seen: new Date().toISOString() });
-        }
+        // Server-verified heartbeat: the API matches the email against the
+        // logged-in session, so nobody can fake someone else's presence.
+        const { apiFetch } = await import('@/lib/apiBase');
+        await apiFetch('/api/presence', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, platform }),
+        });
       } catch {}
     };
     beat();

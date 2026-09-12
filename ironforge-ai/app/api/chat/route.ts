@@ -4,6 +4,7 @@ import { buildKnowledgeContext } from '@/lib/knowledgeSearch';
 import { buildDishContext } from '@/lib/data/dishNutrition';
 import { createStreamingChatCompletion, type ChatMessage } from '@/lib/ai/openai';
 import { trackAIUsage, isQuotaError } from '@/lib/ai/usage';
+import { requireAI } from '@/lib/api/guard';
 
 // Friendly upsell shown when the free Groq quota runs out for the day.
 // Keep it human + beginner-simple, and link to the real plans page.
@@ -70,6 +71,13 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
+    // Security: logged-in session + active trial/subscription + daily cap.
+    // Blocks anonymous quota-burn from any website/app on the internet.
+    const gate = await requireAI(req);
+    if (gate instanceof Response) {
+      const body = await gate.json().catch(() => ({ error: 'Forbidden' }));
+      return Response.json(body, { status: gate.status, headers: corsHeaders });
+    }
     // تحقق سريع من وجود مفتاح Groq السحابي قبل المحاولة
     if (!process.env.OPENAI_API_KEY) {
       console.error('Chat API: Missing OPENAI_API_KEY');

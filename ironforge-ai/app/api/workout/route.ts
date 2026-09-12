@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { workoutPlanPrompt } from '@/lib/ai/prompts';
 import { createChatCompletion, extractJSONFromResponse } from '@/lib/ai/openai';
+import { requireAI } from '@/lib/api/guard';
 
 export const runtime = 'nodejs';
 
@@ -17,6 +18,8 @@ interface WorkoutRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    const gate = await requireAI(req);
+    if (gate instanceof Response) return gate;
     const body: WorkoutRequest = await req.json();
 
     const {

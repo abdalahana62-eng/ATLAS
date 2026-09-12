@@ -4,23 +4,21 @@ import { checkAdmin } from '../auth';
 
 export const runtime = 'nodejs';
 
-// GET /api/admin/subscribers → [{ email, plan, expires_at, daysLeft }]
+// GET /api/admin/presence → currently-online users (owner only).
+// Online = heartbeat within the last 90 seconds.
 export async function GET(req: NextRequest) {
   if (!(await checkAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403 });
   try {
     const supabase = createServiceClient();
+    const cutoff = new Date(Date.now() - 90000).toISOString();
     const { data, error } = await supabase
-      .from('subscriptions')
-      .select('email,plan,expires_at,status,created_at')
-      .order('expires_at', { ascending: false })
-      .limit(500);
+      .from('user_presence')
+      .select('email,platform,last_seen')
+      .gt('last_seen', cutoff)
+      .order('last_seen', { ascending: false })
+      .limit(50);
     if (error) return Response.json({ error: error.message }, { status: 500 });
-    const now = Date.now();
-    const list = (data || []).map((s: any) => ({
-      ...s,
-      daysLeft: Math.max(0, Math.ceil((new Date(s.expires_at).getTime() - now) / 86400000)),
-    }));
-    return Response.json({ subscribers: list });
+    return Response.json({ online: data || [] });
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
   }

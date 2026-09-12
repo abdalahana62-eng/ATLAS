@@ -1,17 +1,21 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
+import { getSessionEmail } from '@/lib/api/guard';
 import { TRIAL_DAYS } from '@/lib/subscription';
 
 export const runtime = 'nodejs';
 
-// GET /api/account/trial?email=x → { startedAt, trialLeft }
-// The trial clock lives on the SERVER (trial_starts table) so website ↔ app
-// share the same 3 free days. Falls back gracefully if migration not run.
+// GET /api/account/trial?email=x → { startedAt, trialLeft }.
+// Strict: email must match the logged-in session (no harvesting others' clocks).
 export async function GET(req: NextRequest) {
   try {
     const email = new URL(req.url).searchParams.get('email')?.toLowerCase().trim();
     if (!email) return Response.json({ error: 'Missing email' }, { status: 400 });
-    const supabase = createClient();
+    const sessionEmail = await getSessionEmail();
+    if (!sessionEmail || sessionEmail !== email) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    const supabase = createServiceClient();
     const { data, error } = await supabase
       .from('trial_starts')
       .select('started_at')
@@ -28,20 +32,24 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/account/trial { email, startedAt? } → registers trial start.
-// First device wins: insert-only, existing rows are never overwritten.
+// POST /api/account/trial { email } → registers trial start.
+// Security: email must match the session; started_at ALWAYS comes from the
+// server clock (client-supplied dates are ignored — stops future-date cheats
+// and pre-registration theft). First device wins: existing rows never change.
 export async function POST(req: NextRequest) {
   try {
-    const { email, startedAt } = await req.json();
+    const { email } = await req.json();
     const em = String(email || '').toLowerCase().trim();
     if (!em) return Response.json({ error: 'Missing email' }, { status: 400 });
-    const supabase = createClient();
-    const row: any = { email: em };
-    if (startedAt) row.started_at = startedAt;
-    const { error } = await supabase.from('trial_starts').upsert(row, {
-      onConflict: 'email',
-      ignoreDuplicates: true,
-    });
+    const sessionEmail = await getSessionEmail();
+    if (!sessionEmail || sessionEmail !== em) {
+      return Response.json({ error: 'Sign in with this email first' }, { status: 403 });
+    }
+    const supabase = createServiceClient();
+    const { error } = await supabase.from('trial_starts').upsert(
+      { email: em, started_at: new Date().toISOString() },
+      { onConflict: 'email', ignoreDuplicates: true }
+    );
     if (error) return Response.json({ error: error.message }, { status: 500 });
     const { data } = await supabase
       .from('trial_starts')
