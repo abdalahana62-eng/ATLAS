@@ -11,13 +11,25 @@ export async function checkAdmin(req: NextRequest): Promise<boolean> {
     const email = req.headers.get('x-admin-email')?.toLowerCase().trim();
     const pass = req.headers.get('x-admin-password') || '';
     const owner = (process.env.ADMIN_EMAIL || OWNER_EMAIL).toLowerCase();
-    if (!ADMIN_PASSWORD) return false;
-    if (!email || email !== owner) return false;
-    if (!pass || pass !== ADMIN_PASSWORD) return false;
+    if (!ADMIN_PASSWORD) {
+      console.error('[admin-auth] DENY: ADMIN_PASSWORD env missing');
+      return false;
+    }
+    if (!email || email !== owner) {
+      console.error('[admin-auth] DENY: email mismatch');
+      return false;
+    }
+    if (!pass || pass !== ADMIN_PASSWORD) {
+      console.error('[admin-auth] DENY: password mismatch');
+      return false;
+    }
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
     const sessEmail = data.user?.email?.toLowerCase().trim();
-    if (!sessEmail || sessEmail !== owner) return false;
+    if (!sessEmail || sessEmail !== owner) {
+      console.error('[admin-auth] DENY: no owner Google session');
+      return false;
+    }
     return true;
   } catch {
     return false;
