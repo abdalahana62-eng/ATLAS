@@ -22,8 +22,9 @@ export default function AdminPage() {
   const [reqs, setReqs] = useState<Req[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [online, setOnline] = useState(0);
-  const [onlineEmails, setOnlineEmails] = useState<string[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<{ email: string; platform: string; last_seen: string }[]>([]);
   const [showOnline, setShowOnline] = useState(false);
+  const [onlineLoading, setOnlineLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('pending');
   const [shot, setShot] = useState<string | null>(null);
@@ -42,6 +43,24 @@ export default function AdminPage() {
     'x-admin-password': sessionStorage.getItem('atlas-admin-pass') || password,
   });
 
+  const planName = (id: string) =>
+    isAr
+      ? ({ monthly: 'شهري', quarterly: 'ربع سنوي (3 شهور)', yearly: 'سنوي' } as any)[id] || id
+      : ({ monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly' } as any)[id] || id;
+
+  const methodName = (m: string) =>
+    isAr
+      ? (m === 'instapay' ? 'انستاباي' : m === 'vodafone' ? 'فودافون كاش' : m)
+      : m;
+
+  const ago = (iso: string) => {
+    const s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+    if (s < 10) return isAr ? 'الآن 🟢' : 'now 🟢';
+    if (s < 60) return isAr ? `منذ ${s} ث` : `${s}s ago`;
+    const m = Math.floor(s / 60);
+    return isAr ? `منذ ${m} د` : `${m}m ago`;
+  };
+
   // Auto-fill owner email from Google session
   useEffect(() => {
     const run = async () => {
@@ -55,25 +74,36 @@ export default function AdminPage() {
     run();
   }, []);
 
-  // Live online users via heartbeat table (online = seen in last 90s), refresh every 15s
+  // Live online users via heartbeat table (online = seen in last 90s), refresh every 15s.
+  // Shows WHO is online right now + from where (app/website) + exact last-seen time.
+  const loadOnline = async () => {
+    setOnlineLoading(true);
+    try {
+      const supabase = createClient();
+      const cutoff = new Date(Date.now() - 90000).toISOString();
+      const { data } = await supabase
+        .from('user_presence')
+        .select('email,platform,last_seen')
+        .gt('last_seen', cutoff)
+        .order('last_seen', { ascending: false })
+        .limit(50);
+      const rows = ((data as any[]) || []).map(r => ({
+        email: String(r.email),
+        platform: String(r.platform || 'web'),
+        last_seen: String(r.last_seen),
+      }));
+      setOnline(rows.length);
+      setOnlineUsers(rows);
+    } catch {}
+    setOnlineLoading(false);
+  };
+
   useEffect(() => {
     if (!authed) return;
-    let alive = true;
     let timer: any = null;
-    const run = async () => {
-      try {
-        const supabase = createClient();
-        const cutoff = new Date(Date.now() - 90000).toISOString();
-        const { data } = await supabase.from('user_presence').select('email').gt('last_seen', cutoff).limit(50);
-        if (!alive) return;
-        const emails = ((data as any[]) || []).map(r => r.email);
-        setOnline(emails.length);
-        setOnlineEmails(emails.slice(0, 20));
-      } catch {}
-    };
-    run();
-    timer = setInterval(run, 15000);
-    return () => { alive = false; try { clearInterval(timer); } catch {} };
+    loadOnline();
+    timer = setInterval(loadOnline, 15000);
+    return () => { try { clearInterval(timer); } catch {} };
   }, [authed]);
 
   const load = async (em?: string, pw?: string) => {
@@ -226,11 +256,24 @@ export default function AdminPage() {
 
         {showOnline && (
           <Card className="p-4 border-ironforge-primary/40 mb-6">
-            <p className="font-bold text-ironforge-text mb-2">🟢 {isAr ? 'المتصلون الآن' : 'Currently online'} ({onlineEmails.length})</p>
-            {onlineEmails.length === 0 && <p className="text-xs text-ironforge-text-muted">{isAr ? 'مفيش حد فاتح التطبيق دلوقتي غيرك — جرّب من موبايل تاني' : 'Nobody online right now — try from another device'}</p>}
+            <div className="flex items-center justify-between mb-2">
+              <p className="font-bold text-ironforge-text">🟢 {isAr ? 'المتصلون الآن' : 'Currently online'} ({onlineUsers.length})</p>
+              <Button onClick={loadOnline} variant="outline" size="sm" className="border-ironforge-border">
+                <RefreshCw className={`w-4 h-4 ${onlineLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
+            {onlineUsers.length === 0 && <p className="text-xs text-ironforge-text-muted">{isAr ? 'مفيش حد فاتح التطبيق دلوقتي غيرك — جرّب من موبايل تاني' : 'Nobody online right now — try from another device'}</p>}
             <div className="space-y-1 max-h-48 overflow-y-auto">
-              {onlineEmails.map(e => (
-                <p key={e} className="text-sm text-ironforge-text bg-ironforge-background rounded-lg px-3 py-1.5" dir="ltr">{e}</p>
+              {onlineUsers.map(u => (
+                <div key={u.email} className="flex items-center justify-between gap-2 text-sm text-ironforge-text bg-ironforge-background rounded-lg px-3 py-1.5">
+                  <span dir="ltr" className="truncate">{u.email}</span>
+                  <span className="flex items-center gap-2 shrink-0 text-xs text-ironforge-text-muted">
+                    <span>{ago(u.last_seen)}</span>
+                    <span className="rounded-full bg-ironforge-primary/15 text-ironforge-primary px-2 py-0.5">
+                      {u.platform === 'app' ? (isAr ? '📱 تطبيق' : '📱 app') : (isAr ? '🌐 موقع' : '🌐 web')}
+                    </span>
+                  </span>
+                </div>
               ))}
             </div>
           </Card>
@@ -276,7 +319,7 @@ export default function AdminPage() {
                   <div className="text-sm">
                     <p className="font-bold text-ironforge-text" dir="ltr">{s.email}</p>
                     <p className="text-ironforge-text-muted mt-1">
-                      <Badge className="bg-ironforge-primary/15 text-ironforge-primary border-ironforge-primary/30">{s.plan}</Badge>
+                      <Badge className="bg-ironforge-primary/15 text-ironforge-primary border-ironforge-primary/30">{planName(s.plan)}</Badge>
                       {' '}<span className={s.daysLeft <= 3 ? 'text-red-400 font-bold' : ''}>{isAr ? `متبقي ${s.daysLeft} يوم` : `${s.daysLeft}d left`}</span>
                       {' • '}{isAr ? 'ينتهي' : 'expires'} {s.expires_at?.slice(0, 10)}
                     </p>
@@ -309,7 +352,12 @@ export default function AdminPage() {
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="text-sm">
                   <p className="font-bold text-ironforge-text" dir="ltr">{r.email}</p>
-                  <p className="text-ironforge-text-muted" dir="ltr">{r.phone} • {r.plan} • {r.amount} ج.م • {r.method}</p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                    <Badge className="bg-ironforge-primary/15 text-ironforge-primary border-ironforge-primary/30">{planName(r.plan)}</Badge>
+                    <Badge className="border-ironforge-border text-ironforge-text-muted">{r.amount} {isAr ? 'ج.م' : 'EGP'}</Badge>
+                    <Badge className="border-ironforge-border text-ironforge-text-muted">{methodName(r.method)}</Badge>
+                  </div>
+                  <p className="text-ironforge-text-muted mt-1" dir="ltr">{r.phone}</p>
                   <p className="text-xs text-ironforge-text-muted">{new Date(r.created_at).toLocaleString()}</p>
                   <button onClick={() => viewShot(r.id)} className="mt-2 inline-flex items-center gap-1 text-xs text-ironforge-primary underline">
                     <Eye className="w-3 h-3" /> {shotLoading ? '...' : (isAr ? 'عرض سكرين التحويل' : 'View screenshot')}

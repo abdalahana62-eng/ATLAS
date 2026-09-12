@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useMemo, Suspense, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Copy, Check, Upload, Smartphone, BadgeCheck, Loader2, ArrowRight } from 'lucide-react';
@@ -49,7 +49,39 @@ function SubscribeInner() {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [queued, setQueued] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Resend requests that were saved on the device while offline/old-version.
+  // Without this, those payments sit in localStorage forever and never reach admin.
+  const flushQueue = async (): Promise<number> => {
+    try {
+      const { apiFetch } = await import('@/lib/apiBase');
+      const q = JSON.parse(localStorage.getItem('atlas-pay-queue') || '[]');
+      if (!Array.isArray(q) || q.length === 0) return 0;
+      const remaining: any[] = [];
+      for (const item of q) {
+        try {
+          const r = await apiFetch('/api/subscriptions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item),
+          });
+          if (!r.ok) remaining.push(item);
+        } catch {
+          remaining.push(item);
+        }
+      }
+      try { localStorage.setItem('atlas-pay-queue', JSON.stringify(remaining)); } catch {}
+      return q.length - remaining.length;
+    } catch {
+      return 0;
+    }
+  };
+
+  useEffect(() => {
+    flushQueue();
+  }, []);
 
   const copyNumber = async () => {
     try { await navigator.clipboard.writeText(PAY_NUMBER); } catch {}
@@ -89,13 +121,18 @@ function SubscribeInner() {
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Failed');
+      setQueued(false);
       setDone(true);
+      // Send any older requests stuck on this device too
+      flushQueue().catch(() => {});
     } catch (e: any) {
-      // fallback: save locally so nothing is lost
+      // Offline/server down: save WITH the screenshot so nothing is lost,
+      // and auto-resend next time this page opens.
       try {
         const q = JSON.parse(localStorage.getItem('atlas-pay-queue') || '[]');
-        q.push({ email: getAccount()?.email, phone, plan: plan.id, amount: plan.price, method, createdAt: new Date().toISOString() });
+        q.push({ email: getAccount()?.email, phone, plan: plan.id, amount: plan.price, method, screenshot: shot, createdAt: new Date().toISOString() });
         localStorage.setItem('atlas-pay-queue', JSON.stringify(q));
+        setQueued(true);
         setDone(true);
       } catch {
         setError(e.message);
@@ -109,11 +146,15 @@ function SubscribeInner() {
       <div className="min-h-screen bg-ironforge-background p-6 flex items-center justify-center">
         <Card className="p-8 max-w-md w-full text-center border-ironforge-primary/40">
           <BadgeCheck className="w-14 h-14 text-ironforge-primary mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-ironforge-text mb-2">{isAr ? 'طلبك وصل ✅' : 'Request received ✅'}</h1>
+          <h1 className="text-2xl font-bold text-ironforge-text mb-2">{queued ? (isAr ? 'اتحفظ وهيتبعت ✅' : 'Saved, will send ✅') : (isAr ? 'طلبك وصل ✅' : 'Request received ✅')}</h1>
           <p className="text-ironforge-text-muted text-sm leading-7">
-            {isAr
-              ? `باقة ${plan.name_ar} (${plan.price} ج.م) — هنراجع التحويل ونفعّل اشتراكك في أقل من 24 ساعة. هنبعتلك على بريدك المسجل.`
-              : `${plan.name_en} (${plan.price} EGP) — we will review and activate within 24h.`}
+            {queued
+              ? (isAr
+                ? `مفيش نت دلوقتي، فطلب باقة ${plan.name_ar} (${plan.price} ج.م) اتحفظ على جهازك بالسكرين وهيتبعت للإدارة لوحده أول ما تفتح الصفحة دي والنت شغال.`
+                : `No connection — your request was saved on this device and will be sent automatically.`)
+              : (isAr
+                ? `باقة ${plan.name_ar} (${plan.price} ج.م) — هنراجع التحويل ونفعّل اشتراكك في أقل من 24 ساعة. هنبعتلك على بريدك المسجل.`
+                : `${plan.name_en} (${plan.price} EGP) — we will review and activate within 24h.`)}
           </p>
           <Link href={`/${locale}/dashboard`}>
             <Button className="w-full mt-6 bg-ironforge-primary text-black">{isAr ? 'رجوع للرئيسية' : 'Back home'}</Button>
