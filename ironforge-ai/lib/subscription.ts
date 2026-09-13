@@ -90,8 +90,9 @@ export async function getPayNumber(): Promise<string> {
     if (r.ok) {
       const d = await r.json();
       if (typeof d?.payNumber === 'string' && d.payNumber) {
-        payNumberCache = d.payNumber;
-        return payNumberCache;
+        const num: string = d.payNumber;
+        payNumberCache = num;
+        return num;
       }
     }
   } catch {}
