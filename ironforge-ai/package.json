@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "build:mobile": "next build",
+    "build": "node scripts/build.js",
+    "build:mobile": "node scripts/build.js",
     "cap:init": "cap init IronForge AI com.ironforge.ai --web-dir=out",
     "cap:add:android": "cap add android",
     "cap:sync": "cap sync android",
