@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { createClient } from '@/lib/supabase/server';
 import { PLANS } from '@/lib/subscription';
 import { getSessionEmail } from '@/lib/api/guard';
 import { apiRateLimited } from '@/lib/security/rate-limit';
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
     if (screenshot.length > 2_500_000 || !isSafeImageDataUrl(screenshot)) {
       return Response.json({ error: 'Screenshot too large' }, { status: 400 });
     }
-    const supabase = createServiceClient();
+    const supabase = createClient();
     const { data, error } = await supabase
       .from('payment_requests')
       .insert({ email, phone, plan, amount, method, screenshot, status: 'pending' })
@@ -77,6 +78,13 @@ export async function POST(req: NextRequest) {
       .single();
     if (error) {
       console.error('[subscriptions] insert failed:', error.message);
+      // Fallback to service if anon RLS blocks (covers both key setups)
+      try {
+        const svc = createServiceClient();
+        const r2 = await svc.from('payment_requests').insert({ email, phone, plan, amount, method, screenshot, status: 'pending' }).select('id').single();
+        if (!r2.error && r2.data) return Response.json({ id: r2.data.id, status: 'pending' });
+        console.error('[subscriptions] service fallback failed:', r2.error?.message);
+      } catch {}
       return Response.json({ error: 'Could not save request' }, { status: 500 });
     }
     return Response.json({ id: data.id, status: 'pending' });
