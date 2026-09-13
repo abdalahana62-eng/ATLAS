@@ -54,7 +54,8 @@ export function getClientIp(req: Request): string {
   return 'unknown';
 }
 
-async function upstashCheck(key: string, limit: number, windowSec: number): Promise<{ allowed: boolean; resetAt: number } | null> {  try {
+async function upstashCheck(key: string, limit: number, windowSec: number): Promise<{ allowed: boolean; resetAt: number } | null> {
+  try {
     const url = process.env.UPSTASH_REDIS_REST_URL;
     const token = process.env.UPSTASH_REDIS_REST_TOKEN;
     if (!url || !token) return null;
@@ -76,12 +77,21 @@ async function upstashCheck(key: string, limit: number, windowSec: number): Prom
   }
 }
 
+async function rateLimitWithUpstash(key: string, limit: number, windowMs: number): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  const up = await upstashCheck(key, limit, Math.ceil(windowMs / 1000));
+  if (up) {
+    return { allowed: up.allowed, remaining: up.allowed ? Math.max(0, limit - 1) : 0, resetAt: up.resetAt };
+  }
+  return rateLimit(key, limit, windowMs);
+}
+
 // Strict throttle for admin auth: 10 attempts / minute / IP.
-export function adminRateLimited(req: Request): Response | null {
+export async function adminRateLimited(req: Request): Promise<Response | null> {
   const ip = getClientIp(req);
   // Combine IP + email header so attacker can't share bucket across targets cheaply.
   const emailHint = (req.headers.get('x-admin-email') || '').toLowerCase().trim().slice(0, 64);
-  const r = rateLimit(`admin:${ip}:${emailHint || 'noemail'}`, 10, 60_000);
+  const key = `admin:${ip}:${emailHint || 'noemail'}`;
+  const r = await rateLimitWithUpstash(key, 10, 60_000);
   if (!r.allowed) {
     return Response.json(
       { error: 'Too many attempts — try again in a minute' },
@@ -95,9 +105,9 @@ export function adminRateLimited(req: Request): Response | null {
 }
 
 // General API throttle: 60 req / minute / IP.
-export function apiRateLimited(req: Request, scope: string, limit = 60): Response | null {
+export async function apiRateLimited(req: Request, scope: string, limit = 60): Promise<Response | null> {
   const ip = getClientIp(req);
-  const r = rateLimit(`api:${scope}:${ip}`, limit, 60_000);
+  const r = await rateLimitWithUpstash(`api:${scope}:${ip}`, limit, 60_000);
   if (!r.allowed) {
     return Response.json(
       { error: 'Too many requests — slow down' },
@@ -112,8 +122,8 @@ export function apiRateLimited(req: Request, scope: string, limit = 60): Respons
 
 // AI/billing throttle: burst protection BEFORE quota check (stops quota-burn).
 // Default 20 req/min/IP for paid AI endpoints. Use at top of every requireAI route.
-export function aiRateLimited(req: Request, scope: string, limit = 20): Response | null {
-  const r = apiRateLimited(req, `ai:${scope}`, limit);
+export async function aiRateLimited(req: Request, scope: string, limit = 20): Promise<Response | null> {
+  const r = await apiRateLimited(req, `ai:${scope}`, limit);
   if (r) return r;
   return null;
 }

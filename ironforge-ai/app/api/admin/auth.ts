@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'crypto';
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { adminRateLimited } from '@/lib/security/rate-limit';
+import { verifyAdminSessionToken } from '@/lib/security/admin-session';
 
 function safeEqual(a: string, b: string): boolean {
   const ab = Buffer.from(a, 'utf8');
@@ -18,8 +19,26 @@ function safeEqual(a: string, b: string): boolean {
 // Fail-closed: any missing env or mismatch → false. Single generic log shape
 // (no email-vs-password oracle) — details stay server-side only.
 // SECURITY: ADMIN_EMAIL has NO code fallback (was hardcoded before) — set it in env.
+// Now also accepts HttpOnly cookie atlas_admin (HMAC, 30min) — preferred. Header
+// path kept as fallback for transition, but cookie is XSS-safe.
 export async function checkAdmin(req: NextRequest): Promise<boolean> {
   try {
+    // 1) Preferred: HttpOnly cookie (no password in JS, not readable by XSS).
+    const cookieToken = req.cookies.get('atlas_admin')?.value || '';
+    if (cookieToken) {
+      const v = verifyAdminSessionToken(cookieToken);
+      if (v) {
+        // Still require Google session — cookie alone is not enough.
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
+        const sessEmail = data.user?.email?.toLowerCase().trim() || '';
+        const owner = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+        if (sessEmail && safeEqual(sessEmail, owner) && safeEqual(v.email, owner)) return true;
+        console.error('[admin-auth] DENY (cookie-session)');
+        return false;
+      }
+    }
+    // 2) Fallback: legacy header (will be removed once all admins use cookie login).
     const email = req.headers.get('x-admin-email')?.toLowerCase().trim() || '';
     const pass = req.headers.get('x-admin-password') || '';
     const owner = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
@@ -57,7 +76,7 @@ export async function checkAdmin(req: NextRequest): Promise<boolean> {
 // Call at the top of every /api/admin handler: rate-limit first, then auth.
 // Returns a Response to send immediately, or null to continue.
 export async function guardAdmin(req: NextRequest): Promise<Response | null> {
-  const limited = adminRateLimited(req);
+  const limited = await adminRateLimited(req);
   if (limited) return limited;
   if (!(await checkAdmin(req))) {
     return Response.json({ error: 'Forbidden' }, { status: 403 });

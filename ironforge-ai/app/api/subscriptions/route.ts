@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
 // Security: session email must match + amount must EXACTLY equal the plan price
 // (stops "yearly for 1 EGP" forgery; admin still eyeballs the screenshot).
 export async function POST(req: NextRequest) {
-  const limited = apiRateLimited(req, 'subscriptions', 10);
+  const limited = await apiRateLimited(req, 'subscriptions', 10);
   if (limited) return limited;
   try {
     const body = await req.json();

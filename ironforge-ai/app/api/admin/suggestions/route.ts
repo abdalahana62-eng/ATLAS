@@ -57,7 +57,7 @@ export async function PATCH(req: NextRequest) {
 // POST /api/admin/suggestions → public submit { email, message }
 export async function POST(req: NextRequest) {
   const cors = corsHeadersFor(req);
-  const limited = apiRateLimited(req, 'suggestions', 10);
+  const limited = await apiRateLimited(req, 'suggestions', 10);
   if (limited) return Response.json({ error: 'Too many requests — slow down' }, { status: 429, headers: cors });
   try {
     const { email, message } = await req.json();

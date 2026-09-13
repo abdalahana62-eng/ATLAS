@@ -37,10 +37,10 @@ export default function AdminPage() {
   const [mailBody, setMailBody] = useState('');
   const [mailSending, setMailSending] = useState(false);
 
+  // HttpOnly cookie atlas_admin is sent automatically (credentials:include).
+  // No password in JS storage anymore — XSS can't steal it.
   const headers = () => ({
     'Content-Type': 'application/json',
-    'x-admin-email': (sessionStorage.getItem('atlas-admin-email') || email).toLowerCase().trim(),
-    'x-admin-password': sessionStorage.getItem('atlas-admin-pass') || password,
   });
   const fetchOpts = (extra: RequestInit = {}): RequestInit => ({ credentials: 'include', cache: 'no-store', ...extra });
 
@@ -60,8 +60,7 @@ export default function AdminPage() {
 
   const logout = async () => {
     try {
-      sessionStorage.removeItem('atlas-admin-email');
-      sessionStorage.removeItem('atlas-admin-pass');
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
       const supabase = createClient();
       await supabase.auth.signOut();
     } catch {}
@@ -87,18 +86,10 @@ export default function AdminPage() {
     return isAr ? `منذ ${m} د` : `${m}m ago`;
   };
 
-  // Auto-fill owner email from Google session
+  // Auto-fill owner email from Google session + check existing cookie session.
   useEffect(() => {
     const run = async () => {
       try {
-        // Auto-expire admin tab session after 30min.
-        const at = Number(sessionStorage.getItem('atlas-admin-at') || 0);
-        if (at && Date.now() - at > 30 * 60 * 1000) {
-          sessionStorage.removeItem('atlas-admin-email');
-          sessionStorage.removeItem('atlas-admin-pass');
-          sessionStorage.removeItem('atlas-admin-at');
-          setAuthed(false);
-        }
         const supabase = createClient();
         const { data } = await supabase.auth.getSession();
         const em = data.session?.user?.email?.toLowerCase().trim() || '';
@@ -113,7 +104,7 @@ export default function AdminPage() {
   const loadOnline = async () => {
     setOnlineLoading(true);
     try {
-      const r = await fetch('/api/admin/presence', fetchOpts({ headers: headers() }));
+      const r = await fetch('/api/admin/presence', fetchOpts());
       if (r.ok) {
         const d = await r.json();
         const rows = ((d.online as any[]) || []).map(x => ({
@@ -142,22 +133,20 @@ export default function AdminPage() {
       const e = (em ?? email).toLowerCase().trim();
       const p = pw ?? password;
       if (!e || !p) throw new Error(isAr ? 'اكتب الإيميل وكلمة السر' : 'Enter email and password');
-      const h = { 'x-admin-email': e, 'x-admin-password': p };
+      // 1) Establish HttpOnly cookie session (30min, XSS-safe)
+      const lr = await fetch('/api/admin/login', fetchOpts({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p }) }));
+      if (lr.status === 429) throw new Error(isAr ? 'محاولات كتير — استنى دقيقة' : 'Too many attempts — wait a minute');
+      if (!lr.ok) throw new Error(isAr ? 'بيانات الدخول غلط أو جلسة جوجل المالك ناقصة — سجّل بجوجل الأول بنفس إيميل المالك' : 'Invalid credentials or missing owner Google session — sign in with Google first');
       const [r1, r2] = await Promise.all([
-        fetch(`/api/admin/requests?status=${filter}`, fetchOpts({ headers: h })),
-        fetch('/api/admin/stats', fetchOpts({ headers: h })),
+        fetch(`/api/admin/requests?status=${filter}`, fetchOpts()),
+        fetch('/api/admin/stats', fetchOpts()),
       ]);
       if (r1.status === 429) throw new Error(isAr ? 'محاولات كتير — استنى دقيقة' : 'Too many attempts — wait a minute');
       if (r1.status === 500) throw new Error(isAr ? 'عطل في السيرفر (غالباً SUPABASE_SERVICE_ROLE_KEY ناقص في Vercel)' : 'Server error (likely missing SUPABASE_SERVICE_ROLE_KEY)');
-      if (!r1.ok) throw new Error(isAr ? 'بيانات الدخول غلط أو جلسة جوجل المالك ناقصة — سجّل بجوجل الأول بنفس إيميل المالك' : 'Invalid credentials or missing owner Google session — sign in with Google first');
+      if (!r1.ok) throw new Error(isAr ? 'بيانات الدخول غلط' : 'Invalid credentials');
       const d1 = await r1.json();
       setReqs(d1.requests || []);
       if (r2.ok) setStats(await r2.json());
-      // SECURITY: tab-only storage + 30min auto-expiry (limits XSS window).
-      // Never use localStorage here. Password never touches logs.
-      sessionStorage.setItem('atlas-admin-email', e);
-      sessionStorage.setItem('atlas-admin-pass', p);
-      sessionStorage.setItem('atlas-admin-at', String(Date.now()));
       setAuthed(true);
     } catch (e: any) { alert(e.message); }
     setLoading(false);
@@ -165,7 +154,7 @@ export default function AdminPage() {
 
   const loadSubs = async () => {
     try {
-      const r = await fetch('/api/admin/subscribers', fetchOpts({ headers: headers() }));
+      const r = await fetch('/api/admin/subscribers', fetchOpts());
       const d = await r.json();
       if (r.ok) setSubs(d.subscribers || []);
     } catch {}
@@ -173,7 +162,7 @@ export default function AdminPage() {
 
   const loadSugs = async () => {
     try {
-      const r = await fetch('/api/admin/suggestions', fetchOpts({ headers: headers() }));
+      const r = await fetch('/api/admin/suggestions', fetchOpts());
       const d = await r.json();
       if (r.ok) setSugs(d.suggestions || []);
     } catch {}
@@ -181,7 +170,7 @@ export default function AdminPage() {
 
   const sugAct = async (id: string, action: 'read' | 'delete') => {
     try {
-      await fetch('/api/admin/suggestions', fetchOpts({ method: 'PATCH', headers: headers(), body: JSON.stringify({ id, action }) }));
+      await fetch('/api/admin/suggestions', fetchOpts({ method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action }) }));
       if (action === 'delete') setSugs(prev => prev.filter(x => x.id !== id));
       else setSugs(prev => prev.map(x => x.id === id ? { ...x, status: 'read' } : x));
     } catch {}
@@ -191,7 +180,7 @@ export default function AdminPage() {
     if (!mailTo || !mailSubject.trim() || !mailBody.trim()) { alert(isAr ? 'اكتب الموضوع والرسالة' : 'Write subject and message'); return; }
     setMailSending(true);
     try {
-      const r = await fetch('/api/admin/send-email', fetchOpts({ method: 'POST', headers: headers(), body: JSON.stringify({ to: mailTo, subject: mailSubject, message: mailBody }) }));
+      const r = await fetch('/api/admin/send-email', fetchOpts({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: mailTo, subject: mailSubject, message: mailBody }) }));
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       alert(isAr ? 'اتبعتت ✅' : 'Sent ✅');
@@ -204,7 +193,7 @@ export default function AdminPage() {
     setShotLoading(true);
     setShot(null);
     try {
-      const r = await fetch(`/api/admin/requests?id=${id}`, fetchOpts({ headers: headers() }));
+      const r = await fetch(`/api/admin/requests?id=${id}`, fetchOpts());
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       setShot(d.request?.screenshot || '');
@@ -389,7 +378,7 @@ export default function AdminPage() {
             {['pending', 'approved', 'rejected'].map(s => (
               <Badge key={s} onClick={() => { setFilter(s); }} className={`cursor-pointer ${filter === s ? 'bg-ironforge-primary text-black' : 'border-ironforge-border text-ironforge-text-muted'}`}>{s}</Badge>
             ))}
-            <Button onClick={() => load(sessionStorage.getItem('atlas-admin-email') || '', sessionStorage.getItem('atlas-admin-pass') || '')} variant="outline" size="sm" className="border-ironforge-border"><RefreshCw className="w-4 h-4" /></Button>
+            <Button onClick={() => load()} variant="outline" size="sm" className="border-ironforge-border"><RefreshCw className="w-4 h-4" /></Button>
           </div>
         </div>
 

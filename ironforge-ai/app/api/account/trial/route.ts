@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 // Strict: email must match the logged-in session (no harvesting others' clocks).
 export async function GET(req: NextRequest) {
   try {
-    const limited = apiRateLimited(req, 'trial-get', 30);
+    const limited = await apiRateLimited(req, 'trial-get', 30);
     if (limited) return limited;
     const email = new URL(req.url).searchParams.get('email')?.toLowerCase().trim();
     if (!email) return Response.json({ error: 'Missing email' }, { status: 400 });
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 // and pre-registration theft). First device wins: existing rows never change.
 export async function POST(req: NextRequest) {
   try {
-    const limited = apiRateLimited(req, 'trial-post', 10);
+    const limited = await apiRateLimited(req, 'trial-post', 10);
     if (limited) return limited;
     const { email } = await req.json();
     const em = String(email || '').toLowerCase().trim();

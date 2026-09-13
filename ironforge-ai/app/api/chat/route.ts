@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
   const corsHeaders = corsHeadersFor(req);
   try {
     // Burst protection first (per-IP), then session + quota gate.
-    const burst = aiRateLimited(req, 'chat', 20);
+    const burst = await aiRateLimited(req, 'chat', 20);
     if (burst) {
       const body = await burst.json().catch(() => ({ error: 'Too many requests' }));
       return Response.json(body, { status: 429, headers: corsHeaders });

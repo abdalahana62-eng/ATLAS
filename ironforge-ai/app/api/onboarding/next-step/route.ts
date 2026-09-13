@@ -23,7 +23,7 @@ interface OnboardingNextStepResponse {
 
 export async function POST(req: NextRequest) {
   try {
-    const burst = aiRateLimited(req, 'onboarding', 15);
+    const burst = await aiRateLimited(req, 'onboarding', 15);
     if (burst) return burst;
     const gate = await requireAI(req);
     if (gate instanceof Response) return gate;

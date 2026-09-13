@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 // (stops spam-cannon if admin creds leak) + generic errors only.
 export async function POST(req: NextRequest) {
   const cors = corsHeadersFor(req);
-  const burst = apiRateLimited(req, 'admin-send-email', 5);
+  const burst = await apiRateLimited(req, 'admin-send-email', 5);
   if (burst) return Response.json({ error: 'Too many requests — slow down' }, { status: 429, headers: cors });
   const denied = await guardAdmin(req);
   if (denied) return Response.json({ error: 'Forbidden' }, { status: denied.status, headers: cors });

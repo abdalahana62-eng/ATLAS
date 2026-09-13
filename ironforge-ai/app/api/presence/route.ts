@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 // someone else's online status.
 export async function POST(req: NextRequest) {
   try {
-    const limited = apiRateLimited(req, 'presence', 30);
+    const limited = await apiRateLimited(req, 'presence', 30);
     if (limited) return limited;
     const body = await req.json();
     const email = String(body.email || '').toLowerCase().trim();

@@ -20,7 +20,7 @@ function quotaUpsell(isAr: boolean): { answer: string; upgrade: boolean } {
 
 export async function POST(req: NextRequest) {
   try {
-    const burst = aiRateLimited(req, 'nutrition-chat', 20);
+    const burst = await aiRateLimited(req, 'nutrition-chat', 20);
     if (burst) return burst;
     const gate = await requireAI(req);
     if (gate instanceof Response) return gate;

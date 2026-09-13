@@ -26,7 +26,7 @@ interface NutritionRequest {
 
 export async function POST(req: NextRequest) {
   try {
-    const burst = aiRateLimited(req, 'nutrition', 10);
+    const burst = await aiRateLimited(req, 'nutrition', 10);
     if (burst) return burst;
     const gate = await requireAI(req);
     if (gate instanceof Response) return gate;

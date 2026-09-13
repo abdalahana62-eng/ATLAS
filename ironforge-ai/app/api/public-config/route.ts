@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 // but we avoid bundling it in static JS (harvesters scan bundles).
 export async function GET(req: NextRequest) {
   const cors = corsHeadersFor(req);
-  const limited = apiRateLimited(req, 'public-config', 30);
+  const limited = await apiRateLimited(req, 'public-config', 30);
   if (limited) return Response.json({ error: 'Too many requests' }, { status: 429, headers: cors });
   const payNumber = process.env.PAY_NUMBER || '';
   if (!payNumber) return Response.json({ error: 'Not configured' }, { status: 503, headers: cors });
