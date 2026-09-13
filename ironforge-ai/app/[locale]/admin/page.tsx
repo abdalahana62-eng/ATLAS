@@ -91,6 +91,14 @@ export default function AdminPage() {
   useEffect(() => {
     const run = async () => {
       try {
+        // Auto-expire admin tab session after 30min.
+        const at = Number(sessionStorage.getItem('atlas-admin-at') || 0);
+        if (at && Date.now() - at > 30 * 60 * 1000) {
+          sessionStorage.removeItem('atlas-admin-email');
+          sessionStorage.removeItem('atlas-admin-pass');
+          sessionStorage.removeItem('atlas-admin-at');
+          setAuthed(false);
+        }
         const supabase = createClient();
         const { data } = await supabase.auth.getSession();
         const em = data.session?.user?.email?.toLowerCase().trim() || '';
@@ -145,8 +153,11 @@ export default function AdminPage() {
       const d1 = await r1.json();
       setReqs(d1.requests || []);
       if (r2.ok) setStats(await r2.json());
+      // SECURITY: tab-only storage + 30min auto-expiry (limits XSS window).
+      // Never use localStorage here. Password never touches logs.
       sessionStorage.setItem('atlas-admin-email', e);
       sessionStorage.setItem('atlas-admin-pass', p);
+      sessionStorage.setItem('atlas-admin-at', String(Date.now()));
       setAuthed(true);
     } catch (e: any) { alert(e.message); }
     setLoading(false);

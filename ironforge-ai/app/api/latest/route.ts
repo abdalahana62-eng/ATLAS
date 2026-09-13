@@ -12,7 +12,11 @@ export async function OPTIONS(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const corsHeaders = corsHeadersFor(req);
   try {
-    const repo = 'abdalahana62-eng/ATLAS';
+    // Repo overridable via env; default kept for backward compat.
+    const repo = process.env.GITHUB_REPO || 'abdalahana62-eng/ATLAS';
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
+      return Response.json({ error: 'Update check failed' }, { status: 500, headers: corsHeaders });
+    }
     const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',

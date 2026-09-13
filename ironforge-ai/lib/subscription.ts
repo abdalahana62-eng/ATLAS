@@ -1,9 +1,15 @@
 // Subscription system: 3-day trial + monthly plans (Instapay / Vodafone Cash)
+// SECURITY: PAY_NUMBER is NOT bundled anymore — fetch via /api/public-config
+// after login (reduces scraping). localStorage below is UI cache ONLY;
+// the server (requireAI + /api/subscriptions) is the source of truth.
 import { apiFetch } from './apiBase';
 
-export const PAY_NUMBER = '01040771597';
 export const TRIAL_DAYS = 3;
-export const OWNER_EMAIL = 'abdalahana555@gmail.com';
+
+// Deprecated static fallback (kept empty so old bundles don't leak PII).
+// Use getPayNumber() instead.
+export const PAY_NUMBER = '';
+export const OWNER_EMAIL = '';
 
 export interface Plan {
   id: 'monthly' | 'quarterly' | 'yearly';
@@ -69,8 +75,27 @@ export function subDaysLeft(): number {
 }
 
 export function hasAccess(): boolean {
+  // UI-only hint. Never trust this for authorization — every paid API
+  // re-checks the server (requireAI). Editable localStorage can't unlock backend.
   if (typeof window === 'undefined') return true;
   return trialDaysLeft() > 0 || subDaysLeft() > 0;
+}
+
+// Server-provided payment number (authed + rate-limited). Cached in memory.
+let payNumberCache: string | null = null;
+export async function getPayNumber(): Promise<string> {
+  if (payNumberCache) return payNumberCache;
+  try {
+    const r = await apiFetch('/api/public-config', { cache: 'no-store' });
+    if (r.ok) {
+      const d = await r.json();
+      if (typeof d?.payNumber === 'string' && d.payNumber) {
+        payNumberCache = d.payNumber;
+        return payNumberCache;
+      }
+    }
+  } catch {}
+  return '';
 }
 export async function refreshSubFromServer(email: string): Promise<boolean> {
   try {

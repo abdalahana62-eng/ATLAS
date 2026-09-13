@@ -6,11 +6,16 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
-import { PLANS, TRIAL_DAYS } from '@/lib/subscription';
+import { useEffect, useState } from 'react';
+import { PLANS, TRIAL_DAYS, getPayNumber } from '@/lib/subscription';
 
 export default function PricingPage() {
   const locale = useLocale();
   const isAr = locale === 'ar';
+  const [payNumber, setPayNumber] = useState('…');
+  useEffect(() => {
+    getPayNumber().then((n) => { if (n) setPayNumber(n); });
+  }, []);
 
   const icons = [Star, Zap, Crown];
   const descs = isAr
@@ -32,7 +37,7 @@ export default function PricingPage() {
           </p>
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-ironforge-primary/30 bg-ironforge-primary/10 px-4 py-2 text-sm text-ironforge-primary">
             <Smartphone className="w-4 h-4" />
-            {isAr ? 'الدفع: انستاباي / فودافون كاش على 01040771597' : 'Pay: Instapay / Vodafone Cash to 01040771597'}
+            {isAr ? 'الدفع: انستاباي / فودافون كاش على' : 'Pay: Instapay / Vodafone Cash to'} <span dir="ltr">{payNumber}</span>
           </div>
         </div>
 
@@ -87,8 +92,8 @@ export default function PricingPage() {
           </h3>
           <p className="text-sm text-ironforge-text-muted leading-7">
             {isAr
-              ? '1. اختر الباقة → 2. حوّل المبلغ انستاباي أو فودافون كاش على 01040771597 → 3. ارفع سكرين شوت التحويل ورقم موبايلك → 4. بنفعّلك الاشتراك في أقل من 24 ساعة'
-              : '1. Pick a plan → 2. Transfer via Instapay or Vodafone Cash to 01040771597 → 3. Upload the transfer screenshot + your phone → 4. We activate within 24h'}
+              ? <>1. اختر الباقة → 2. حوّل المبلغ انستاباي أو فودافون كاش على <span dir="ltr">{payNumber}</span> → 3. ارفع سكرين شوت التحويل ورقم موبايلك → 4. بنفعّلك الاشتراك في أقل من 24 ساعة</>
+              : <>1. Pick a plan → 2. Transfer via Instapay or Vodafone Cash to <span dir="ltr">{payNumber}</span> → 3. Upload the transfer screenshot + your phone → 4. We activate within 24h</>}
           </p>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { createStreamingChatCompletion, type ChatMessage } from '@/lib/ai/openai
 import { trackAIUsage, isQuotaError } from '@/lib/ai/usage';
 import { requireAI } from '@/lib/api/guard';
 import { corsHeadersFor, corsPreflight } from '@/lib/security/cors';
+import { aiRateLimited } from '@/lib/security/rate-limit';
 import { validateChatMessages } from '@/lib/security/validate';
 
 // Friendly upsell shown when the free Groq quota runs out for the day.
@@ -70,6 +71,12 @@ export async function OPTIONS(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const corsHeaders = corsHeadersFor(req);
   try {
+    // Burst protection first (per-IP), then session + quota gate.
+    const burst = aiRateLimited(req, 'chat', 20);
+    if (burst) {
+      const body = await burst.json().catch(() => ({ error: 'Too many requests' }));
+      return Response.json(body, { status: 429, headers: corsHeaders });
+    }
     // Security: logged-in session + active trial/subscription + daily cap.
     // Blocks anonymous quota-burn from any website/app on the internet.
     const gate = await requireAI(req);

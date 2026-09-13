@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
-import { PLANS, PAY_NUMBER, getPlan, getAccount } from '@/lib/subscription';
+import { PLANS, getPlan, getAccount, getPayNumber } from '@/lib/subscription';
 
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -51,6 +51,10 @@ function SubscribeInner() {
   const [done, setDone] = useState(false);
   const [queued, setQueued] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [payNumber, setPayNumber] = useState('…');
+  useEffect(() => {
+    getPayNumber().then((n) => { if (n) setPayNumber(n); });
+  }, []);
 
   // Resend requests that were saved on the device while offline/old-version.
   // Without this, those payments sit in localStorage forever and never reach admin.
@@ -84,7 +88,7 @@ function SubscribeInner() {
   }, []);
 
   const copyNumber = async () => {
-    try { await navigator.clipboard.writeText(PAY_NUMBER); } catch {}
+    try { await navigator.clipboard.writeText(payNumber); } catch {}
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -191,7 +195,7 @@ function SubscribeInner() {
             ))}
           </div>
           <div className="flex items-center justify-between rounded-xl bg-ironforge-background border border-ironforge-primary/30 p-4">
-            <span className="text-2xl font-black text-ironforge-text tracking-widest" dir="ltr">{PAY_NUMBER}</span>
+            <span className="text-2xl font-black text-ironforge-text tracking-widest" dir="ltr">{payNumber}</span>
             <Button onClick={copyNumber} variant="outline" size="sm" className="border-ironforge-border">
               {copied ? <Check className="w-4 h-4 text-ironforge-primary" /> : <Copy className="w-4 h-4" />}
               {copied ? (isAr ? 'اتنسخ' : 'Copied') : (isAr ? 'نسخ' : 'Copy')}

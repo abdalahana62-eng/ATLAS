@@ -1,7 +1,6 @@
 import { timingSafeEqual } from 'crypto';
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { OWNER_EMAIL } from '@/lib/subscription';
 import { adminRateLimited } from '@/lib/security/rate-limit';
 
 function safeEqual(a: string, b: string): boolean {
@@ -18,14 +17,20 @@ function safeEqual(a: string, b: string): boolean {
 // Triple lock: owner email header + password + owner Google session (server-verified).
 // Fail-closed: any missing env or mismatch → false. Single generic log shape
 // (no email-vs-password oracle) — details stay server-side only.
+// SECURITY: ADMIN_EMAIL has NO code fallback (was hardcoded before) — set it in env.
 export async function checkAdmin(req: NextRequest): Promise<boolean> {
   try {
     const email = req.headers.get('x-admin-email')?.toLowerCase().trim() || '';
     const pass = req.headers.get('x-admin-password') || '';
-    const owner = (process.env.ADMIN_EMAIL || OWNER_EMAIL).toLowerCase().trim();
+    const owner = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
     const adminPassword = process.env.ADMIN_PASSWORD || '';
-    if (!adminPassword) {
+    if (!owner || !adminPassword) {
       console.error('[admin-auth] DENY (config)');
+      return false;
+    }
+    // Enforce strong password length (weak passwords fail closed).
+    if (adminPassword.length < 16) {
+      console.error('[admin-auth] DENY (weak-config)');
       return false;
     }
     if (!email || !safeEqual(email, owner)) {

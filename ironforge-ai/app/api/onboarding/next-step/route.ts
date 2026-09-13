@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { onboardingCoachPrompt } from '@/lib/ai/prompts';
 import { createChatCompletion } from '@/lib/ai/openai';
 import { requireAI } from '@/lib/api/guard';
+import { aiRateLimited } from '@/lib/security/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -22,6 +23,8 @@ interface OnboardingNextStepResponse {
 
 export async function POST(req: NextRequest) {
   try {
+    const burst = aiRateLimited(req, 'onboarding', 15);
+    if (burst) return burst;
     const gate = await requireAI(req);
     if (gate instanceof Response) return gate;
     const body: OnboardingNextStepRequest = await req.json();

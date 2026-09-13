@@ -5,9 +5,11 @@ const config: CapacitorConfig = {
   appName: 'ATLAS',
   webDir: 'out',
   // أوفلاين + فحص تحديث عند وجود نت
+  // SECURITY: cleartext=false لمنع HTTP المكشوف (MITM). كل API عبر HTTPS فقط.
   server: {
     androidScheme: 'https',
-    cleartext: true,
+    cleartext: false,
+    allowNavigation: ['atlasfit.pro', '*.vercel.app'],
   },
   plugins: {
     SplashScreen: {

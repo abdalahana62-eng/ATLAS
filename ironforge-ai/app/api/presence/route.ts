@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getSessionEmail } from '@/lib/api/guard';
+import { apiRateLimited } from '@/lib/security/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -10,6 +11,8 @@ export const runtime = 'nodejs';
 // someone else's online status.
 export async function POST(req: NextRequest) {
   try {
+    const limited = apiRateLimited(req, 'presence', 30);
+    if (limited) return limited;
     const body = await req.json();
     const email = String(body.email || '').toLowerCase().trim();
     const platform = body.platform === 'app' ? 'app' : 'web';

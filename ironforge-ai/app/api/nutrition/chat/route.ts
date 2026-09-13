@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { createChatCompletion } from '@/lib/ai/openai';
 import { trackAIUsage, isQuotaError } from '@/lib/ai/usage';
 import { requireAI } from '@/lib/api/guard';
+import { aiRateLimited } from '@/lib/security/rate-limit';
 import { buildKnowledgeContext } from '@/lib/knowledgeSearch';
 import { buildDishContext } from '@/lib/data/dishNutrition';
 
@@ -19,6 +20,8 @@ function quotaUpsell(isAr: boolean): { answer: string; upgrade: boolean } {
 
 export async function POST(req: NextRequest) {
   try {
+    const burst = aiRateLimited(req, 'nutrition-chat', 20);
+    if (burst) return burst;
     const gate = await requireAI(req);
     if (gate instanceof Response) return gate;
     const { message, stats, targetMacros, country, logged } = await req.json();
