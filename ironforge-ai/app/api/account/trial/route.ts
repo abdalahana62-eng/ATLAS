@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     if (limited) return limited;
     const email = new URL(req.url).searchParams.get('email')?.toLowerCase().trim();
     if (!email) return Response.json({ error: 'Missing email' }, { status: 400 });
-    const sessionEmail = await getSessionEmail();
+    const sessionEmail = await getSessionEmail(req);
     if (!sessionEmail || sessionEmail !== email) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
     const em = String(email || '').toLowerCase().trim();
     if (!em) return Response.json({ error: 'Missing email' }, { status: 400 });
-    const sessionEmail = await getSessionEmail();
+    const sessionEmail = await getSessionEmail(req);
     if (!sessionEmail || sessionEmail !== em) {
       return Response.json({ error: 'Sign in with this email first' }, { status: 403 });
     }

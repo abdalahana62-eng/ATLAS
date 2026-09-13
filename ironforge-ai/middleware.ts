@@ -16,9 +16,17 @@ export default async function middleware(req: NextRequest) {
     if (req.method === 'OPTIONS') {
       return new NextResponse(null, { status: 204, headers });
     }
-    const res = NextResponse.next();
-    for (const [k, v] of Object.entries(headers)) res.headers.set(k, v);
-    return res;
+    // Refresh Supabase session cookies AND attach CORS headers.
+    // Without this, getUser() in API routes sees expired tokens.
+    try {
+      const sessionRes = await updateSession(req);
+      for (const [k, v] of Object.entries(headers)) sessionRes.headers.set(k, v);
+      return sessionRes;
+    } catch {
+      const res = NextResponse.next();
+      for (const [k, v] of Object.entries(headers)) res.headers.set(k, v);
+      return res;
+    }
   }
 
   // Top-level OAuth fallback page: no locale handling needed.

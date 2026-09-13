@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const email = String(body.email || '').toLowerCase().trim();
     const platform = body.platform === 'app' ? 'app' : 'web';
     if (!email) return Response.json({ error: 'Missing email' }, { status: 400 });
-    const sessionEmail = await getSessionEmail();
+    const sessionEmail = await getSessionEmail(req);
     if (!sessionEmail || sessionEmail !== email) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }

@@ -17,7 +17,7 @@ const PLAN_PRICE: Record<string, number> = Object.fromEntries(
 export async function GET(req: NextRequest) {
   const email = new URL(req.url).searchParams.get('email')?.toLowerCase().trim();
   if (!email) return Response.json({ error: 'Missing email' }, { status: 400 });
-  const sessionEmail = await getSessionEmail();
+  const sessionEmail = await getSessionEmail(req);
   if (!sessionEmail || sessionEmail !== email) {
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     if (!/^\+?\d{8,15}$/.test(phone.replace(/[\s-]/g, ''))) {
       return Response.json({ error: 'Invalid phone' }, { status: 400 });
     }
-    const sessionEmail = await getSessionEmail();
+    const sessionEmail = await getSessionEmail(req);
     if (!sessionEmail || sessionEmail !== email) {
       return Response.json({ error: 'Sign in with this email first' }, { status: 403 });
     }

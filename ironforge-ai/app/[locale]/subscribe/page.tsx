@@ -123,23 +123,41 @@ function SubscribeInner() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, phone, plan: plan.id, amount: plan.price, method, screenshot: shot }),
       });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error || 'Failed');
-      setQueued(false);
-      setDone(true);
-      // Send any older requests stuck on this device too
-      flushQueue().catch(() => {});
-    } catch (e: any) {
-      // Offline/server down: save WITH the screenshot so nothing is lost,
-      // and auto-resend next time this page opens.
-      try {
-        const q = JSON.parse(localStorage.getItem('atlas-pay-queue') || '[]');
-        q.push({ email: getAccount()?.email, phone, plan: plan.id, amount: plan.price, method, screenshot: shot, createdAt: new Date().toISOString() });
-        localStorage.setItem('atlas-pay-queue', JSON.stringify(q));
-        setQueued(true);
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) {
+        setQueued(false);
         setDone(true);
-      } catch {
-        setError(e.message);
+        flushQueue().catch(() => {});
+      } else if (r.status >= 500) {
+        // Server/network error: save offline so nothing is lost
+        try {
+          const q = JSON.parse(localStorage.getItem('atlas-pay-queue') || '[]');
+          q.push({ email: getAccount()?.email, phone, plan: plan.id, amount: plan.price, method, screenshot: shot, createdAt: new Date().toISOString() });
+          localStorage.setItem('atlas-pay-queue', JSON.stringify(q));
+          setQueued(true);
+          setDone(true);
+        } catch {
+          setError(d.error || 'Server error, try again');
+        }
+      } else {
+        // 4xx: real client/auth error — show it, DON'T queue as "no net"
+        setError(d.error || (isAr ? 'فشل الإرسال، تأكد من تسجيل الدخول' : 'Failed, check login'));
+      }
+    } catch (e: any) {
+      // Network failure (fetch threw) — offline
+      const isNetworkError = e instanceof TypeError || /Failed to fetch|NetworkError|Load failed/i.test(e?.message || '');
+      if (isNetworkError) {
+        try {
+          const q = JSON.parse(localStorage.getItem('atlas-pay-queue') || '[]');
+          q.push({ email: getAccount()?.email, phone, plan: plan.id, amount: plan.price, method, screenshot: shot, createdAt: new Date().toISOString() });
+          localStorage.setItem('atlas-pay-queue', JSON.stringify(q));
+          setQueued(true);
+          setDone(true);
+        } catch {
+          setError(e?.message || 'Network error');
+        }
+      } else {
+        setError(e?.message || (isAr ? 'حدث خطأ' : 'Something went wrong'));
       }
     }
     setLoading(false);

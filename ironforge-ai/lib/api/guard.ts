@@ -5,8 +5,34 @@ import { TRIAL_DAYS } from '@/lib/subscription';
 export const TRIAL_DAILY_AI_CAP = 30;
 export const SUB_DAILY_AI_CAP = 300;
 
-// Session email from the caller's Supabase cookies. Null = not logged in.
-export async function getSessionEmail(): Promise<string | null> {
+// Session email from the caller's Supabase cookies OR Authorization Bearer token.
+// Bearer is required for the Capacitor APK (cookies are per-origin localhost and never reach atlasfit.pro).
+export async function getSessionEmail(req?: Request): Promise<string | null> {
+  // 1) Authorization: Bearer <supabase JWT> — used by the APK via apiFetch
+  if (req) {
+    try {
+      const auth = req.headers.get('authorization') || req.headers.get('Authorization');
+      if (auth && auth.toLowerCase().startsWith('bearer ')) {
+        const token = auth.slice(7).trim();
+        if (token.length > 20) {
+          const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+          if (url && anon) {
+            const { createClient: createJsClient } = await import('@supabase/supabase-js');
+            // Validate the JWT directly with Supabase
+            const tmp = createJsClient(url, anon);
+            const { data } = await tmp.auth.getUser(token);
+            if (data?.user?.email) return data.user.email.toLowerCase().trim();
+            // Fallback: client with Authorization header set
+            const tmp2 = createJsClient(url, anon, { global: { headers: { Authorization: `Bearer ${token}` } } });
+            const { data: d2 } = await tmp2.auth.getUser();
+            if (d2?.user?.email) return d2.user.email.toLowerCase().trim();
+          }
+        }
+      }
+    } catch {}
+  }
+  // 2) Cookie-based session (web / same-origin)
   try {
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
@@ -69,7 +95,7 @@ function trialLeftDays(startedAt: string): number {
 export async function requireAI(
   req: Request
 ): Promise<{ email: string; isSub: boolean } | Response> {
-  const email = await getSessionEmail();
+  const email = await getSessionEmail(req);
   if (!email) {
     return Response.json(
       { error: 'سجّل دخولك الأول • Sign in required' },

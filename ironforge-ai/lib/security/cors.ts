@@ -4,6 +4,8 @@
 const DEFAULT_ALLOWED = [
   'https://localhost',
   'capacitor://localhost',
+  'https://atlasfit.pro',
+  'https://www.atlasfit.pro',
   'http://localhost:3000',
   'http://localhost:8081',
 ];
@@ -39,6 +41,7 @@ export function corsHeadersFor(req: Request): Record<string, string> {
       Vary: 'Origin',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-email, x-admin-password',
+      'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Max-Age': '86400',
     };
   }
