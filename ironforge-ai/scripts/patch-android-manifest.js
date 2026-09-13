@@ -2,11 +2,52 @@
 // (com.atlas.ai://auth/callback) returns from the system browser back into
 // the app. Runs in CI after `npx cap sync android` (android/ is gitignored).
 // Idempotent: skips if the intent-filter already exists.
+// Also ensures a persistent debug keystore so APK updates don't require uninstall.
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+const os = require('os');
 
 const MANIFEST = path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
 const MARKER = 'com.atlas.ai';
+
+function ensureDebugKeystore() {
+  const repoKeystore = path.join(__dirname, '..', 'resources', 'debug.keystore');
+  const homeKeystore = path.join(os.homedir(), '.android', 'debug.keystore');
+  try {
+    if (fs.existsSync(repoKeystore)) {
+      // Use the committed persistent keystore for all builds
+      fs.mkdirSync(path.dirname(homeKeystore), { recursive: true });
+      fs.copyFileSync(repoKeystore, homeKeystore);
+      console.log('[keystore] restored persistent debug.keystore from resources/');
+      return;
+    }
+    // First run on CI: generate a new debug keystore and commit it back
+    if (process.env.CI && !fs.existsSync(repoKeystore)) {
+      console.log('[keystore] generating new persistent debug.keystore...');
+      fs.mkdirSync(path.dirname(homeKeystore), { recursive: true });
+      fs.mkdirSync(path.dirname(repoKeystore), { recursive: true });
+      // keytool is available on the GitHub Actions runner (Java 21)
+      execSync(
+        'keytool -genkey -v -keystore "' + homeKeystore + '" -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"',
+        { stdio: 'inherit' }
+      );
+      fs.copyFileSync(homeKeystore, repoKeystore);
+      console.log('[keystore] generated and copied to resources/debug.keystore');
+      // Commit it back so next builds reuse the same signature (requires GITHUB_TOKEN with workflow scope — will be done via Actions if needed)
+      try {
+        execSync('git config user.name "github-actions[bot]"', { stdio: 'ignore' });
+        execSync('git config user.email "github-actions[bot]@users.noreply.github.com"', { stdio: 'ignore' });
+        execSync('git add "' + repoKeystore + '"', { stdio: 'ignore' });
+        execSync('git commit -m "chore: persist debug keystore for consistent APK updates" || true', { stdio: 'ignore' });
+        execSync('git push || true', { stdio: 'ignore' });
+        console.log('[keystore] committed persistent keystore to repo');
+      } catch {}
+    }
+  } catch (e) {
+    console.log('[keystore] ensure failed:', e.message);
+  }
+}
 
 const INTENT_FILTER = `            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -17,6 +58,7 @@ const INTENT_FILTER = `            <intent-filter>
 `;
 
 function main() {
+  ensureDebugKeystore();
   if (!fs.existsSync(MANIFEST)) {
     console.log('[deep-link] AndroidManifest not found, skipping:', MANIFEST);
     return;
