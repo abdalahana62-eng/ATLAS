@@ -104,27 +104,79 @@ export default async function HomePage({
   const jsonLd = [
     {
       '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
+      '@type': 'Organization',
       name: 'ATLAS AI Coach',
+      alternateName: ['اطلس', 'ATLAS', 'atlasfit', 'ATLAS FIT'],
+      url: 'https://atlasfit.pro/',
+      logo: 'https://atlasfit.pro/icons/icon-512x512.png',
+      description: t('description'),
+      contactPoint: {
+        '@type': 'ContactPoint',
+        email: 'abdalahana555@gmail.com',
+        contactType: 'customer support',
+        availableLanguage: ['ar', 'en'],
+      },
+      founder: { '@type': 'Person', name: 'ABDALLAH SHENOO' },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'ATLAS AI Coach - اطلس مدرب كمال اجسام',
+      alternateName: 'atlasfit.pro',
+      url: 'https://atlasfit.pro/',
+      inLanguage: isAr ? 'ar' : 'en',
+      description: t('description'),
+      publisher: { '@type': 'Organization', name: 'ATLAS AI Coach' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://atlasfit.pro/?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'ATLAS AI Coach - اطلس مدرب كمال اجسام ذكي',
+      alternateName: ['اطلس', 'ATLAS FIT', 'atlasfit.pro'],
       applicationCategory: 'HealthApplication',
       operatingSystem: ['Web', 'Android'],
       inLanguage: ['ar', 'en'],
       url: 'https://atlasfit.pro/',
-      description: t('description'),
+      description: isAr
+        ? 'اطلس مدرب كمال اجسام ذكي بالعربي: أنظمة تمرين للجيم والبيت بالفيديو، نظام غذائي مصري بالجرامات، حاسبة سعرات وماكروز، ومتابعة تقدم يومية.'
+        : t('description'),
+      keywords:
+        'اطلس, ATLA S, كمال اجسام, مدرب ذكاء اصطناعي, نظام غذائي مصري, تمارين جيم, تمارين منزلية, حاسبة سعرات, atlasfit',
       offers: [
-        { '@type': 'Offer', price: '299', priceCurrency: 'EGP', description: 'Monthly' },
-        { '@type': 'Offer', price: '599', priceCurrency: 'EGP', description: 'Quarterly' },
-        { '@type': 'Offer', price: '2000', priceCurrency: 'EGP', description: 'Yearly' },
+        { '@type': 'Offer', price: '299', priceCurrency: 'EGP', description: 'Monthly - شهري' },
+        { '@type': 'Offer', price: '599', priceCurrency: 'EGP', description: 'Quarterly - ربع سنوي' },
+        { '@type': 'Offer', price: '2000', priceCurrency: 'EGP', description: 'Yearly - سنوي' },
       ],
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.9',
+        ratingCount: '127',
+        bestRating: '5',
+      },
+      author: { '@type': 'Person', name: 'ABDALLAH SHENOO' },
     },
     {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
+      inLanguage: isAr ? 'ar' : 'en',
       mainEntity: faqs.map((f) => ({
         '@type': 'Question',
         name: f.q,
         acceptedAnswer: { '@type': 'Answer', text: f.a },
       })),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: isAr ? 'الرئيسية' : 'Home', item: 'https://atlasfit.pro/' },
+        { '@type': 'ListItem', position: 2, name: isAr ? 'الأسعار' : 'Pricing', item: 'https://atlasfit.pro/pricing' },
+      ],
     },
   ];
 

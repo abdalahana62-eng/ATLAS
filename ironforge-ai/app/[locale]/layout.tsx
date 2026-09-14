@@ -27,25 +27,92 @@ export async function generateMetadata({
   const description = t('description');
   const canonicalPath = locale === 'ar' ? '/' : '/en';
 
+  // كلمات مفتاحية مركزة للبحث العربي + الإنجليزي
+  const keywordsAr = [
+    'اطلس',
+    'ATLAS',
+    'اطلس فت',
+    'atlasfit',
+    'مدرب كمال اجسام',
+    'مدرب ذكاء اصطناعي',
+    'كمال اجسام',
+    'نظام غذائي مصري',
+    'تمارين جيم',
+    'تمارين منزلية',
+    'حاسبة سعرات',
+    'تغذية كمال اجسام',
+    'برنامج تمرين',
+  ];
+  const keywordsEn = [
+    'ATLAS',
+    'atlasfit',
+    'atlasfit.pro',
+    'AI bodybuilding coach',
+    'gym workout plan',
+    'home workout',
+    'Egyptian meal plan',
+    'calorie calculator',
+    'fitness AI',
+  ];
+
+  const keywords = isAr ? [...keywordsAr, ...keywordsEn] : [...keywordsEn, ...keywordsAr];
+
+  // Google Search Console verification - ضع القيمة في Vercel env: GOOGLE_SITE_VERIFICATION
+  const googleVerification = process.env.GOOGLE_SITE_VERIFICATION;
+
   return {
     title: { default: title, template: `%s | ATLAS` },
     description,
+    keywords,
+    authors: [{ name: 'ABDALLAH SHENOO', url: 'https://atlasfit.pro' }],
+    creator: 'ABDALLAH SHENOO',
+    publisher: 'ATLAS AI Coach',
+    category: 'fitness',
+    classification: 'Health & Fitness',
     metadataBase: new URL('https://atlasfit.pro'),
     alternates: {
       canonical: canonicalPath,
-      languages: { ar: '/', en: '/en' },
+      languages: { ar: '/', en: '/en', 'x-default': '/' },
     },
-    robots: { index: true, follow: true },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       type: 'website',
       siteName: 'ATLAS AI Coach',
       locale: isAr ? 'ar_EG' : 'en_US',
+      alternateLocale: isAr ? ['en_US'] : ['ar_EG'],
       url: canonicalPath,
       title,
       description,
+      images: [
+        {
+          url: '/icons/icon-512x512.png',
+          width: 512,
+          height: 512,
+          alt: 'ATLAS AI Coach - مدرب كمال أجسام ذكي',
+        },
+      ],
     },
-    twitter: { card: 'summary', title, description },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/icons/icon-512x512.png'],
+      creator: '@atlasfit',
+    },
     manifest: '/manifest.json',
+    ...(googleVerification
+      ? { verification: { google: googleVerification } }
+      : {}),
     appleWebApp: {
       capable: true,
       statusBarStyle: 'black-translucent',

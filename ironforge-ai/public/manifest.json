@@ -1,7 +1,7 @@
 {
-  "name": "ATLAS - AI Bodybuilding Coach",
+  "name": "ATLAS - اطلس مدرب كمال أجسام ذكي",
   "short_name": "ATLAS",
-  "description": "AI-powered bodybuilding coach - training, nutrition, and progress tracking",
+  "description": "اطلس مدرب كمال أجسام بالذكاء الاصطناعي - أنظمة تمرين للجيم والبيت، نظام غذائي مصري بالجرامات، وحاسبة سعرات",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
