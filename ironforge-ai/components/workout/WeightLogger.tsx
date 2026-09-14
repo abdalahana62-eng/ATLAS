@@ -59,7 +59,7 @@ export default function WeightLogger({ exercise, muscle }: { exercise: string; m
   const today = logs.find(l => l.log_date === new Date().toISOString().slice(0, 10));
 
   return (
-    <Card className="p-5 border-ironforge-border bg-ironforge-card">
+    <Card className="p-4 border-ironforge-border bg-ironforge-card w-full max-w-full overflow-hidden">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-bold text-ironforge-text flex items-center gap-2">
           🏋️ {isAr ? 'سجل وزنك' : 'Log your lift'}
@@ -92,14 +92,14 @@ export default function WeightLogger({ exercise, muscle }: { exercise: string; m
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center w-full">
         <input value={weight} onChange={e => setWeight(e.target.value.replace(/[^0-9.]/g, ''))} onKeyDown={onKeyDown} inputMode="decimal"
           placeholder={isAr ? 'الوزن (كجم)' : 'Weight (kg)'}
-          className={`flex-1 bg-ironforge-background border rounded-lg px-3 py-3 text-ironforge-text text-center font-bold text-lg focus:ring-2 focus:ring-ironforge-primary/30 outline-none ${willBePR ? 'border-amber-500/50 bg-amber-500/5' : 'border-ironforge-border'}`} />
-        <span className="self-center text-ironforge-text-muted font-bold">×</span>
+          className={`min-w-0 w-full bg-ironforge-background border rounded-xl px-2 py-2.5 text-ironforge-text text-center font-bold text-base focus:ring-2 focus:ring-ironforge-primary/30 outline-none ${willBePR ? 'border-amber-500/50 bg-amber-500/5' : 'border-ironforge-border'}`} />
+        <span className="text-ironforge-text-muted font-black text-lg leading-none">×</span>
         <input value={reps} onChange={e => setReps(e.target.value.replace(/\D/g, ''))} onKeyDown={onKeyDown} inputMode="numeric"
           placeholder={isAr ? 'العدات' : 'Reps'}
-          className="flex-1 bg-ironforge-background border border-ironforge-border rounded-lg px-3 py-3 text-ironforge-text text-center font-bold text-lg focus:ring-2 focus:ring-ironforge-primary/30 outline-none" />
+          className="min-w-0 w-full bg-ironforge-background border border-ironforge-border rounded-xl px-2 py-2.5 text-ironforge-text text-center font-bold text-base focus:ring-2 focus:ring-ironforge-primary/30 outline-none" />
       </div>
 
       {willBePR && (

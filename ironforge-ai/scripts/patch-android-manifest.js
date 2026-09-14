@@ -9,6 +9,7 @@ const { execSync } = require('child_process');
 const os = require('os');
 
 const MANIFEST = path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
+const BUILD_GRADLE = path.join(__dirname, '..', 'android', 'app', 'build.gradle');
 const MARKER = 'com.atlas.ai';
 
 function ensureDebugKeystore() {
@@ -57,8 +58,46 @@ const INTENT_FILTER = `            <intent-filter>
             </intent-filter>
 `;
 
+function ensureReleaseSigning() {
+  if (!fs.existsSync(BUILD_GRADLE)) {
+    console.log('[signing] build.gradle not found, skipping:', BUILD_GRADLE);
+    return;
+  }
+  let gradle = fs.readFileSync(BUILD_GRADLE, 'utf8');
+  // نحتاج توقيع release بنفس debug keystore عشان التحديث يتثبت فوق القديم بدون حذف
+  // نستخدم المسار النسبي من android/app/ إلى resources/debug.keystore
+  const keystoreRelative = '../../resources/debug.keystore';
+  const repoKeystore = path.join(__dirname, '..', 'resources', 'debug.keystore');
+  if (!fs.existsSync(repoKeystore)) {
+    console.log('[signing] repo keystore not found, skipping signing patch');
+    return;
+  }
+  if (gradle.includes('ATLAS_RELEASE_STORE_FILE')) {
+    console.log('[signing] already patched, skipping');
+    return;
+  }
+  // حقن signingConfigs.release داخل android { ... }
+  // نبحث عن `signingConfigs {` أو ننشئه
+  if (gradle.includes('signingConfigs')) {
+    gradle = gradle.replace(/signingConfigs\s*\{/, `signingConfigs {\n        release {\n            storeFile file('${keystoreRelative}')\n            storePassword 'android'\n            keyAlias 'androiddebugkey'\n            keyPassword 'android'\n        }`);
+  } else {
+    gradle = gradle.replace(/android\s*\{/, `android {\n    signingConfigs {\n        release {\n            storeFile file('${keystoreRelative}')\n            storePassword 'android'\n            keyAlias 'androiddebugkey'\n            keyPassword 'android'\n        }\n    }`);
+  }
+  // اربط buildTypes.release بـ signingConfig
+  if (gradle.includes('buildTypes')) {
+    // أضف signingConfig لكل release block
+    gradle = gradle.replace(/(release\s*\{[^}]*)(debuggable\s+false)/, `$1signingConfig signingConfigs.release\n            $2`);
+    if (!gradle.includes('signingConfig signingConfigs.release')) {
+      gradle = gradle.replace(/release\s*\{/, `release {\n            signingConfig signingConfigs.release`);
+    }
+  }
+  fs.writeFileSync(BUILD_GRADLE, gradle);
+  console.log('[signing] patched build.gradle to use persistent debug.keystore for release');
+}
+
 function main() {
   ensureDebugKeystore();
+  ensureReleaseSigning();
   if (!fs.existsSync(MANIFEST)) {
     console.log('[deep-link] AndroidManifest not found, skipping:', MANIFEST);
     return;

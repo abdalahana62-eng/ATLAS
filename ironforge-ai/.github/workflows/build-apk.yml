@@ -37,7 +37,8 @@ jobs:
         run: |
           npx cap add android || true
           npx cap sync android
-      - name: Build APK (release)
+          node scripts/patch-android-manifest.js
+      - name: Build APK (release - signed with persistent keystore)
         working-directory: ironforge-ai/android
         # SECURITY: release build only (debuggable=false). Debug APKs allow
         # USB debugging + tampering. Sign via ANDROID_KEYSTORE_* secrets.
