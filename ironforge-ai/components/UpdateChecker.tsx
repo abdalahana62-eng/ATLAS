@@ -19,7 +19,13 @@ export default function UpdateChecker() {
     setDismissed(true);
   };
 
+  // فقط في التطبيق الأصلي (APK) — لا تظهر أبداً على الموقع https://atlasfit.pro
+  const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.() === true;
+
   useEffect(() => {
+    // لا تفحص على الموقع — فقط في الـ APK (فحص ديناميكي بعد ما Capacitor يحمل)
+    const nativeNow = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.() === true;
+    if (!nativeNow) return;
     // لا تفحص لو مفيش نت
     if (!navigator.onLine) return;
 
@@ -111,6 +117,8 @@ export default function UpdateChecker() {
     window.open(updateUrl, '_blank', 'noopener');
   };
 
+  // لا تظهر بانر التحديث على الموقع نهائياً — فقط داخل التطبيق
+  if (!isNative) return null;
   if (dismissed || !updateUrl) return null;
 
   return (
