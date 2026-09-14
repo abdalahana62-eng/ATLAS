@@ -95,6 +95,22 @@ export default function UpdateChecker() {
     return () => clearTimeout(t);
   }, []);
 
+  const handleUpdate = async () => {
+    if (!updateUrl) return;
+    try {
+      // في الـ APK افتح بالـ Browser الأصلي عشان التحميل يبدأ فوراً
+      const cap: any = (window as any).Capacitor;
+      if (cap?.isNativePlatform?.()) {
+        try {
+          const { Browser } = await import('@capacitor/browser');
+          await Browser.open({ url: updateUrl });
+          return;
+        } catch {}
+      }
+    } catch {}
+    window.open(updateUrl, '_blank', 'noopener');
+  };
+
   if (dismissed || !updateUrl) return null;
 
   return (
@@ -111,27 +127,26 @@ export default function UpdateChecker() {
           <button
             onClick={dismiss}
             className="text-ironforge-text-muted hover:text-ironforge-text text-xl leading-none"
+            aria-label="إغلاق"
           >
             ×
           </button>
         </div>
         <div className="flex gap-2 mt-4">
-          <a
-            href={updateUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 text-center rounded-xl bg-ironforge-primary text-black font-bold py-2.5 hover:bg-ironforge-primary-dark transition"
+          <button
+            onClick={handleUpdate}
+            className="flex-1 text-center rounded-xl bg-ironforge-primary text-black font-black py-3 hover:bg-ironforge-primary-dark transition shadow-lg shadow-ironforge-primary/20"
           >
-            حمّل التحديث
-          </a>
+            حدّث الآن ⬇️
+          </button>
           <button
             onClick={dismiss}
-            className="px-4 py-2.5 rounded-xl border border-ironforge-border text-ironforge-text hover:bg-ironforge-background transition"
+            className="px-4 py-3 rounded-xl border border-ironforge-border text-ironforge-text hover:bg-ironforge-background transition"
           >
             لاحقاً
           </button>
         </div>
-        <p className="text-[11px] text-ironforge-text-muted mt-2 text-center">يحتاج إعادة تثبيت (دقيقة)</p>
+        <p className="text-[11px] text-ironforge-text-muted mt-2 text-center">سيتم التحديث فوق النسخة الحالية بدون حذف — دقيقة واحدة</p>
       </div>
     </div>
   );
