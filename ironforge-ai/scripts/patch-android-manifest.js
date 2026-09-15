@@ -95,9 +95,41 @@ function ensureReleaseSigning() {
   console.log('[signing] patched build.gradle to use persistent debug.keystore for release');
 }
 
+function ensurePlayVersion() {
+  if (!fs.existsSync(BUILD_GRADLE)) return;
+  let gradle = fs.readFileSync(BUILD_GRADLE, 'utf8');
+  // Play يتطلب versionCode رقمي يزيد مع كل رفع + versionName نصي (1.1.1)
+  const runNumber = parseInt(process.env.GITHUB_RUN_NUMBER || '0', 10) || 0;
+  // base مرتفع (1100) عشان أول رفع على بلاي يكون أعلى من أي نسخة APK جانبية قديمة
+  const versionCode = 1100 + runNumber;
+  const rawTag = process.env.APP_VERSION || process.env.NEXT_PUBLIC_APP_VERSION || '';
+  const versionName = rawTag.replace(/^v/, '') || '1.1.1';
+  let changed = false;
+  if (/versionCode\s+\d+/.test(gradle)) {
+    gradle = gradle.replace(/versionCode\s+\d+/, `versionCode ${versionCode}`);
+    changed = true;
+  }
+  if (/versionName\s+["'][^"']*["']/.test(gradle)) {
+    gradle = gradle.replace(/versionName\s+["'][^"']*["']/, `versionName "${versionName}"`);
+    changed = true;
+  }
+  // ثبّت applicationId عشان بلاي يعتبر كل رفع تحديث لنفس التطبيق
+  if (/applicationId\s+["']/.test(gradle) && !gradle.includes(`applicationId "${MARKER}"`)) {
+    gradle = gradle.replace(/applicationId\s+["'][^"']*["']/, `applicationId "${MARKER}"`);
+    changed = true;
+  }
+  if (changed) {
+    fs.writeFileSync(BUILD_GRADLE, gradle);
+    console.log(`[play-version] versionCode=${versionCode} versionName=${versionName} appId=${MARKER}`);
+  } else {
+    console.log('[play-version] no version fields found, skipping');
+  }
+}
+
 function main() {
   ensureDebugKeystore();
   ensureReleaseSigning();
+  ensurePlayVersion();
   if (!fs.existsSync(MANIFEST)) {
     console.log('[deep-link] AndroidManifest not found, skipping:', MANIFEST);
     return;

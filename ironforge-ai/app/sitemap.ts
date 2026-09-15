@@ -2,7 +2,8 @@ import type { MetadataRoute } from 'next';
 
 const BASE = 'https://atlasfit.pro';
 // Public, index-worthy pages only (behind-login pages must NOT be in sitemap)
-const PAGES = ['', '/pricing', '/auth/signup'];
+// /privacy + /terms مطلوبين لموافقة Google Play (روابط ثابتة بدون locale)
+const PAGES = ['', '/pricing', '/auth/signup', '/privacy', '/terms'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

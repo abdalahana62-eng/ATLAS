@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Play AAB + APK
 
 on:
   push:
@@ -31,27 +31,36 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_APP_VERSION: ${{ github.ref_name }}
+          APP_VERSION: ${{ github.ref_name }}
         run: npm run build
-      - name: Sync Capacitor
+      - name: Sync Capacitor + patch for Play
         working-directory: ironforge-ai
         run: |
           npx cap add android || true
           npx cap sync android
           node scripts/patch-android-manifest.js
-      - name: Build APK (release - signed with persistent keystore)
+        env:
+          APP_VERSION: ${{ github.ref_name }}
+          NEXT_PUBLIC_APP_VERSION: ${{ github.ref_name }}
+      - name: Build AAB (Google Play) + APK (sideload)
         working-directory: ironforge-ai/android
-        # SECURITY: release build only (debuggable=false). Debug APKs allow
-        # USB debugging + tampering. Sign via ANDROID_KEYSTORE_* secrets.
-        run: ./gradlew assembleRelease
-      - name: Upload APK artifact
+        # AAB هو المطلوب لرفع بلاي. APK يفضل موجود للتحميل من الموقع.
+        # التوقيع ثابت من resources/debug.keystore — أول رفع فعّل Play App Signing
+        # وبعدها جوجل يدير توقيع التوزيع وكل رفع يبقى تحديث بدون حذف.
+        run: ./gradlew bundleRelease assembleRelease
+      - name: Upload artifacts (AAB + APK)
         uses: actions/upload-artifact@v4
         with:
-          name: atlas-release-apk
-          path: ironforge-ai/android/app/build/outputs/apk/release/app-release*.apk
-      - name: Upload to Release
+          name: atlas-play-aab-apk
+          path: |
+            ironforge-ai/android/app/build/outputs/bundle/release/app-release.aab
+            ironforge-ai/android/app/build/outputs/apk/release/app-release*.apk
+      - name: Upload to Release (AAB + APK)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
-          files: ironforge-ai/android/app/build/outputs/apk/release/app-release*.apk
+          files: |
+            ironforge-ai/android/app/build/outputs/bundle/release/app-release.aab
+            ironforge-ai/android/app/build/outputs/apk/release/app-release*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
