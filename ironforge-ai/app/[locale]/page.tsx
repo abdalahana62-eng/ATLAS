@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import {
-  ArrowRight,
   BarChart3,
   Dumbbell,
   Sparkles,
@@ -10,8 +9,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { Card } from '@/components/ui/Card';
+import HeroCtas from '@/components/HeroCtas';
 import TodayPlanCard from '@/components/TodayPlanCard';
 import AuthCodeCatcher from '@/components/AuthCodeCatcher';
 
@@ -230,20 +229,7 @@ export default async function HomePage({
               {t('description')}
             </p>
 
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <LiquidButton asChild size="lg" className="w-full rounded-2xl px-7 text-base font-bold text-white sm:w-auto">
-                <Link href="/onboarding" className="inline-flex items-center gap-2">
-                  {t('common.next')}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </LiquidButton>
-
-              <LiquidButton asChild size="lg" variant="secondary" className="w-full rounded-2xl px-7 text-base font-bold text-white sm:w-auto">
-                <Link href="/auth/signup" className="inline-flex items-center gap-2">
-                  {t('common.continue')}
-                </Link>
-              </LiquidButton>
-            </div>
+            <HeroCtas nextLabel={t('common.next')} continueLabel={t('common.continue')} />
 
             <div className="mt-10 grid max-w-lg grid-cols-3 gap-3">
               {metrics.map((item) => (
