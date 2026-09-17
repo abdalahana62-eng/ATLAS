@@ -6,6 +6,7 @@ import { routing } from '@/i18n/routing';
 import Navigation from '@/components/layout/Navigation';
 import UpdateChecker from '@/components/UpdateChecker';
 import PresenceTracker from '@/components/PresenceTracker';
+import AdsProvider from '@/components/ads/AdsProvider';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -162,6 +163,7 @@ export default async function LocaleLayout({
           </div>
           <UpdateChecker />
           <PresenceTracker />
+          <AdsProvider />
         </NextIntlClientProvider>
       </body>
     </html>

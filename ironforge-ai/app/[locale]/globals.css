@@ -65,6 +65,14 @@
   html[dir="rtl"] .tracking-tight {
     letter-spacing: 0 !important;
   }
+
+  /* AdMob native banner يظهر فوق WebView — ارفع المحتوى عشان ما يغطيش الأزرار */
+  :root {
+    --atlas-ad-banner-offset: 0px;
+  }
+  body.atlas-ads-banner-visible main {
+    padding-bottom: var(--atlas-ad-banner-offset) !important;
+  }
 }
 
 @layer utilities {
