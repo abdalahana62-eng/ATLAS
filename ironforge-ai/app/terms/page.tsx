@@ -31,10 +31,6 @@ export default function TermsPage() {
             <h2 className="text-lg font-bold text-white">4. الحساب</h2>
             <p>أنت مسؤول عن الحفاظ على سرية حسابك. يمنع مشاركة الحساب الواحد بين عدة أشخاص.</p>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-white">5. التواصل</h2>
-            <p><a className="text-[#a3e635] underline" href="mailto:abdalahana555@gmail.com">abdalahana555@gmail.com</a></p>
-          </div>
         </section>
       </div>
     </main>

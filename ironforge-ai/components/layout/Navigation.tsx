@@ -178,8 +178,7 @@ export default function Navigation() {
               v{appVersion}
             </p>
             <p className="text-[11px] text-ironforge-text-muted mt-2 pt-2 border-t border-ironforge-border">
-              Owner: ABDALLAH SHENOO<br />
-              <a href="mailto:abdalahana555@gmail.com" className="text-ironforge-primary hover:underline">abdalahana555@gmail.com</a>
+              Owner: ABDALLAH SHENOO
             </p>
           </div>
         </div>
@@ -307,8 +306,7 @@ export default function Navigation() {
                     v{appVersion}
                   </p>
                   <p className="text-[11px] text-ironforge-text-muted mt-2 pt-2 border-t border-ironforge-border">
-                    Owner: ABDALLAH SHENOO<br />
-                    <a href="mailto:abdalahana555@gmail.com" className="text-ironforge-primary hover:underline">abdalahana555@gmail.com</a>
+                    Owner: ABDALLAH SHENOO
                   </p>
                 </div>
               </div>

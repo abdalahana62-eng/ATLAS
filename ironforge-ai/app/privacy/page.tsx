@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-white">4. حقوقك</h2>
-            <p>تقدر تطلب تصدير بياناتك أو حذف حسابك نهائياً في أي وقت عبر: abdalahana555@gmail.com — وسيتم الحذف خلال 7 أيام.</p>
+            <p>تقدر تطلب تصدير بياناتك أو حذف حسابك نهائياً في أي وقت — وسيتم الحذف خلال 7 أيام.</p>
           </div>
           <div>
             <h2 className="text-lg font-bold text-white">5. الأطفال</h2>
@@ -41,11 +41,11 @@ export default function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-white">6. التواصل</h2>
-            <p>ATLAS AI Coach — المالك: ABDALLAH SHENOO — <a className="text-[#a3e635] underline" href="mailto:abdalahana555@gmail.com">abdalahana555@gmail.com</a></p>
+            <p>ATLAS AI Coach — المالك: ABDALLAH SHENOO</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
             <p className="font-bold text-white">Privacy Policy (EN summary)</p>
-            <p className="mt-1">ATLAS collects account (email/name), workout logs you enter, and subscription status. No bank card data stored. Data processed via Supabase/Google/Vercel. Contact abdalahana555@gmail.com for export or deletion (within 7 days). Not for children under 16.</p>
+            <p className="mt-1">ATLAS collects account (email/name), workout logs you enter, and subscription status. No bank card data stored. Data processed via Supabase/Google/Vercel. You can request export or deletion anytime (within 7 days). Not for children under 16.</p>
           </div>
         </section>
       </div>

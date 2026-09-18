@@ -112,7 +112,6 @@ export default async function HomePage({
       description: t('description'),
       contactPoint: {
         '@type': 'ContactPoint',
-        email: 'abdalahana555@gmail.com',
         contactType: 'customer support',
         availableLanguage: ['ar', 'en'],
       },
@@ -289,7 +288,7 @@ export default async function HomePage({
 
         <footer className="border-t border-white/10 py-8 text-center">
           <p className="text-sm text-slate-400">
-            Owner: <span className="font-semibold text-white">ABDALLAH SHENOO</span> — <a href="mailto:abdalahana555@gmail.com" className="text-ironforge-primary hover:underline">abdalahana555@gmail.com</a>
+            Owner: <span className="font-semibold text-white">ABDALLAH SHENOO</span>
           </p>
           <p className="text-xs text-slate-500 mt-2">© 2026 ATLAS AI Coach. All rights reserved.</p>
         </footer>
