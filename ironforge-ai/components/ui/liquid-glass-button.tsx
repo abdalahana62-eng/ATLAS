@@ -93,90 +93,45 @@ function LiquidButton({
   className,
   variant,
   size,
-  asChild = false,
   children,
   ...props
 }: React.ComponentProps<"button"> &
-  VariantProps<typeof liquidbuttonVariants> & {
-    asChild?: boolean
-  }) {
-  const Comp = asChild ? Slot : "button"
-  const rawId = React.useId()
-  const filterId = `container-glass-${rawId.replace(/[^a-zA-Z0-9]/g, "")}`
-
+  VariantProps<typeof liquidbuttonVariants>) {
+  // ملحوظة: بدون asChild عن قصد — النسخة الأصلية كانت تمرر 4 عناصر لـ Slot
+  // فيكراش (Slot يقبل عنصر واحد فقط). الزجاج هنا CSS حقيقي يعمل في
+  // Chrome و Safari و WebView (الأندرويد)، لأن backdrop-filter: url(#...)
+  // غير مدعوم في المتصفحات فكان التأثير لا يظهر أصلاً.
   return (
-    <>
-      <Comp
-        data-slot="button"
-        className={cn(
-          "relative",
-          liquidbuttonVariants({ variant, size, className })
-        )}
-        {...props}
-      >
-        <div className="absolute top-0 left-0 z-0 h-full w-full rounded-full
-            shadow-[0_0_6px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3px_rgba(0,0,0,0.9),inset_-3px_-3px_0.5px_-3px_rgba(0,0,0,0.85),inset_1px_1px_1px_-0.5px_rgba(0,0,0,0.6),inset_-1px_-1px_1px_-0.5px_rgba(0,0,0,0.6),inset_0_0_6px_6px_rgba(0,0,0,0.12),inset_0_0_2px_2px_rgba(0,0,0,0.06),0_0_12px_rgba(255,255,255,0.15)]
-        transition-all
-        dark:shadow-[0_0_8px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3.5px_rgba(255,255,255,0.09),inset_-3px_-3px_0.5px_-3.5px_rgba(255,255,255,0.85),inset_1px_1px_1px_-0.5px_rgba(255,255,255,0.6),inset_-1px_-1px_1px_-0.5px_rgba(255,255,255,0.6),inset_0_0_6px_6px_rgba(255,255,255,0.12),inset_0_0_2px_2px_rgba(255,255,255,0.06),0_0_12px_rgba(0,0,0,0.15)]" />
-        <div
-          className="absolute top-0 left-0 isolate -z-10 h-full w-full overflow-hidden rounded-md"
-          style={{ backdropFilter: `url("#${filterId}")` }}
-        />
-
-        <div className="pointer-events-none z-10 ">
-          {children}
-        </div>
-        <GlassFilter id={filterId} />
-      </Comp>
-    </>
+    <button
+      data-slot="button"
+      className={cn(
+        "relative isolate overflow-hidden",
+        liquidbuttonVariants({ variant, size, className })
+      )}
+      {...props}
+    >
+      {/* طبقة الزجاج: تدرج شفاف + بلور حقيقي للخلفية */}
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-[inherit] border border-white/30 bg-gradient-to-b from-white/25 via-white/10 to-white/[0.03] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(255,255,255,0.08),0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+      />
+      {/* لمعة علوية */}
+      <div
+        aria-hidden
+        className="absolute inset-x-4 top-1 h-1/2 rounded-full bg-gradient-to-b from-white/25 to-transparent blur-[3px]"
+      />
+      {/* انعكاس سفلي خفيف */}
+      <div
+        aria-hidden
+        className="absolute inset-x-6 bottom-1 h-1/4 rounded-full bg-gradient-to-t from-[#a3e635]/20 to-transparent blur-[4px]"
+      />
+      <span className="relative z-10 inline-flex items-center gap-2">
+        {children}
+      </span>
+    </button>
   )
 }
 
-
-function GlassFilter({ id }: { id: string }) {
-  return (
-    <svg className="hidden" aria-hidden="true">
-      <defs>
-        <filter
-          id={id}
-          x="0%"
-          y="0%"
-          width="100%"
-          height="100%"
-          colorInterpolationFilters="sRGB"
-        >
-          {/* Generate turbulent noise for distortion */}
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.05 0.05"
-            numOctaves="1"
-            seed="1"
-            result="turbulence"
-          />
-
-          {/* Blur the turbulence pattern slightly */}
-          <feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise" />
-
-          {/* Displace the source graphic with the noise */}
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="blurredNoise"
-            scale="70"
-            xChannelSelector="R"
-            yChannelSelector="B"
-            result="displaced"
-          />
-
-          {/* Apply overall blur on the final result */}
-          <feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur" />
-
-          {/* Output the result */}
-          <feComposite in="finalBlur" in2="finalBlur" operator="over" />
-        </filter>
-      </defs>
-    </svg>
-  );
-}
 
 type ColorVariant =
   | "default"
