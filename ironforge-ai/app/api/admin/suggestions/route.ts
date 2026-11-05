@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { guardAdmin } from '../auth';
 import { corsHeadersFor } from '@/lib/security/cors';
@@ -64,7 +63,7 @@ export async function POST(req: NextRequest) {
     if (!isEmail(email) || !isText(message, 1, 1000)) {
       return Response.json({ error: 'Bad request' }, { status: 400, headers: cors });
     }
-    const supabase = createClient();
+    const supabase = createServiceClient();
     const { error } = await supabase.from('suggestions').insert({ email: String(email).toLowerCase().trim(), message: String(message).trim().slice(0, 1000) });
     if (error) {
       console.error('[suggestions] insert failed:', error.message);

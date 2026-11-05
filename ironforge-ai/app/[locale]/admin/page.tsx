@@ -156,8 +156,9 @@ export default function AdminPage() {
     try {
       const r = await fetch('/api/admin/subscribers', fetchOpts());
       const d = await r.json();
+      console.log('[admin/loadSubs] response:', { status: r.status, count: d.subscribers?.length });
       if (r.ok) setSubs(d.subscribers || []);
-    } catch {}
+    } catch (e: any) { console.error('[admin/loadSubs] failed:', e?.message || e); }
   };
 
   const loadSugs = async () => {
@@ -182,6 +183,7 @@ export default function AdminPage() {
     try {
       const r = await fetch('/api/admin/send-email', fetchOpts({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: mailTo, subject: mailSubject, message: mailBody }) }));
       const d = await r.json();
+      console.log('[admin/sendMail] response:', { status: r.status, data: d });
       if (!r.ok) throw new Error(d.error);
       alert(isAr ? 'اتبعتت ✅' : 'Sent ✅');
       setMailTo(null); setMailSubject(''); setMailBody('');
@@ -206,6 +208,7 @@ export default function AdminPage() {
     try {
       const r = await fetch('/api/admin/requests', fetchOpts({ method: 'PATCH', headers: headers(), body: JSON.stringify({ id, action }) }));
       const d = await r.json();
+      console.log('[admin/act] response:', { status: r.status, data: d });
       if (!r.ok) throw new Error(d.error);
       setReqs(prev => prev.filter(x => x.id !== id));
       setStats(s => s ? { ...s, pending: Math.max(0, s.pending - 1), activeSubs: action === 'approve' ? s.activeSubs + 1 : s.activeSubs } : s);

@@ -64,6 +64,7 @@ export async function PATCH(req: NextRequest) {
       return Response.json({ error: 'Bad request' }, { status: 400, headers: cors });
     }
     const supabase = createServiceClient();
+
     const { data: pr, error: e1 } = await supabase
       .from('payment_requests')
       .select('*')
@@ -72,7 +73,10 @@ export async function PATCH(req: NextRequest) {
     if (e1 || !pr) return Response.json({ error: 'Not found' }, { status: 404, headers: cors });
 
     const status = action === 'approve' ? 'approved' : 'rejected';
-    const { error: e2 } = await supabase.from('payment_requests').update({ status, reviewed_at: new Date().toISOString() }).eq('id', id);
+    const { error: e2 } = await supabase
+      .from('payment_requests')
+      .update({ status, reviewed_at: new Date().toISOString() })
+      .eq('id', id);
     if (e2) {
       console.error('[admin/requests] update failed:', e2.message);
       return Response.json({ error: 'Update failed' }, { status: 500, headers: cors });
@@ -80,20 +84,60 @@ export async function PATCH(req: NextRequest) {
 
     let expiresAt: string | null = null;
     if (action === 'approve') {
+      if (!pr.email || !isValidEmail(pr.email)) {
+        console.error('[admin/requests] approve failed: invalid email in request', pr.email);
+        return Response.json({ error: 'Invalid email in request' }, { status: 400, headers: cors });
+      }
+
       const plan = getPlan(pr.plan);
       // extend from current expiry if still active
-      const { data: existing } = await supabase.from('subscriptions').select('expires_at').eq('email', pr.email).maybeSingle();
-      const base = existing && new Date(existing.expires_at).getTime() > Date.now() ? new Date(existing.expires_at).getTime() : Date.now();
+      const { data: existing } = await supabase
+        .from('subscriptions')
+        .select('expires_at')
+        .eq('email', pr.email)
+        .maybeSingle();
+      const base =
+        existing && new Date(existing.expires_at).getTime() > Date.now()
+          ? new Date(existing.expires_at).getTime()
+          : Date.now();
       expiresAt = new Date(base + plan.days * 86400000).toISOString();
-      const { error: e3 } = await supabase.from('subscriptions').upsert({ email: pr.email, plan: pr.plan, expires_at: expiresAt, status: 'active', updated_at: new Date().toISOString() });
+
+      const { error: e3, data: upserted } = await supabase
+        .from('subscriptions')
+        .upsert({
+          email: pr.email,
+          plan: pr.plan,
+          expires_at: expiresAt,
+          status: 'active',
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
       if (e3) {
         console.error('[admin/requests] activate failed:', e3.message);
         return Response.json({ error: 'Activate failed' }, { status: 500, headers: cors });
       }
+      if (!upserted) {
+        console.error('[admin/requests] activate failed: no row returned from upsert');
+        return Response.json({ error: 'Activate failed: no row returned' }, { status: 500, headers: cors });
+      }
+
+      console.log(
+        `[admin/requests] approved email=${pr.email} plan=${pr.plan} expiresAt=${expiresAt}`
+      );
     }
+
     return Response.json({ status, expiresAt }, { headers: cors });
   } catch (e: any) {
     console.error('[admin/requests] patch failed:', e?.message || e);
     return Response.json({ error: 'Internal error' }, { status: 500, headers: cors });
   }
+}
+
+function isValidEmail(v: unknown): v is string {
+  if (typeof v !== 'string') return false;
+  const s = v.trim();
+  if (!s || s.length > 254) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
 }

@@ -1,5 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 
 // SERVER-ONLY. Uses the service_role key (bypasses RLS).
 // NEVER import this from client components — it must stay in route handlers.
@@ -24,23 +23,10 @@ export function createServiceClient() {
   if (kind !== 'sb_secret') {
     console.error('[supabase] WRONG service key kind: %s (expected sb_secret_ from Supabase → API Keys → Secret)', kind);
   }
-  const cookieStore = cookies();
-
-  return createServerClient(url, key, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value, ...options });
-        } catch {}
-      },
-      remove(name: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value: '', ...options });
-        } catch {}
-      },
+  return createClient(url, key, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
     },
   });
 }
