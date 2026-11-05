@@ -209,6 +209,9 @@ export default function AdminPage() {
       if (!r.ok) throw new Error(d.error);
       setReqs(prev => prev.filter(x => x.id !== id));
       setStats(s => s ? { ...s, pending: Math.max(0, s.pending - 1), activeSubs: action === 'approve' ? s.activeSubs + 1 : s.activeSubs } : s);
+      if (action === 'approve') {
+        await loadSubs();
+      }
       alert(isAr ? `تم ${action === 'approve' ? 'التفعيل حتى ' + d.expiresAt?.slice(0, 10) : 'الرفض'}` : `Done: ${action}`);
     } catch (e: any) { alert(e.message); }
   };
