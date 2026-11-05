@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/Card';
 import HeroCtas from '@/components/HeroCtas';
 import TodayPlanCard from '@/components/TodayPlanCard';
 import AuthCodeCatcher from '@/components/AuthCodeCatcher';
+import DownloadAppButton from '@/components/DownloadAppButton';
 
 export default async function HomePage({
   params: { locale }
@@ -210,6 +211,7 @@ export default async function HomePage({
               {t('joinNow')}
             </Button>
           </Link>
+          <DownloadAppButton />
         </header>
 
         <section className="grid items-center gap-8 py-8 md:grid-cols-[1.2fr_0.8fr] md:py-14">

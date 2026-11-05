@@ -7,6 +7,7 @@ import Navigation from '@/components/layout/Navigation';
 import UpdateChecker from '@/components/UpdateChecker';
 import PresenceTracker from '@/components/PresenceTracker';
 import AdsProvider from '@/components/ads/AdsProvider';
+import AppInstallPrompt from '@/components/AppInstallPrompt';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -164,6 +165,7 @@ export default async function LocaleLayout({
           <UpdateChecker />
           <PresenceTracker />
           <AdsProvider />
+          <AppInstallPrompt />
         </NextIntlClientProvider>
       </body>
     </html>
